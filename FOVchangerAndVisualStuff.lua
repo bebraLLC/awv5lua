@@ -5,8 +5,8 @@ local TAB = gui.Tab(visuals_menu, "lua_fov_tab", "Fov Changer")
 
 local FOVBOX = gui.Groupbox(TAB, "FOV", 15, 15, 605, 500)
 local SLIDER = gui.Slider( FOVBOX, "lua_fov_slider", "Field of View", 90, 0, 180 )
-local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 40, 0, 180 )
-local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 15, 0, 180 )
+local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 50, 0, 180 )
+local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 25, 0, 180 )
 
 local VIEWFOVBOX = gui.Groupbox(TAB, "Viewmodel", 15, 220, 605, 500)
 local SLIDER_VIEW = gui.Slider( VIEWFOVBOX, "lua_fov_slider_view", "Viewmodel Field of View", 64, 0, 180 )
@@ -75,18 +75,15 @@ callbacks.Register('Draw', 'noshadows', noshadows)
 
 --[[
 -- TranspirancyOnZoom ------------------>
-
 local TransparencyOnZoom = gui.Reference("VISUALS", "LOCAL", "Helper")
 local Enable_box = gui.Checkbox(TransparencyOnZoom, "enable_transparency_checkbox", "Enable TransparencyOnScope", 0)
 Enable_box:SetDescription("Enable Local ChamsTransparecy on Scope")
-
 local cache = {
 clr_local,
 clr_local_hidden,
 clr_ghost,
 clr_ghost_hidden
 }
-
 local invoke_cache_callback = function()
     if cache.clr_local ~= nil then
         gui.SetValue("esp.chams.local.visible.clr", cache.clr_local[1], cache.clr_local[2], cache.clr_local[3], cache.clr_local[4])
@@ -105,23 +102,18 @@ local invoke_cache_callback = function()
         cache.clr_ghost_hidden = nil
     end
 end
-
 callbacks.Register("Draw", "scope_trpn", function()
     local me = entities.GetLocalPlayer()
-
     if me == nil or not me:IsAlive() or Enable_box:GetValue() == nil then
         invoke_cache_callback()
         return
     end
-
     local m_bIsScoped = me:GetProp("m_bIsScoped")
     local m_iTeamNum = me:GetProp("m_iTeamNum") -- T: 2 CT: 3
-
     if cache.clr_local == nil then cache.clr_local = { gui.GetValue("esp.chams.local.visible.clr") } end
 	if cache.clr_local_hidden == nil then cache.clr_local_hidden = { gui.GetValue("esp.chams.local.occluded.clr") } end
     if cache.clr_ghost == nil then cache.clr_ghost = { gui.GetValue("esp.chams.ghost.visible.clr") } end
 	if cache.clr_ghost_hidden == nil then cache.clr_ghost_hidden = { gui.GetValue("esp.chams.ghost.occluded.clr") } end
-
     print(cache.clr_local)
     print(cache.clr_local_hidden)
     print(cache.clr_ghost)    
@@ -129,7 +121,6 @@ callbacks.Register("Draw", "scope_trpn", function()
 	
 	
     if m_bIsScoped == 1 or m_bIsScoped == 257 then
-
         if m_iTeamNum == 2 then gui.SetValue("esp.chams.local.visible.clr", 90, 90, 90, 32) end
         if m_iTeamNum == 2 then gui.SetValue("esp.chams.local.occluded.clr", 90, 90, 90, 32) end
         if m_iTeamNum == 2 then gui.SetValue("esp.chams.ghost.visible.clr", 90, 90, 90, 32) end
@@ -142,7 +133,6 @@ callbacks.Register("Draw", "scope_trpn", function()
         invoke_cache_callback()
     end
 end)
-
 -- END TranspirancyOnZoom ------------------>
 --]]
 
@@ -190,9 +180,12 @@ local localvisibleclr_r, localvisibleclr_g, localvisibleclr_b, localvisibleclr_a
 callbacks.Register( "Draw", function()
 if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;
 local player_local = entities.GetLocalPlayer();
-local zoomed = player_local:GetProp("m_bIsScoped")
-draw.Text(100 , 100,"Scoped: " .. tostring(zoomed))
-if zoomed == 1 then
+if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;
+local scoped = player_local:GetProp("m_bIsScoped")
+if scoped ~= 0 or scoped ~= 256 or scoped ~= 257 then
+draw.Text(100 , 100,"Scoped: " .. tostring(scoped))
+if scoped ~= 0 then
+
     if slidervalue ~= SLIDER:GetValue() then
         change = 1
     end
@@ -320,7 +313,8 @@ else
 
         set = 0
         stored = 0
-    end
+end
+end
 end
 end)
 -- End TransparenzOnScope --

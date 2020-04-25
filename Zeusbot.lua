@@ -1,4 +1,6 @@
 -------------------- Zeusbot
+local zeusbot = gui.Checkbox(gui.Reference("Ragebot", "Aimbot", "Extra"), "enable_zeusbot_chkbox", "Enable Zeusbot", 0)
+
 local function zeuslegit()
 
 if not zeusbot:GetValue() or entities.GetLocalPlayer() == nil then 

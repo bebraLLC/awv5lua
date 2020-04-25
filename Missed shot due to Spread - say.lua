@@ -100,6 +100,7 @@ local function update_shots(event)
 end
 
 local function main()
+w, h = draw.GetScreenSize()
 
     if( entities.GetLocalPlayer() == nil or not bez_checkbox_enable:GetValue() ) then
 
@@ -110,7 +111,8 @@ local function main()
 
     if(ern_shots.hit > 0) then
 
-client.ChatSay("[x22cheats.com] Missed shot due to spread")print("Aimware: Hits bitchniggas ass")
+draw.TextShadow(50, 50, "[x22cheats.com] Missed shot due to spread")
+print("Aimware: Hits bitchniggas ass")
 
     if(ern_shots.hit == 1 or ern_shots.missed == 1) then
 
@@ -118,12 +120,10 @@ ern_shots.hit = ern_shots.hit - 1
 
 ern_shots.missed = ern_shots.fired - ern_shots.hit
 
-if(ern_shots.missed > 0) then
+if (ern_shots.missed > 0 or ern_shots.missed == 1) then
 
-if(ern_shots.missed == 1) then
-
-client.ChatSay("[x22cheats.com] Missed shot due to spread")
-
+draw.TextShadow(50, 50, "[x22cheats.com] Missed shot due to spread")
+print("Aimware: Failed on teabagged bitch")
   
 ern_shots.fired = ern_shots.fired - 1
 ern_shots.missed = ern_shots.missed - 1
@@ -133,7 +133,7 @@ ern_shots.missed = ern_shots.missed - 1
               end
          end
 end
-end
+
 
 
 
