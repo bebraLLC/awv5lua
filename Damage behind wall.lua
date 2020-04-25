@@ -1,4 +1,6 @@
 local ref = gui.Reference("Ragebot", "Accuracy", "Weapon")
+local enabled = gui.Checkbox(ref, "lua_damge_behind_wall_chkbox", "Enable Damage behind wall", 0)
+
 local weapon_list = { "asniper", "sniper", "scout", "hpistol", "pistol", "rifle" }
 
 local rbot_autosniper_mindamage_2 = gui.Slider(ref, weapon_list[1] .. ".mindmg.2", "Damage Visible(auto)", 0, 0, 100);
@@ -150,7 +152,12 @@ local function is_vis(LocalPlayerPos)
 end
 
 callbacks.Register("Draw", function()
-    local Player, LocalPlayer = entities_check()
+    
+if (enabled:GetValue() == false) then
+        return;
+    end
+
+local Player, LocalPlayer = entities_check()
     if LocalPlayer then
         local weapon = LocalPlayer:GetWeaponID()
         local slider = find_key(weapon) --finding mindamage var  ["asniper.mindmg"] = { 11, 38 },
