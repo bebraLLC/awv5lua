@@ -1,4 +1,4 @@
-local ref_gui = gui.Reference("Misc", "Enhancement")
+local ref_gui = gui.Reference("Visuals", "Local", "Helper")
 local msc_ref = gui.Text(ref_gui, "HitMarker on the Center")
 local hitcross = gui.Checkbox(msc_ref, 'lua_healthshot_hitcross_enabled', 'Enable crosshair marker', 0)
 local hitmarkerColor = gui.ColorPicker(hitcross, "lua_healthshot_hitcross_color", "", 255, 165, 10, 255);
