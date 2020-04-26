@@ -1,23 +1,32 @@
 local all_says = {
     hegrenade = {
         'Catch retard!',
+		'Here, a hot Portato!'
     },
 
     flashbang = {
         'Look a bird!',
+		'3, 2, 1, Cheeeese'
     },
 
     molotov = {
         'BURN BABY BURN!!!',
+		'Barbecue Time'
     },
 
     smokegrenade = {
         'I am a ninja',
+		'Hide and seek, just wait, i´m comin'
     },
 
     incgrenade = {
         'BURN BABY BURN!!!',
-    }
+		'Barbecue Time'
+    },
+	
+	decoy = {
+		'Time to pFake'
+	}
 }
 
 local function throw_say(e)

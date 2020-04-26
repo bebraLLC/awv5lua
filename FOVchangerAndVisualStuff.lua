@@ -182,9 +182,9 @@ if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then re
 local player_local = entities.GetLocalPlayer();
 if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;
 local scoped = player_local:GetProp("m_bIsScoped")
-if scoped ~= 0 or scoped ~= 256 or scoped ~= 257 then
+if scoped ~= 0 or scoped ~= 256 then
 draw.Text(100 , 100,"Scoped: " .. tostring(scoped))
-if scoped ~= 0 then
+if scoped == 1 or scoped == 257 then
 
     if slidervalue ~= SLIDER:GetValue() then
         change = 1

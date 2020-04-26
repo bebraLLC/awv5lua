@@ -1,4 +1,4 @@
-local Chat_Breaker_Spam = {
+--[[local Chat_Breaker_Spam = {
     "﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽",
 };
 local ref = gui.Tab(gui.Reference("Misc"), "extra.settings", "Extra")
@@ -21,9 +21,9 @@ function ChatSpam()
     end
 end
 callbacks.Register( "Draw", "ChatSpam", ChatSpam );
+]]
 
 
---[[
 -------------- Chat Spammer
 local G_M1 = gui.Tab(gui.Reference("Misc"), "extra.settings", "Extra")
 local CC_Show = gui.Checkbox(G_M1, "msc_chat_spams", "Chat Spams", false)
@@ -41,4 +41,3 @@ elseif CC_Spams:GetValue() == 1 and globals.RealTime() >= c_spammedlast then cli
 elseif CC_Spams:GetValue() == 2 and globals.RealTime() >= c_spammedlast then client.ChatSay(ChatSpam2:GetValue()) c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100
 elseif CC_Spams:GetValue() == 3 and globals.RealTime() >= c_spammedlast then client.ChatSay("﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽\n") c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100 end end
 callbacks.Register("Draw", custom_chat)
-]]
