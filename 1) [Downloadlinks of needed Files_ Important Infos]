@@ -10,7 +10,7 @@ LuaScripts which work like Extensions for Aimware´s CSGO v5 Cheat
 
 Luas with multiple versions [X versions] means you can edit the script and choose the code it should use.
 
-Just change the positions of "--[[" and "]]--". Just put the "--[[" infront of a scriptcode and the "]]--" 
+Just change the positions of "--[[" and "]]". Just put the "--[[" infront of a scriptcode and the "]]" 
 
 behind the scriptcode to "disable" it and vica versa, delete them to "enable" code. 
 
