@@ -1,4 +1,6 @@
-local GROUP = gui.Groupbox(gui.Reference("MISC", "Other", "Helper"), "Sonar ESP", 15, 250, 297, 300)
+local REFER = gui.Reference("Misc")
+local BEEPTAB = gui.Tab(REFER, "sonar.esp.tab", "Sonar Sound ESP")
+local GROUP = gui.Groupbox(BEEPTAB, "Sonar ESP", 16, 16, 297, 300)
 local ENABLE = gui.Checkbox(GROUP, "sonar.enabled", "Enable", false)
 local VOLUME = gui.Slider(GROUP, "sonar.volume", "Volume", 50, 1, 100, 1)
 local SOUND = gui.Combobox(GROUP, "sonar.sound", "Sound", "Button 17", "Button 15", "Blip 1", "Blip 2", "Bell", "Button 10")

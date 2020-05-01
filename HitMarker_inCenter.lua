@@ -1,9 +1,9 @@
 local ref_gui = gui.Reference("Visuals", "Local", "Helper")
 local msc_ref = gui.Text(ref_gui, "HitMarker on the Center")
-local hitcross = gui.Checkbox(msc_ref, 'lua_healthshot_hitcross_enabled', 'Enable crosshair marker', 0)
-local hitmarkerColor = gui.ColorPicker(hitcross, "lua_healthshot_hitcross_color", "", 255, 165, 10, 255);
+local hitcross = gui.Checkbox(ref_gui, 'lua_healthshot_hitcross_enabled', 'Enable crosshair marker', 0)
+local hitmarkerColor = gui.ColorPicker(ref_gui, "lua_healthshot_hitcross_color", "", 255, 165, 10, 255);
 hitcross:SetDescription("Drawing a marker on the center of screen") 
-local linesize = gui.Slider(msc_ref, 'lua_healthshot_hitcross_slider', 'Crosshair marker size', 15, 0, 20)
+local linesize = gui.Slider(ref_gui, 'lua_healthshot_hitcross_slider', 'Crosshair marker size', 15, 0, 20)
 
 local CrossTime = 0
 local alpha = 0;

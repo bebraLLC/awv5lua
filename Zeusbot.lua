@@ -1,8 +1,7 @@
 -------------------- Zeusbot
-local zeusbot = gui.Checkbox(gui.Reference("Ragebot", "Aimbot", "Extra"), "enable_zeusbot_chkbox", "Enable Zeusbot", 0)
-
+local zeusbot = gui.Checkbox(gui.Reference("Legitbot", "Other", "Extra"), "enable_zeusbot_chkbox", "Enable Zeusbot", 0)
+zeusbot:SetDescription("Enable Zeus Triggerbot")
 local function zeuslegit()
-
 if not zeusbot:GetValue() or entities.GetLocalPlayer() == nil then 
 return 
 end
@@ -26,7 +25,7 @@ gui.SetValue("lbot.trg.zeus.hitchance", gui.GetValue("rbot.accuracy.weapon.zeus.
 else 
 gui.SetValue("lbot.trg.enable", trige2) 
 gui.SetValue("lbot.trg.autofire", trigaf2) 
-gui.SetValue("lbot.trg.hitchance", trighc2) 
+gui.SetValue("lbot.trg.zeus.hitchance", trighc2) 
 end 
 end
 

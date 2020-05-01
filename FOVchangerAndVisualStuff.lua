@@ -5,8 +5,8 @@ local TAB = gui.Tab(visuals_menu, "lua_fov_tab", "Fov Changer")
 
 local FOVBOX = gui.Groupbox(TAB, "FOV", 15, 15, 605, 500)
 local SLIDER = gui.Slider( FOVBOX, "lua_fov_slider", "Field of View", 90, 0, 180 )
-local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 50, 0, 180 )
-local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 25, 0, 180 )
+local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 80, 0, 180 )
+local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 45, 0, 180 )
 
 local VIEWFOVBOX = gui.Groupbox(TAB, "Viewmodel", 15, 220, 605, 500)
 local SLIDER_VIEW = gui.Slider( VIEWFOVBOX, "lua_fov_slider_view", "Viewmodel Field of View", 64, 0, 180 )
@@ -183,7 +183,7 @@ local player_local = entities.GetLocalPlayer();
 if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;
 local scoped = player_local:GetProp("m_bIsScoped")
 if scoped ~= 0 or scoped ~= 256 then
-draw.Text(100 , 100,"Scoped: " .. tostring(scoped))
+draw.Text(10 , 10,"Scoped: " .. tostring(scoped))
 if scoped == 1 or scoped == 257 then
 
     if slidervalue ~= SLIDER:GetValue() then

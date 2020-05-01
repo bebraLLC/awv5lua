@@ -7,50 +7,63 @@ local ref_upd = gui.Reference("Settings")
 local x88_tab = gui.Tab(ref, "x88_tab", "x88Cheats")
 local x88_updtab = gui.Tab(ref_upd, "x88_updtab", "x88Cheats Updates")
 
--- Auto Updater
-local clientVersion = "1.0.6"
-local latestVersion = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/version.txt")
-local function Update()
-    if clientVersion ~= latestVersion then
-        currentScript = file.Open(GetScriptName(), "w")
-        currentScript:Write(http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/x88cheats%20UI.lua"))
-        currentScript:Close()
-        LoadScript(GetScriptName())
-    end
-end
---End - Auto-Updater--
+local curclientType = 1
+local curVer = "1.2"
+local defaultlatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/defver.txt")
+local mllatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/mlver.txt")
+
 --GUI of Auto-Updater--
 local updater_groupbox = gui.Groupbox(x88_updtab, "Updater", 16, 16, 160, 0)
 local changelog_groupbox = gui.Groupbox(x88_updtab, "Changelog", 192, 16, 431, 167)
-local clientversion_text = gui.Text(updater_groupbox, "Current version: v" .. clientVersion)
-local latestversion_text = gui.Text(updater_groupbox, "Latest version: v" .. latestVersion)
-local update_button = gui.Button(updater_groupbox, "Update", Update)
+local curVer_text = gui.Text(updater_groupbox, "Current version: v" .. curVer)
+local curclientType_text = gui.Text(updater_groupbox, "Client Type:" .. " Default")
+local defaultlatVer_text = gui.Text(updater_groupbox, "Latest Default Version: v" .. defaultlatVer)
+local defaultlatVer_text = gui.Text(updater_groupbox, "Latest ML15Edition Version: v" .. mllatVer)
+local x88Type_check = gui.Combobox(updater_groupbox, "x88Type", "x88UI", "Default", "MasterLooser15 Edition")
+x88Type_check:SetDescription("Which x88UI style you want.")
 local changelog_groupbox = gui.Text(changelog_groupbox, http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/changelog.txt"))
 --END - GUI of Auto-Updater--
 
+--New--
+local function UpdateNew()
+	if gui.GetValue("x88_updtab.x88Type") == 0 then
+		if (curclientType == 1 and (curVer ~= defaultlatVer)) or curclientType == 2 then
+		currentScript = file.Open(GetScriptName(), "w")
+        currentScript:Write(http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Modules/x88Default.lua"))
+        currentScript:Close()
+		LoadScript(GetScriptName())
+	end
+	else
+		if (curclientType == 2 and (curVer ~= mllatVer)) or curclientType == 1 then
+		currentScript = file.Open(GetScriptName(), "w")
+        currentScript:Write(http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Modules/x88ML.lua"))
+        currentScript:Close()
+		LoadScript(GetScriptName())
+		end
+	end
+end
+local update_button = gui.Button(updater_groupbox, "Update", UpdateNew)
+
 --GUI--
 local x88_group = gui.Groupbox(x88_tab, "Settings", 15,15, 295,400)
-local x88_defaultst = gui.Groupbox(x88_tab, "Default UI Settings", 15,240, 294,400)
-local x88_mlst = gui.Groupbox(x88_tab, "MasterLooser UI Settings", 15,520, 294,400)
+local x88_st = gui.Groupbox(x88_tab, "UI Settings", 15,240, 294,400)
 local x88_styles = gui.Groupbox(x88_tab, "Styles", 320,15, 295,400)
-local x88_offsets = gui.Groupbox(x88_tab, "Offsets", 320, 565, 295, 400 )
-local x88_othr = gui.Groupbox(x88_tab, "Extra", 15,620,294,400)
-local x88_info = gui.Groupbox(x88_tab, "Information", 320,1015,294,400)
-local x88_con = gui.Groupbox(x88_tab, "Contact Information", 15,1075,294,400)
+local x88_offsets = gui.Groupbox(x88_tab, "Offsets", 320, 495, 295, 400 )
+local x88_othr = gui.Groupbox(x88_tab, "Extra", 15,520,294,400)
+local x88_info = gui.Groupbox(x88_tab, "Information", 320,945,294,400)
+local x88_con = gui.Groupbox(x88_tab, "Contact Information", 15,975,294,400)
 local ToggleMenu = gui.Checkbox(x88_group, "x88_enable", "Menu", false)
 local ToggleWel = gui.Checkbox(x88_group, "x88_welcome", "Welcome!", false)
-local ToggleAdvanced = gui.Checkbox(x88_defaultst, "x88_advanced", "Advanced Mode", false)
-local ToggleKD = gui.Checkbox(x88_defaultst, "x88_kd", "Kills&Deaths", false)
+local ToggleAdvanced = gui.Checkbox(x88_st, "x88_advanced", "Advanced Mode", false)
+local ToggleKD = gui.Checkbox(x88_st, "x88_kd", "Kills&Deaths", false)
 local ToggleWM = gui.Checkbox(x88_group, "x88_watermark", "Premium Watermark", false)
-local ToggleESP = gui.Checkbox(x88_defaultst, "x88_esp", "Visual Features", false)
-local ToggleMisc = gui.Checkbox(x88_defaultst, "x88_misc", "Misc Features", false)
-local ToggleStyles = gui.Combobox(x88_styles, "x88_style", "UI Style", "Default", "MasterLooser15")
+local ToggleESP = gui.Checkbox(x88_st, "x88_esp", "Visual Features", false)
+local ToggleMisc = gui.Checkbox(x88_st, "x88_misc", "Misc Features", false)
 local clr_menu = gui.ColorPicker(x88_styles, "x88_menu_clr", "Menu", 255,255,255,255)
 local clr_wel = gui.ColorPicker(x88_styles, "x88_wel_clr", "Welcome Message", 252,211,3,255)
 local clr_wm = gui.ColorPicker(x88_styles, "x88_wm_clr", "Watermark", 192,108,129,255)
 local clr_func_off = gui.ColorPicker(x88_styles, "x88_func_clr_off", "Functions OFF", 255,255,255,255)
 local clr_func_on = gui.ColorPicker(x88_styles, "x88_func_clr_on", "Functions ON", 67,144,219,255)
-local clr_func_on2 = gui.ColorPicker(x88_mlst, "x88_func_clr_on2", "2nd Functions ON", 143,222,203,255)
 gui.Text(x88_styles, "SEIZURE WARNING!")
 local epilepsy_menu = gui.Checkbox(x88_styles, "x88_rainbow_menu", "Rainbow Menu", false)
 local epilepsy_wel = gui.Checkbox(x88_styles, "x88_rainbow_wel", "Rainbow Welcome Message", false)
@@ -80,7 +93,6 @@ ToggleESP:SetDescription("Shows Visual features in menu.")
 ToggleMisc:SetDescription("Shows Misc features in menu.")
 ToggleWM:SetDescription("Shows premium x88 software watermark.")
 ToggleAdvanced:SetDescription("Shows type of Auto-Strafe, Fake-Lag and Fake-Ping.")
-ToggleStyles:SetDescription("Chooses style of the menu.")
 epilepsy_menu:SetDescription("Draws menu in animated rainbow color.")
 epilepsy_wel:SetDescription("Draws welcome msg. in animated rainbow color.")
 epilepsy_wm:SetDescription("Draws watermark in animated rainbow color.")
@@ -132,7 +144,6 @@ x = x + welcome_offset_x:GetValue()
 y = y + welcome_offset_y:GetValue()
 	if gui.GetValue("esp.master") then
 	if ToggleWel:GetValue() then
-    if gui.GetValue("esp.x88_tab.x88_style") == 0 then
 		draw.SetFont(font)
 	    if epilepsy_wel:GetValue()
 	    then
@@ -147,17 +158,6 @@ y = y + welcome_offset_y:GetValue()
     	draw.TextShadow(x,y+15,"Made by w1ldac3")
     	--Credits to Dragon--
     	draw.TextShadow(x+115,y+15,"Credits to Dragon")
-	elseif gui.GetValue("esp.x88_tab.x88_style") == 1 then
-		draw.SetFont(font)
-		if epilepsy_wel:GetValue()
-	    then
-	    draw.Color(r,g,b,a)
-	    else
-        draw.Color(clr_wel:GetValue())
-	    end
-		draw.TextShadow(x,y,"Hello MasterLooser15 :)")
-		draw.TextShadow(x,y+15, "Hello Vexxes :)")
-	end
 	end
 	end
 end
@@ -174,9 +174,6 @@ x = x + menu_offset_x:GetValue()
 y = y + menu_offset_y:GetValue()
 	if gui.GetValue("esp.master") then
 	if ToggleMenu:GetValue() then
---Check if MasterLooser15 Style is off--
-	if gui.GetValue("esp.x88_tab.x88_style") == 0 then
---Check finished--
 	if entities.GetLocalPlayer() then
 		draw.SetFont(font)
 		--MENU Draws--
@@ -588,7 +585,10 @@ draw.TextShadow(x,y+135,"KnifeBot:")
         draw.TextShadow(x+150,y+90, "SHIFT")
         elseif gui.GetValue("rbot.accuracy.weapon.asniper.doublefire") == 2 then
         draw.Color(clr_func_on:GetValue())
-        draw.TextShadow(x+150,y+90, "RAPID")
+		draw.TextShadow(x+150,y+90, "RAPID")
+		elseif gui.GetValue("rbot.accuracy.weapon.asniper.doublefire") == 3 then
+        draw.Color(clr_func_on:GetValue())
+        draw.TextShadow(x+150,y+90, "RAPID FC")
     end
         if gui.GetValue("rbot.antiaim.advanced.pitch") == 0 then
         draw.Color(clr_func_off:GetValue())
@@ -642,306 +642,6 @@ end
         draw.TextShadow(x+150,y,"OFF")
     end
 end
---Check if MasterLooser15 Style is on--
-	elseif gui.GetValue("esp.x88_tab.x88_style") == 1 then
---Check finished--
-	if entities.GetLocalPlayer() then
-	--1st Menu--
-	draw.SetFont(font)
-	if epilepsy_menu:GetValue() then
-		draw.Color(r,g,b,a)
-		else
-		draw.Color(clr_menu:GetValue())
-		end	draw.TextShadow(x,y,"Triggerbot:")
-	draw.TextShadow(x,y+15,"Bunnyhop:")
-	draw.TextShadow(x,y+30,"Chams:")
-	draw.TextShadow(x,y+45,"ESP:")
-	draw.TextShadow(x,y+60,"RankESP:")
-	draw.TextShadow(x,y+75,"NoHands?:")
-	draw.TextShadow(x,y+90,"AA:")
-	draw.TextShadow(x,y+105,"AA Mode:")
-	draw.TextShadow(x,y+120,"Clantag:")
-	draw.TextShadow(x,y+135,"Trickshot?:")
-	draw.TextShadow(x,y+150,"FOVChanger:")
-	draw.TextShadow(x,y+165,"Weapon FOV:")
-	draw.TextShadow(x,y+180,"Crosshair:")
-	draw.TextShadow(x,y+195,"pSilent:")
-	draw.TextShadow(x,y+210,"AutoFire:")
-	draw.TextShadow(x,y+225,"HVH Mode:")
-	draw.TextShadow(x,y+240,"HS Only?:")
-	--End of 1st Menu--
-	--2nd Menu--
-	draw.TextShadow(x+140,y,"MPoints?:")
-	draw.TextShadow(x+140,y+15,"Legit:")
-	draw.TextShadow(x+140,y+30,"Thirdp:")
-	draw.TextShadow(x+140,y+45,"BackTrack:")
-	draw.TextShadow(x+140,y+60,"BTChams:")
-	draw.TextShadow(x+140,y+75,"AntiTrig:")
-	draw.TextShadow(x+140,y+90,"SuperLegit:")
-	draw.TextShadow(x+140,y+105,"Trolling?:")
-	draw.TextShadow(x+140,y+120,"Kills:")
-	draw.TextShadow(x+140,y+135,"Deaths:")
-	draw.TextShadow(x+140,y+150,"KD:")
-	draw.TextShadow(x+140,y+165,"Ping:")
-	--End of 2nd Menu--
-	--Functions--
-if gui.GetValue("lbot.master") then
-	if gui.GetValue("lbot.trg.enable") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y,"OFF")
-	end
-	else
-	draw.TextShadow(x+90,y,"OFF")
-end
-if string.match(tostring(gui.GetValue("misc.autojump")), "Off") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+15,"OFF")
-	elseif string.match(tostring(gui.GetValue("misc.autojump")), "Perfect") or string.match(tostring(gui.GetValue("misc.autojump")), "Legit") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y+15,"ON")
-end
-if gui.GetValue("esp.chams.enemy.occluded") == 0 and 
-gui.GetValue("esp.chams.enemy.visible") == 0 then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+30,"OFF")
-elseif gui.GetValue("esp.chams.enemy.occluded") or gui.GetValue("esp.chams.enemy.visible") ~= 0 then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+30,"")
-end
-if gui.GetValue("esp.chams.enemy.occluded") == 0 then
-if gui.GetValue("esp.chams.enemy.visible") > 0 then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+80,y+30,"V_Static")
-end
-	elseif gui.GetValue("esp.chams.enemy.occluded") > 0 then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+80,y+30,"F_Static")
-end
-if gui.GetValue("esp.overlay.enemy.box") == 0 then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+45,"OFF")
-	elseif gui.GetValue("esp.overlay.enemy.box") == 1 then
-	draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+90,y+45,"Outline")
-	elseif gui.GetValue("esp.overlay.enemy.box") == 2 then
-	draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+90,y+45,"Normal")
-end
-if gui.GetValue("misc.rankreveal") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y+60,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+60,"OFF")
-end
-if gui.GetValue("lbot.master") or gui.GetValue("rbot.master") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+90,"")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+90,"OFF")
-end
-if gui.GetValue("lbot.master") then
-	if string.match(tostring(gui.GetValue("lbot.antiaim.type")), "Minimum") or string.match(tostring(gui.GetValue("lbot.antiaim.type")), "Maximum") then
-	draw.Color(r,g,b)
-	draw.TextShadow(x+90,y+90,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+90,"OFF")
-end
-end
-if gui.GetValue("rbot.master") then
-	if string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Backward") or string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Spinbot") or string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Desync") or string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Desync Jitter") then
-	draw.Color(255,0,0)
-	draw.TextShadow(x+50,y+90,"WARNING: ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+90,"OFF")
-	end
-end
-if gui.GetValue("lbot.master") or gui.GetValue("rbot.master") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+105,"")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+105,"OFF")
-end
-if gui.GetValue("lbot.master") then
-	if string.match(tostring(gui.GetValue("lbot.antiaim.type")), "Off") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+105,"OFF")
-	elseif string.match(tostring(gui.GetValue("lbot.antiaim.type")), "Minimum") or string.match(tostring(gui.GetValue("lbot.antiaim.type")), "Maximum") then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+60,y+105,"Legit Desync")
-end
-end
-if gui.GetValue("rbot.master") then
-	if string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Off") then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+90,y+105,"OFF")
-	elseif string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Backward") then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+90,y+105,"Back")
-	elseif string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Spinbot") then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+90,y+105,"Spin")
-	elseif string.match(tostring(gui.GetValue("rbot.antiaim.base")), "Desync") then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+90,y+105,"Sync")
-end
-end
-if gui.GetValue("misc.clantag") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y+120,"1")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+120,"0")
-end
-if gui.GetValue("esp.x88_tab.x88_viewmodel_editor") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y+150,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+150,"OFF")
-end
-if gui.GetValue("esp.x88_tab.x88_viewmodel_editor") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+165,vfov:GetValue())
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+165,"OFF")
-end
-if gui.GetValue("esp.other.crosshair") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90,y+180,"xhair")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+180,"OFF")
-end
-if gui.GetValue("lbot.master") or gui.GetValue("rbot.master") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+195,"")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+195,"OFF")
-end
-if gui.GetValue("lbot.master") then
-	if gui.GetValue("lbot.semirage.silentaimbot") then
-	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+90, y+195,"Tick")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90, y+195,"OFF")
-end
-end
-if gui.GetValue("rbot.master") then
-	if gui.GetValue("rbot.aim.target.silentaim") then
-	draw.Color(255,0,0)
-	draw.TextShadow(x+90,y+195,"Override")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+195,"OFF")
-end
-end
-if gui.GetValue("lbot.master") then
-	if gui.GetValue("lbot.aim.autofire") then
-	draw.Color(255,0,0)
-	draw.TextShadow(x+90,y+210,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+210,"OFF")
-end
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+210,"OFF")
-end
-if gui.GetValue("rbot.master") then
-	draw.Color(255,0,0)
-	draw.TextShadow(x+90,y+225,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+90,y+225,"OFF")
-end
-if entities.FindByClass( "CBasePlayer" )[1] ~= nil then
-        latency=entities.GetPlayerResources():GetPropInt( "m_iPing", client.GetLocalPlayerIndex() )
-   draw.Color(255,255,255)
-	draw.TextShadow(x+174,y+165,latency)  
-end
-if gui.GetValue("lbot.master") then
-	draw.Color(clr_func_on2:GetValue())
-	draw.TextShadow(x+230,y+15,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230,y+15,"OFF")
-end
-if gui.GetValue("lbot.extra.backtrack") == 0 then
-		draw.Color(clr_func_off:GetValue())
-		draw.TextShadow(x+230,y+45,"OFF")
-		elseif gui.GetValue("lbot.extra.backtrack") <= 100 then
-		draw.Color(clr_func_on2:GetValue())
-		draw.TextShadow(x+230,y+45,"Legit")
-		elseif gui.GetValue("lbot.extra.backtrack") <= 150 then
-		draw.Color(255,255,0)
-		draw.TextShadow(x+230,y+45,"Medium")
-		elseif gui.GetValue("lbot.extra.backtrack") <= 250 then
-		draw.Color(255,165,0)
-		draw.TextShadow(x+230,y+45,"Blatant")
-		elseif gui.GetValue("lbot.extra.backtrack") <= 400 then
-		draw.Color(255,0,0)
-		draw.TextShadow(x+230,y+45,"MAX")
-end
-if gui.GetValue("esp.local.thirdpersondist") == 0 then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230, y+30,"OFF")
-end
-if gui.GetValue("esp.local.thirdpersondist") > 0 then
-	draw.Color(255,255,255)
-	draw.TextShadow(x+230,y+30,"ON")
-	draw.TextShadow(x+255,y+30,gui.GetValue("esp.local.thirdpersondist"))
-end
-if gui.GetValue("esp.chams.backtrack.occluded") == 0 and gui.GetValue("esp.chams.backtrack.visible") == 0 then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230,y+60,"OFF")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x,y,"")
-end
-if gui.GetValue("esp.chams.backtrack.occluded") > 0 or gui.GetValue("esp.chams.backtrack.visible") > 0 then
-	draw.Color(clr_func_on2:GetValue())
-	draw.TextShadow(x+230,y+60,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x,y,"")
-end
-if gui.GetValue("misc.fakelag.enable") then
-	if gui.GetValue("misc.fakelag.peek") then
-	draw.Color(clr_func_on2:GetValue())
-	draw.TextShadow(x+230,y+75,"ON")
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230,y+75,"OFF")
-	end
-	else
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230,y+75,"OFF")
-end
-if gui.GetValue("lbot.master") then
-	if gui.GetValue("lbot.aim.enable") then
-	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+230,y+90,"OFF")
-	else
-	draw.Color(clr_func_on2:GetValue())
-	draw.TextShadow(x+230,y+90,"ON")
-	end
-	else
-    draw.Color(clr_func_on2:GetValue())
-	draw.TextShadow(x+230,y+90,"ON")
-end
-end
-end
 end
 end
 end
@@ -962,7 +662,6 @@ y = y + kd_offset_y:GetValue()
 if gui.GetValue("esp.master") then
 if ToggleKD:GetValue() then
 if entities.GetLocalPlayer() then
-if gui.GetValue("esp.x88_tab.x88_style") == 0 then
 	draw.SetFont(font)
 	--Kills&Deaths--
 	draw.Color(255,100,0,255)
@@ -976,20 +675,6 @@ if gui.GetValue("esp.x88_tab.x88_style") == 0 then
     --deaths
     draw.Color(255, 255, 255, 255)
     draw.TextShadow(x+45, y+15, entities.GetPlayerResources():GetPropInt('m_iDeaths', client.GetLocalPlayerIndex()))
-end
-end
-end
-if gui.GetValue("esp.x88_tab.x88_style") == 1 then
-	if ToggleMenu:GetValue() then
-	draw.SetFont(font)
-	draw.Color(255, 255, 255, 255)
-    draw.TextShadow(menu_x+173, menu_y+120, entities.GetPlayerResources():GetPropInt('m_iKills', client.GetLocalPlayerIndex()
-))
-    --deaths
-    draw.Color(255, 255, 255, 255)
-    draw.TextShadow(menu_x+190, menu_y+135, entities.GetPlayerResources():GetPropInt('m_iDeaths', client.GetLocalPlayerIndex()))
-	draw.Color(255,255,255,255)
-	draw.TextShadow(menu_x+163, menu_y+150, getKdr(entities.GetLocalPlayer()))
 end
 end
 end

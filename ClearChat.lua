@@ -26,8 +26,8 @@ callbacks.Register( "Draw", "ChatSpam", ChatSpam );
 
 -------------- Chat Spammer
 local G_M1 = gui.Tab(gui.Reference("Misc"), "extra.settings", "Extra")
-local CC_Show = gui.Checkbox(G_M1, "msc_chat_spams", "Chat Spams", false)
-local CC_W = gui.Window("CC_W", "Chat Spam", 200,200,200,285)
+local CC_Show = gui.Checkbox(G_M1, "msc_chat_spams", "Start/Stop ChatSpammer", false)
+local CC_W = gui.Window("CC_W", "Chat Spam", 200,200,200,380)
 local CC_G1 = gui.Groupbox(CC_W, "Chat Spams", 15, 15, 170, 224)
 local CC_Spams = gui.Combobox(CC_G1, "CC_Spam", "Spams", "Off", "Spam 1", "Spam 2", "Clear Chat")
 local CC_Spam_spd = gui.Slider(CC_G1, "CC_Spam_Speed", "Spam Speed", 67.5, 10, 250)
@@ -35,9 +35,17 @@ local chatspam1txt = gui.Text(CC_G1, "Spam 1") local ChatSpam1 = gui.Editbox(CC_
 local chatspam2txt = gui.Text(CC_G1, "Spam 2") local ChatSpam2 = gui.Editbox(CC_G1, "CC_Spam2", "Custom Chat Spam 2")
 
 local c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100
-function custom_chat()
-if CC_Spams:GetValue() == 0 then return
+local function custom_chat()
+CC_W:SetActive(gui.Reference("Menu"):IsActive())
+
+if CC_Show:GetValue() ~= true then return end
+
+ if CC_Spams:GetValue() == 0 then return
 elseif CC_Spams:GetValue() == 1 and globals.RealTime() >= c_spammedlast then client.ChatSay(ChatSpam1:GetValue()) c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100
 elseif CC_Spams:GetValue() == 2 and globals.RealTime() >= c_spammedlast then client.ChatSay(ChatSpam2:GetValue()) c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100
-elseif CC_Spams:GetValue() == 3 and globals.RealTime() >= c_spammedlast then client.ChatSay("﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽\n") c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100 end end
+elseif CC_Spams:GetValue() == 3 and globals.RealTime() >= c_spammedlast then client.ChatSay("﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽ ﷽﷽﷽\n") c_spammedlast = globals.RealTime() + CC_Spam_spd:GetValue()/100 end 
+end
 callbacks.Register("Draw", custom_chat)
+
+
+
