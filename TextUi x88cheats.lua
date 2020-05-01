@@ -8,7 +8,7 @@ local x88_tab = gui.Tab(ref, "x88_tab", "x88Cheats")
 local x88_updtab = gui.Tab(ref_upd, "x88_updtab", "x88Cheats Updates")
 
 local curclientType = 1
-local curVer = "1.2"
+local curVer = "1.2.5"
 local defaultlatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/defver.txt")
 local mllatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/mlver.txt")
 
@@ -68,7 +68,7 @@ gui.Text(x88_styles, "SEIZURE WARNING!")
 local epilepsy_menu = gui.Checkbox(x88_styles, "x88_rainbow_menu", "Rainbow Menu", false)
 local epilepsy_wel = gui.Checkbox(x88_styles, "x88_rainbow_wel", "Rainbow Welcome Message", false)
 local epilepsy_wm = gui.Checkbox(x88_styles, "x88_rainbow_wm", "Rainbow Watermark", false)
-local epilepsy_func = gui.Checkbox(x88_styles, "x88_rainbow_func", "Rainbow Functions (v1.1)", false)
+local epilepsy_func = gui.Checkbox(x88_styles, "x88_rainbow_func", "Rainbow Functions (v1.3)", false)
 local welcome_offset_x = gui.Slider(x88_offsets, "x88_welcome_offset_x", "Welcome! Offset X", 270, 0, 700)
 local welcome_offset_y = gui.Slider(x88_offsets, "x88_welcome_offset_y", "Welcome! Offset Y", 5, 0, 700)
 local menu_offset_x = gui.Slider(x88_offsets, "x88_menu_offset_x", "Menu Offset X", 270, 0, 700)
@@ -82,7 +82,7 @@ gui.Text(x88_info, "Credits:")
 gui.Text(x88_info, "Originally by I_Am_The_Dragon (UID: 220920)")
 gui.Text(x88_info, "Reworked by w1ldac3 (UID: 217577)")
 gui.Text(x88_info, "S/o to Squidoodle (UID: 305824) for helping a lot   with parts of code.")
-gui.Text(x88_con, "Discord w1ldac3#5772")
+gui.Text(x88_con, "Discord w1ldac3#1337")
 gui.Text(x88_con, "Telegram @w1ldac3")
 -- End - Text in GUI--
 --Descriptions--
@@ -104,7 +104,6 @@ local font = draw.CreateFont("Tahoma", 14, 700, {0x200})
 local username = client.GetPlayerNameByIndex(client.GetLocalPlayerIndex())
 --This ^ gets your name from game--
 --Thanks for helping Squidoodle--
-
 
 local function overlay()
 --RGB--
@@ -153,7 +152,7 @@ y = y + welcome_offset_y:GetValue()
 	    end
         --Hello MasterLooser15!--
         draw.TextShadow(x,y,"Hello ")
-        draw.TextShadow(x+35,y,username)
+        draw.TextShadow(x+35,y,username .. " :)")
     	--MADE by w1ldac3--
     	draw.TextShadow(x,y+15,"Made by w1ldac3")
     	--Credits to Dragon--
@@ -278,125 +277,131 @@ if ToggleESP:GetValue() then
 		draw.Color(r,g,b,a)
 		else
 		draw.Color(clr_menu:GetValue())
-		end	draw.TextShadow(x+205,y+105,"BOX ESP:")
-	draw.TextShadow(x+205,y+120,"Box Precision:")
-	draw.TextShadow(x+205,y+135,"Chams:")
-	draw.TextShadow(x+205,y+150,"Chams XQZ:")
-	draw.TextShadow(x+205,y+165,"BTChams:")
-	draw.TextShadow(x+205,y+180,"BTChams XQZ:")
-	draw.TextShadow(x+205,y+195,"Glow:")
-	draw.TextShadow(x+205,y+210,"Player Indicators:")
+        end	
+local offyspecial = 15
+if ToggleMisc:GetValue() then
+    offyspecial = offyspecial + 90
+end
+
+    draw.TextShadow(x+205,y+offyspecial+0,"BOX ESP:")
+	draw.TextShadow(x+205,y+offyspecial+15,"Box Precision:")
+	draw.TextShadow(x+205,y+offyspecial+30,"Chams:")
+	draw.TextShadow(x+205,y+offyspecial+45,"Chams XQZ:")
+	draw.TextShadow(x+205,y+offyspecial+60,"BTChams:")
+	draw.TextShadow(x+205,y+offyspecial+75,"BTChams XQZ:")
+	draw.TextShadow(x+205,y+offyspecial+90,"Glow:")
+	draw.TextShadow(x+205,y+offyspecial+105,"Player Indicators:")
 if gui.GetValue("esp.overlay.enemy.box") == 0 then
 	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+355,y+105, "OFF")
+	draw.TextShadow(x+355,y+offyspecial+0, "OFF")
 	elseif gui.GetValue("esp.overlay.enemy.box") == 1 then
 	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+355,y+105, "Outlined")
+	draw.TextShadow(x+355,y+offyspecial+0, "Outlined")
 	elseif gui.GetValue("esp.overlay.enemy.box") == 2 then
 	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+355,y+105, "Normal")
+	draw.TextShadow(x+355,y+offyspecial+0, "Normal")
 end
 if gui.GetValue("esp.overlay.enemy.precision") then
 	draw.Color(clr_func_on:GetValue())	
-	draw.TextShadow( x+355, y+120, "ON")	
+	draw.TextShadow( x+355, y+offyspecial+15, "ON")	
 	else
 	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow( x+355, y+120, "OFF")
+	draw.TextShadow( x+355, y+offyspecial+15, "OFF")
 end
 if gui.GetValue("esp.chams.enemy.visible") == 0 then
     draw.Color(clr_func_off:GetValue())
-    draw.TextShadow(x+355,y+135, "OFF" )
+    draw.TextShadow(x+355,y+offyspecial+30, "OFF" )
 	elseif gui.GetValue("esp.chams.enemy.visible") == 1 then
 	draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Flat" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Flat" )
     elseif gui.GetValue("esp.chams.enemy.visible") == 2 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Color" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Color" )
     elseif gui.GetValue("esp.chams.enemy.visible") == 3 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Metallic" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Metallic" )
     elseif gui.GetValue("esp.chams.enemy.visible") == 4 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Glow" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Glow" )
     elseif gui.GetValue("esp.chams.enemy.visible") == 5 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Textured" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Textured" )
     elseif gui.GetValue("esp.chams.enemy.visible") == 6 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+135,  "Invisible" )
+    draw.TextShadow(x+355,y+offyspecial+30,  "Invisible" )
 end
 if gui.GetValue("esp.chams.enemy.occluded") == 0 then
     draw.Color(clr_func_off:GetValue())
-    draw.TextShadow(x+355,y+150, "OFF" )
+    draw.TextShadow(x+355,y+offyspecial+45, "OFF" )
     elseif gui.GetValue("esp.chams.enemy.occluded") == 1 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+150,  "Flat" )
+    draw.TextShadow(x+355,y+offyspecial+45,  "Flat" )
     elseif gui.GetValue("esp.chams.enemy.occluded") == 2 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+150,  "Color" )
+    draw.TextShadow(x+355,y+offyspecial+45,  "Color" )
     elseif gui.GetValue("esp.chams.enemy.occluded") == 3 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+150,  "Metallic" )
+    draw.TextShadow(x+355,y+offyspecial+45,  "Metallic" )
     elseif gui.GetValue("esp.chams.enemy.occluded") == 4 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+150,  "Glow" )
+    draw.TextShadow(x+355,y+offyspecial+45,  "Glow" )
 end
 if gui.GetValue("esp.chams.backtrack.visible") == 0 then
     draw.Color(clr_func_off:GetValue())
-    draw.TextShadow(x+355,y+165, "OFF" )
+    draw.TextShadow(x+355,y+offyspecial+60, "OFF" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 1 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Flat" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Flat" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 2 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Color" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Color" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 3 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Metallic" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Metallic" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 4 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Glow" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Glow" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 5 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Textured" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Textured" )
     elseif gui.GetValue("esp.chams.backtrack.visible") == 6 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+165,  "Invisible" )
+    draw.TextShadow(x+355,y+offyspecial+60,  "Invisible" )
 end
 
 if gui.GetValue("esp.chams.backtrack.occluded") == 0 then
     draw.Color(clr_func_off:GetValue())
-    draw.TextShadow(x+355,y+180, "OFF" )
+    draw.TextShadow(x+355,y+offyspecial+75, "OFF" )
     elseif gui.GetValue("esp.chams.backtrack.occluded") == 1 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+180,  "Flat" )
+    draw.TextShadow(x+355,y+offyspecial+75,  "Flat" )
     elseif gui.GetValue("esp.chams.backtrack.occluded") == 2 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+180,  "Color" )
+    draw.TextShadow(x+355,y+offyspecial+75,  "Color" )
     elseif gui.GetValue("esp.chams.backtrack.occluded") == 3 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+180,  "Metallic" )
+    draw.TextShadow(x+355,y+offyspecial+75,  "Metallic" )
     elseif gui.GetValue("esp.chams.backtrack.occluded") == 4 then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+180,  "Glow" )
+    draw.TextShadow(x+355,y+offyspecial+75,  "Glow" )
 end
 if gui.GetValue("esp.overlay.enemy.glow") == 0 then
 	draw.Color(clr_func_off:GetValue())
-	draw.TextShadow(x+355,y+195,"OFF")
+	draw.TextShadow(x+355,y+offyspecial+90,"OFF")
 	elseif gui.GetValue("esp.overlay.enemy.glow") == 1 then
 	draw.Color(clr_func_on:GetValue())
-	draw.TextShadow(x+355,y+195,"Team")
+	draw.TextShadow(x+355,y+offyspecial+90,"Team")
 	elseif 
 gui.GetValue("esp.overlay.enemy.glow") == 2 then
 	draw.Color(0,255,0,255)
-	draw.TextShadow(x+355,y+195,"Health")
+	draw.TextShadow(x+355,y+offyspecial+90,"Health")
 end
 if gui.GetValue("esp.local.outofview") then
     draw.Color(clr_func_on:GetValue())
-    draw.TextShadow(x+355,y+210, "ON")
+    draw.TextShadow(x+355,y+offyspecial+105, "ON")
     else
     draw.Color(clr_func_off:GetValue())
-    draw.TextShadow(x+355,y+210, "OFF")
+    draw.TextShadow(x+355,y+offyspecial+105, "OFF")
 end
 end
 --End of Visuals--
@@ -406,7 +411,8 @@ if ToggleMisc:GetValue() then
 		draw.Color(r,g,b,a)
 		else
 		draw.Color(clr_menu:GetValue())
-		end	draw.TextShadow(x+205,y+15,"Auto-Strafe:")
+        end	
+    draw.TextShadow(x+205,y+15,"Auto-Strafe:")
 	draw.TextShadow(x+205,y+30,"Bunny-Hop:")
 	draw.TextShadow(x+205,y+45,"FakeLag:")
 	draw.TextShadow(x+205,y+60,"Fake PING:")

@@ -6,7 +6,7 @@ hitcross:SetDescription("Drawing a marker on the center of screen")
 local linesize = gui.Slider(ref_gui, 'lua_healthshot_hitcross_slider', 'Crosshair marker size', 15, 0, 20)
 
 local CrossTime = 0
-local alpha = 0;
+local alpha = 200;
 local screenCenterX, screenCenterY = draw.GetScreenSize();
 screenCenterX = screenCenterX / 2;
 screenCenterY = screenCenterY / 2;

@@ -44,7 +44,8 @@ callbacks.Register("Draw", function()
     local divider = ' | ';
     local cheatName = 'aimware.net ';
     local userName = ' kriZz ';
-    -- Do not edit below
+    
+	-- Do not edit below
     local delay;
     local tick;
 	local fps = 'FPS: ';

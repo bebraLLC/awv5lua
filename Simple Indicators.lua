@@ -14,7 +14,15 @@ local button_held = input.IsButtonDown
     
 		draw.SetFont(draw.CreateFont("Tahoma", 20, 700))
 
-    if (gui.GetValue("misc.fakelag.enable") == true) then
+    if (gui.GetValue("rbot.antiaim.advanced.autodir") == true) then
+        draw.Color(0,128,0,255)
+        draw.TextShadow(16, half_screenY+15+y_offset:GetValue(), "FreeStand")
+	else
+        draw.Color(128,0,0,255)
+		draw.TextShadow(16, half_screenY+15+y_offset:GetValue(), "FreeStand")
+    end
+
+	if (gui.GetValue("misc.fakelag.enable") == true) then
         draw.Color(0,128,0,255)
         draw.TextShadow(16, half_screenY+35+y_offset:GetValue(), "Fakelag")
 	else

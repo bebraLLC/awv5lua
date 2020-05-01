@@ -231,8 +231,8 @@ local function handleUserInterface()
 	else
 		variables[m]["VIS_MODE"]:SetInvisible(true);
 		variables[m]["VIS_COLOR"]:SetInvisible(true);
-		variables[m]["REF"]:SetInvisible(true)
-
+		variables[m]["VIS_REF"]:SetInvisible(true)
+		
 		variables[m]["HID_MODE"]:SetInvisible(true);
 		variables[m]["HID_COLOR"]:SetInvisible(true);
 
