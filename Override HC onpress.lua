@@ -9,7 +9,7 @@ local enabled = false
 local reduce_hc_ref = gui.Reference("RAGEBOT", "ACCURACY", "WEAPON");
 local asniperhcslider = gui.Slider(reduce_hc_ref,"asniperhcslider", "New HC Slider", 0, 1, 100)
 --local asnipermindmgslider = gui.Slider(reduce_hc_ref,"asnipermindmgslider", "New MinDmg Slider", 0, 1, 100)
-local tgglkey = gui.Keybox(reduce_hc_ref, "ChangeDmgKey", "Change HC key", false);
+local tgglkey = gui.Keybox(reduce_hc_ref, "ChangeHCKey", "Change HC key", false);
 
 -- cache old hc/dmg to restore later
 local old_hc = getValue("rbot.accuracy.weapon.asniper.hitchance")

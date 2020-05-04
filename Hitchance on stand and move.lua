@@ -1,33 +1,27 @@
 --Moving and Standing hitchance--
---Version 0.1.0------------------
----------------------------------
--------Script by konupall--------
----------------------------------
---Future Goals:------------------
---Add other weapons--------------
---Add more features--------------
----------------------------------
 
-local kui = gui.Groupbox( gui.Reference( "Ragebot", "Accuracy", "Weapon"), "Moving and standing hitchance")
-local hcslider2 = gui.Slider( kui, "rbot.accuracy.weapon.asniper.hitchance", "Standing hitchance", 0, 0, 100 )
-local hcslider1 = gui.Slider( kui, "rbot.accuracy.weapon.asniper.hitchance", "Moving hitchance", 0, 0, 100 )
+local gui = gui.Groupbox( gui.Reference( "Ragebot", "Accuracy", "Weapon"), "Moving and Standing Hitchance")
+local hcslider1 = gui.Slider( gui, "asniper.hitchance.move", "Moving Hitchance", 0, 0, 100 )
+local hcslider2 = gui.Slider( gui, "asniper.hitchance.stand", "Standing Hitchance", 0, 0, 100 )
+local veloslider = gui.Slider( gui, "asniper.hitchance.velocity", "Max StandVelocity", 0, 0, 120, 0.5)
 
 local function movstandhc()
     velocity = math.sqrt(localPlayer:GetPropFloat( "localdata", "m_vecVelocity[0]" )^2 + localPlayer:GetPropFloat( "localdata", "m_vecVelocity[1]" )^2)
-    if velocity > 5 then
-        gui.SetValue( "rbot.accuracy.weapon.asniper.hitchance", minValue )
+    	if velocity > maxVelo then
+        gui.SetValue( "rbot.accuracy.weapon.asniper.hitchance", minValue )	-- Moving 	(when Velocity is higher than veloslider Value)
     else
-        gui.SetValue( "rbot.accuracy.weapon.asniper.hitchance", maxValue )
+        gui.SetValue( "rbot.accuracy.weapon.asniper.hitchance", maxValue )	-- Standing (when Velocity is lower than veloslider Value)
     end
 end
 
 local function sethc()
     minValue = hcslider1:GetValue()
     maxValue = hcslider2:GetValue()
+	maxVelo  = veloslider:GetValue()
 end
 
 
-local function retard()
+local function localcheck()
     localPlayer = entities.GetLocalPlayer()
     if localPlayer then
         sethc()
@@ -35,4 +29,4 @@ local function retard()
     end
 end
 
-callbacks.Register( "Draw", retard )
+callbacks.Register( "Draw", "localcheck", localcheck )

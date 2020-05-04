@@ -1,11 +1,6 @@
---[[
-	Original by: AnAnAn, catmanformod2019
-	Recode by: zack
-]]
-
 local IsButtonDown, GetMousePos, AbsoluteFrameTime, Color, FilledRect, OutlinedRect, RoundedRectFill, Line, Text, RealTime, sin, floor, CreateFont, GetLocalPlayer, GetLocalPlayerIndex, GetPlayerResources, GetScreenSize, GetConVar, SetFont = input.IsButtonDown, input.GetMousePos, globals.AbsoluteFrameTime, draw.Color, draw.FilledRect, draw.OutlinedRect, draw.RoundedRectFill, draw.Line, draw.Text, globals.RealTime, math.sin, math.floor, draw.CreateFont, entities.GetLocalPlayer, client.GetLocalPlayerIndex, entities.GetPlayerResources, draw.GetScreenSize, client.GetConVar, draw.SetFont
 
-local w=gui.Window('ow_wm_pos_wn','onion wm',0,0,0,0)local sX,sY=gui.Slider(w,"ow_wm_pos_x","x",300,0,7680),gui.Slider(w,"ow_wm_pos_y","y",0,0,4320)w:SetActive(0)
+local w=gui.Window('ow_wm_pos_wn','onion wm',0,0,0,0)local sX,sY=gui.Slider(w,"ow_wm_pos_x","x",0,900,1280),gui.Slider(w,"ow_wm_pos_y","y",0,0,960)w:SetActive(0)
 
 local frame_rate = 0
 local get_fps = function(t) if t then return floor( ( 1 / AbsoluteFrameTime() ) + 0.5 ) else frame_rate = 0.9 * frame_rate + (1 - 0.9) * AbsoluteFrameTime() return floor((1 / frame_rate) + 0.5)end end
@@ -64,7 +59,7 @@ local function MAIN()
 	local player_resources = GetPlayerResources()
 
 	local fps = get_fps(true) 
-	-- local time = date('%I:%M:%S %p')
+	--local time = os.date('%h:%m:%s: %p:') --os.date()
 
 	local ping = local_player and player_resources:GetPropInt( 'm_iPing', GetLocalPlayerIndex() ).. ' ms' or ''
 	--local tick = local_player and floor( local_player:GetProp( 'localdata', 'm_nTickBase' ) + 0x40 ) or ''
@@ -107,7 +102,8 @@ local function MAIN()
 	draw_rounded_rect(x + 206, y + 33, x + 221, y + 48, 120, 120, 120, 255)
 	draw_text(x + 212, y + 35, 30, 30, 30, 255, font.V12, '-')
 	draw_text(x + 210, y + 30, 30, 30, 30, 255, font.V12, '|')
-	draw_text(x + 225, y + 33, 255, 255, 255, 200, font.V13, "TIME(SOON)")
+	draw_text(x + 208, y + 30, 30, 30, 30, 255, font.V12, ' Time:')
+	draw_text(x + 225, y + 33, 255, 255, 255, 200, font.V13, time)
 
 
 	--- AIMWARE.net ---

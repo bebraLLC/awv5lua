@@ -7,7 +7,7 @@
 
 uiSpeed = true -- Enable speed indicator
 uiGraph = true -- Enable speed graph
-uiGraphJumps = true -- Speed graph display jumps
+uiGraphJumps = false -- Speed graph display jumps
 
 uiGraphWidth = 250 -- Speed graph width (min: 0, max: 700, default: 250)
 uiGraphMaxY = 400 -- Speed graph max speed (min: 0, max: 5000, default: 400)

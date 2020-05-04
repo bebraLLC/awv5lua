@@ -8,20 +8,22 @@ local x88_tab = gui.Tab(ref, "x88_tab", "x88Cheats")
 local x88_updtab = gui.Tab(ref_upd, "x88_updtab", "x88Cheats Updates")
 
 local curclientType = 1
-local curVer = "1.2.5"
+local curVer = "1.2.8"
 local defaultlatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/defver.txt")
 local mllatVer = http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/Versions/mlver.txt")
 
 --GUI of Auto-Updater--
-local updater_groupbox = gui.Groupbox(x88_updtab, "Updater", 16, 16, 160, 0)
-local changelog_groupbox = gui.Groupbox(x88_updtab, "Changelog", 192, 16, 431, 167)
+local upd_gbox_sel = gui.Groupbox(x88_updtab, "Selector", 15, 15, 600, 0 )
+local upd_sel = gui.Combobox(upd_gbox_sel, "x88.upd.sel", "Tab Chooser", "Updater", "Change-Log")
+local updater_groupbox = gui.Groupbox(x88_updtab, "Updater", 15, 125, 600, 0)
+local changelog_groupbox = gui.Groupbox(x88_updtab, "Change-Log", 15, 125, 600, 0)
 local curVer_text = gui.Text(updater_groupbox, "Current version: v" .. curVer)
 local curclientType_text = gui.Text(updater_groupbox, "Client Type:" .. " Default")
 local defaultlatVer_text = gui.Text(updater_groupbox, "Latest Default Version: v" .. defaultlatVer)
 local defaultlatVer_text = gui.Text(updater_groupbox, "Latest ML15Edition Version: v" .. mllatVer)
 local x88Type_check = gui.Combobox(updater_groupbox, "x88Type", "x88UI", "Default", "MasterLooser15 Edition")
 x88Type_check:SetDescription("Which x88UI style you want.")
-local changelog_groupbox = gui.Text(changelog_groupbox, http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/changelog.txt"))
+local changelog_text = gui.Text(changelog_groupbox, http.Get("https://raw.githubusercontent.com/w1ldac3/x88Cheats-UI-Lua/master/changelog.txt"))
 --END - GUI of Auto-Updater--
 
 --New--
@@ -45,25 +47,26 @@ end
 local update_button = gui.Button(updater_groupbox, "Update", UpdateNew)
 
 --GUI--
-local x88_group = gui.Groupbox(x88_tab, "Settings", 15,15, 295,400)
-local x88_st = gui.Groupbox(x88_tab, "UI Settings", 15,240, 294,400)
-local x88_styles = gui.Groupbox(x88_tab, "Styles", 320,15, 295,400)
-local x88_offsets = gui.Groupbox(x88_tab, "Offsets", 320, 495, 295, 400 )
-local x88_othr = gui.Groupbox(x88_tab, "Extra", 15,520,294,400)
-local x88_info = gui.Groupbox(x88_tab, "Information", 320,945,294,400)
-local x88_con = gui.Groupbox(x88_tab, "Contact Information", 15,975,294,400)
-local ToggleMenu = gui.Checkbox(x88_group, "x88_enable", "Menu", false)
-local ToggleWel = gui.Checkbox(x88_group, "x88_welcome", "Welcome!", false)
-local ToggleAdvanced = gui.Checkbox(x88_st, "x88_advanced", "Advanced Mode", false)
-local ToggleKD = gui.Checkbox(x88_st, "x88_kd", "Kills&Deaths", false)
-local ToggleWM = gui.Checkbox(x88_group, "x88_watermark", "Premium Watermark", false)
-local ToggleESP = gui.Checkbox(x88_st, "x88_esp", "Visual Features", false)
-local ToggleMisc = gui.Checkbox(x88_st, "x88_misc", "Misc Features", false)
-local clr_menu = gui.ColorPicker(x88_styles, "x88_menu_clr", "Menu", 255,255,255,255)
-local clr_wel = gui.ColorPicker(x88_styles, "x88_wel_clr", "Welcome Message", 252,211,3,255)
-local clr_wm = gui.ColorPicker(x88_styles, "x88_wm_clr", "Watermark", 192,108,129,255)
-local clr_func_off = gui.ColorPicker(x88_styles, "x88_func_clr_off", "Functions OFF", 255,255,255,255)
-local clr_func_on = gui.ColorPicker(x88_styles, "x88_func_clr_on", "Functions ON", 67,144,219,255)
+local x88_group = gui.Groupbox(x88_tab,"x88Settings",15,15, 295,400)
+local x88_st = gui.Groupbox(x88_tab,"UI Settings",320,15, 295,400)
+local x88_styles = gui.Groupbox(x88_tab,"Styles",320,15, 295,400)
+local x88_offsets = gui.Groupbox(x88_tab,"Offsets",320,15, 295, 400 )
+local x88_othr = gui.Groupbox(x88_tab,"Extra", 320,15,294,400)
+local x88_info = gui.Groupbox(x88_tab,"Information", 15,290,294,400)
+local x88_con = gui.Groupbox(x88_tab,"Contact Information", 15,457,294,400)
+local ToggleMenu = gui.Checkbox(x88_group,"x88_enable", "Menu", false)
+local ToggleWel = gui.Checkbox(x88_group,"x88_welcome", "Welcome!", false)
+local ToggleAdvanced = gui.Checkbox(x88_st,"x88_advanced", "Advanced Mode", false)
+local ToggleWM = gui.Checkbox(x88_group,"x88_watermark", "Premium Watermark", false)
+local SettingsBox = gui.Combobox(x88_group,"settings.box", "Settings", "UI Settings", "Styles", "Offsets", "Extra")
+local ToggleKD = gui.Checkbox(x88_st,"x88_kd","Kills&Deaths", false)
+local ToggleESP = gui.Checkbox(x88_st,"x88_esp","Visual Features", false)
+local ToggleMisc = gui.Checkbox(x88_st,"x88_misc", "Misc Features", false)
+local clr_menu = gui.ColorPicker(ToggleMenu,"x88_menu_clr", "Menu", 255,255,255,255)
+local clr_wel = gui.ColorPicker(ToggleWel,"x88_wel_clr", "Welcome Message", 252,211,3,255)
+local clr_wm = gui.ColorPicker(ToggleWM,"x88_wm_clr", "Watermark", 192,108,129,255)
+local clr_func_off = gui.ColorPicker(x88_styles,"x88_func_clr_off", "Functions OFF", 255,255,255,255)
+local clr_func_on = gui.ColorPicker(x88_styles,"x88_func_clr_on", "Functions ON", 67,144,219,255)
 gui.Text(x88_styles, "SEIZURE WARNING!")
 local epilepsy_menu = gui.Checkbox(x88_styles, "x88_rainbow_menu", "Rainbow Menu", false)
 local epilepsy_wel = gui.Checkbox(x88_styles, "x88_rainbow_wel", "Rainbow Welcome Message", false)
@@ -100,10 +103,35 @@ epilepsy_func:SetDescription("Draws *OFF/ON* in animated rainbow color.")
 --End - Descriptions--
 --End - GUI--
 
+local function guitoggles()
+    local curupdsel = upd_sel:GetValue()
+    updater_groupbox:SetInvisible(true)
+    changelog_groupbox:SetInvisible(true)
+    if curupdsel == 0 then
+        updater_groupbox:SetInvisible(false)
+    elseif curupdsel == 1 then
+        changelog_groupbox:SetInvisible(false)
+    end
+
+    local cursett = SettingsBox:GetValue()
+    x88_st:SetInvisible(true)
+    x88_styles:SetInvisible(true)
+    x88_offsets:SetInvisible(true)
+    x88_othr:SetInvisible(true)
+
+    if cursett == 0 then
+    x88_st:SetInvisible(false)
+    elseif cursett == 1 then
+    x88_styles:SetInvisible(false)
+    elseif cursett == 2 then
+    x88_offsets:SetInvisible(false)
+    elseif cursett == 3 then
+    x88_othr:SetInvisible(false)
+    end
+end
+
 local font = draw.CreateFont("Tahoma", 14, 700, {0x200})
-local username = client.GetPlayerNameByIndex(client.GetLocalPlayerIndex())
---This ^ gets your name from game--
---Thanks for helping Squidoodle--
+local username = ""
 
 local function overlay()
 --RGB--
@@ -130,8 +158,12 @@ y = y + wmark_offset_y:GetValue()
 	end
 end
 
+local function username()
+    username = client.GetConVar( "name" )
+end
+
 local function welcome()
---RGB--
+    --RGB--
 local speed = 3
     local r = math.floor(math.sin(globals.RealTime() * speed) * 127 + 128)
     local g = math.floor(math.sin(globals.RealTime() * speed + 2) * 127 + 128)
@@ -142,7 +174,7 @@ local x, y = 0, 0
 x = x + welcome_offset_x:GetValue()
 y = y + welcome_offset_y:GetValue()
 	if gui.GetValue("esp.master") then
-	if ToggleWel:GetValue() then
+    if ToggleWel:GetValue() then
 		draw.SetFont(font)
 	    if epilepsy_wel:GetValue()
 	    then
@@ -157,8 +189,8 @@ y = y + welcome_offset_y:GetValue()
     	draw.TextShadow(x,y+15,"Made by w1ldac3")
     	--Credits to Dragon--
     	draw.TextShadow(x+115,y+15,"Credits to Dragon")
-	end
-	end
+end
+end
 end
 local function textui()
 --RGB--
@@ -432,23 +464,19 @@ if gui.GetValue("misc.strafe.enable") then
 	draw.TextShadow(x+380,y+15, "|")
     if string.match(tostring(gui.GetValue("misc.strafe.mode")), "Silent") then
     draw.Color(255,0,0,255)
-	draw.TextShadow(x+390,y+15, "SILENT")
+	draw.TextShadow(x+390,y+15, "  SILENT")
 	elseif string.match(tostring(gui.GetValue("misc.strafe.mode")), "Normal") then
     draw.Color(255,255,0,255)
-	draw.TextShadow(x+390,y+15, "NORMAL")
+	draw.TextShadow(x+390,y+15, "  NORMAL")
 	elseif string.match(tostring(gui.GetValue("misc.strafe.mode")), "Sideways") then
     draw.Color(255,255,0,255)
-	draw.TextShadow(x+390,y+15, "SIDEWAYS")
-
+	draw.TextShadow(x+390,y+15, "  SIDEWAYS")
 	elseif string.match(tostring(gui.GetValue("misc.strafe.mode")), "W-Only") then
     draw.Color(255,255,0,255)
-	draw.TextShadow(x+390,y+15, "W")
-
-
-
+	draw.TextShadow(x+390,y+15, " W")
 	elseif string.match(tostring(gui.GetValue("misc.strafe.mode")), "Mouse") then
     draw.Color(25,193,33,255)
-	draw.TextShadow(x+390,y+15, "MOUSE")
+	draw.TextShadow(x+390,y+15, "  MOUSE")
 
 end
 end
@@ -476,16 +504,16 @@ if gui.GetValue("misc.fakelag.enable") then
 		draw.TextShadow(x+380,y+45, "|")
 		if gui.GetValue("misc.fakelag.type") == 0 then 
 		draw.Color(25,193,33,255)
-		draw.TextShadow(x+390,y+45, "NORMAL")
+		draw.TextShadow(x+390,y+45, "  NORMAL")
 		elseif gui.GetValue("misc.fakelag.type") == 1 then
 		draw.Color(255,0,0,255)
-		draw.TextShadow(x+390,y+45, "ADAPTIVE")
+		draw.TextShadow(x+390,y+45, "  ADAPTIVE")
 		elseif gui.GetValue("misc.fakelag.type") == 2 then
 		draw.Color(255,165,0,255)
-		draw.TextShadow(x+390,y+45, "RANDOM")
+		draw.TextShadow(x+390,y+45, "  RANDOM")
 		elseif gui.GetValue("misc.fakelag.type") == 3 then
 		draw.Color(255,165,0,255)
-		draw.TextShadow(x+390,y+45, "SWITCH")
+		draw.TextShadow(x+390,y+45, "  SWITCH")
 end
 if gui.GetValue("misc.fakelag.peek") then
         draw.Color(clr_func_on:GetValue())
@@ -506,19 +534,19 @@ if gui.GetValue("misc.fakelatency.enable") then
 		draw.TextShadow(x+380,y+60, "|")
 		if gui.GetValue("misc.fakelatency.amount") == 0 then
         draw.Color(255,255,255)
-        draw.TextShadow(x+390,y+60, "0")
+        draw.TextShadow(x+390,y+60, "  0")
         elseif gui.GetValue("misc.fakelatency.amount") <= 100 then
         draw.Color( 25, 193, 33, 255 )
-        draw.TextShadow(x+390,y+60, "LOW")
+        draw.TextShadow(x+390,y+60, "  LOW")
 		elseif gui.GetValue("misc.fakelatency.amount") <= 350 then
         draw.Color( 255, 255, 0, 255 )
-        draw.TextShadow(x+390,y+60, "MEDIUM")
+        draw.TextShadow(x+390,y+60, "  MEDIUM")
 		elseif gui.GetValue("misc.fakelatency.amount") <= 700 then
         draw.Color( 255, 165, 0, 255 )
-        draw.TextShadow(x+390,y+60, "BAD INTERNET")
+        draw.TextShadow(x+390,y+60, "  BAD INTERNET")
 		elseif gui.GetValue("misc.fakelatency.amount") <= 1000 then
         draw.Color( 255, 0, 0, 255 )
-        draw.TextShadow(x+390,y+60, "MAX")
+        draw.TextShadow(x+390,y+60, "  MAX")
 
     end
 end
@@ -594,7 +622,7 @@ draw.TextShadow(x,y+135,"KnifeBot:")
 		draw.TextShadow(x+150,y+90, "RAPID")
 		elseif gui.GetValue("rbot.accuracy.weapon.asniper.doublefire") == 3 then
         draw.Color(clr_func_on:GetValue())
-        draw.TextShadow(x+150,y+90, "RAPID FC")
+        draw.TextShadow(x+145,y+90, "RAPID FC")
     end
         if gui.GetValue("rbot.antiaim.advanced.pitch") == 0 then
         draw.Color(clr_func_off:GetValue())
@@ -867,12 +895,53 @@ if me ~= nil and not gui.GetValue("rbot.master") then
 end
 callbacks.Register("Draw", "punch", punch);
 --Recoil Crosshair by Cheeseot
+--Crosshair Hitmarker by w1ldac3--
+local calpha = 0
+local ccheck = gui.Checkbox(x88_othr, "cross.hitmarker", "Crosshair Hitmarker", false)
+local csize = gui.Slider(x88_othr, "cross.hitmarker.size", "Hitmarker Size", 14, 1, 40 )
+local cgap = gui.Slider(x88_othr, "cross.hitmarker.gap", "Gap Size", 7, 0, 20, 0.5)
+ccheck:SetDescription("Draws hitmarker when you hit someone.")
+cgap:SetDescription("Must be lower value than size of hitmarker.")
+csize:SetDescription("Hitmarker's size.")
+
+function hitmarker()
+local cursize = csize:GetValue()
+local curgap = cgap:GetValue()
+local cscreencenterX, cscreencenterY = draw.GetScreenSize() 
+cscreencenterX = cscreencenterX / 2; cscreencenterY = cscreencenterY / 2
+draw.Color(255,255,255,calpha)
+draw.Line(cscreencenterX - cursize, cscreencenterY + cursize, cscreencenterX - curgap, cscreencenterY + curgap)
+draw.Line(cscreencenterX - cursize, cscreencenterY - cursize, cscreencenterX - curgap, cscreencenterY - curgap)
+draw.Line(cscreencenterX + cursize, cscreencenterY + cursize, cscreencenterX + curgap, cscreencenterY + curgap)
+draw.Line(cscreencenterX + cursize, cscreencenterY - cursize, cscreencenterX + curgap, cscreencenterY - curgap)
+if(calpha > 0) then
+    calpha = calpha - 2.5
+    end
+end
+
+function enemyhit(event)
+    if ccheck:GetValue() then
+    if(event:GetName() == "player_hurt") then 
+        local attacker = event:GetInt("attacker") 
+        local attackerindex = client.GetPlayerIndexByUserID(attacker)
+        if(attackerindex == client.GetLocalPlayerIndex()) then
+        calpha = 255
+        end
+    end
+    end
+end
+
+callbacks.Register( "FireGameEvent", "enemyhitfunction", enemyhit)
+callbacks.Register( "Draw", "hitmarker", hitmarker)
+--END - Crosshair Hitmarker--
 --Callbacks\Listeners--
 client.AllowListener( "player_death" )
 client.AllowListener( "client_disconnect" )
 client.AllowListener( "begin_new_match" )
 callbacks.Register( "FireGameEvent", "KillDeathCount", KillDeathCount)
 callbacks.Register("Draw", "Custom Viewmodel Editor", Visuals_Viewmodel)
+callbacks.Register("Draw", "username", username)
+callbacks.Register("Draw", "guitoggles", guitoggles)
 callbacks.Register("Draw", "kills_deaths", kills_deaths)
 callbacks.Register( "Draw", "overlay", overlay )
 callbacks.Register( "Draw", "welcome", welcome )

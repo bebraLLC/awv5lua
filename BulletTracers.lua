@@ -11,13 +11,12 @@
 
 
 -------------------------------------GUI setup-------------------------------------
-local ref = gui.Reference("Visuals");
-local tab = gui.Tab(ref, "bullet.tracer.tab", "Bullet Tracers")
-local tracerSettings = gui.Groupbox(tab, "Tracer Settings", 328, 16, 296, 400); -- This looks lines up properly idk why values are so disgusting
-local tracerColors = gui.Groupbox(tab, "Tracer Colors", 16, 16, 296, 400);
+local ref = gui.Reference("Visuals", "World");
+local tracerSettings = gui.Groupbox(ref, "Tracer Settings", 328, 216, 296, 400); -- This looks lines up properly idk why values are so disgusting
+local tracerColors = gui.Groupbox(ref, "Tracer Colors", 16, 390, 296, 400);
 
-local refSettings = gui.Reference("Visuals", "Bullet Tracers", "Tracer Settings");
-local refColor = gui.Reference("Visuals", "Bullet Tracers", "Tracer Colors");
+local refSettings = gui.Reference("Visuals", "World", "Tracer Settings");
+local refColor = gui.Reference("Visuals", "World", "tracer Colors");
 
 local enableCheckbox = gui.Checkbox(refSettings, "lua_tracer", "Enable Tracers", true);
 enableCheckbox:SetDescription("Enable tracers globaly");
@@ -53,15 +52,14 @@ experimental:SetDescription("Only show enemy tracers close to you.");
 local experimentalDistance = gui.Slider(refSettings, "lua_experiment_distance", "Maximum distance", 50, 0, 1000);
 experimentalDistance:SetDescription("Maximum distance a tracer can be for it to render.");
 
-local cubeSize = gui.Slider(refSettings, "lua_tracer_cubesize", "CubeSize", 2, 1, 10);
-cubeSize:SetDescription("Size of Box shown at the collabs end of Tracers."); 
-
 -------------------------------------Var setup-------------------------------------
+--change this to liking doesn't matter enough to get a slider--
+local cubeSize = 2; -- bullet impact size
 
 local hitCount = 0;
 local tempHitCount = 0;
 local minViewOffset, maxViewOffset = 46, 64;
-local localPlayer = entities.GetLocalPlayer();
+local localPlayer;
 
 hitData = {};
 hitData.hitPos = {};
@@ -83,16 +81,11 @@ end
 local function addEntry(hitPos, eyePos, entity)
 	table.insert(hitData.hitPos,  hitPos);
 	table.insert(hitData.eyePos,  eyePos);
-	table.insert(hitData.hitTime, globals.CurTime());	
+	table.insert(hitData.hitTime, globals.CurTime());
 	table.insert(hitData.entity,  entity);
 	
 	hitCount = hitCount + 1;
 end
-
---change these to liking--
-local cubeSize = 2;       -- bullet impact size
-local tracerLifeSpan = 2; -- how long tracer stays onscreen before fading
-local tracerFadeTime = 2; -- how long it takes tracer to fade after lifespan is reached
 
 local function drawCubeFromCenter(size, center, r, g, b, a)
 	local point1x, point1y = client.WorldToScreen(Vector3(center.x - size, center.y - size, center.z - size));
@@ -103,16 +96,16 @@ local function drawCubeFromCenter(size, center, r, g, b, a)
 	local point6x, point6y = client.WorldToScreen(Vector3(center.x + size, center.y - size, center.z + size));
 	local point7x, point7y = client.WorldToScreen(Vector3(center.x - size, center.y + size, center.z + size));
 	local point8x, point8y = client.WorldToScreen(Vector3(center.x + size, center.y + size, center.z + size));
-
+	
 	draw.Color(r, g, b, a);
 	draw.Line(point1x, point1y, point2x, point2y);
 	draw.Line(point1x, point1y, point3x, point3y);
 	draw.Line(point1x, point1y, point5x, point5y);
-
+	
 	draw.Line(point8x, point8y, point7x, point7y);
 	draw.Line(point8x, point8y, point6x, point6y);
 	draw.Line(point8x, point8y, point4x, point4y);
-
+	
 	draw.Line(point6x, point6y, point3x, point3y);
 	draw.Line(point4x, point4y, point3x, point3y);
 	draw.Line(point4x, point4y, point2x, point2y);
