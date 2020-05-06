@@ -1,9 +1,9 @@
 --Moving and Standing hitchance--
 
-local gui = gui.Groupbox( gui.Reference( "Ragebot", "Accuracy", "Weapon"), "Moving and Standing Hitchance")
-local hcslider1 = gui.Slider( gui, "asniper.hitchance.move", "Moving Hitchance", 0, 0, 100 )
-local hcslider2 = gui.Slider( gui, "asniper.hitchance.stand", "Standing Hitchance", 0, 0, 100 )
-local veloslider = gui.Slider( gui, "asniper.hitchance.velocity", "Max StandVelocity", 0, 0, 120, 0.5)
+local kui = gui.Groupbox( gui.Reference( "Ragebot", "Accuracy", "Weapon"), "Moving and Standing Hitchance")
+local hcslider1 = gui.Slider( kui, "asniper.hitchance.move", "Moving Hitchance", 0, 0, 100 )
+local hcslider2 = gui.Slider( kui, "asniper.hitchance.stand", "Standing Hitchance", 0, 0, 100 )
+local veloslider = gui.Slider( kui, "asniper.hitchance.velocity", "Max StandVelocity", 0, 0, 120, 0.5)
 
 local function movstandhc()
     velocity = math.sqrt(localPlayer:GetPropFloat( "localdata", "m_vecVelocity[0]" )^2 + localPlayer:GetPropFloat( "localdata", "m_vecVelocity[1]" )^2)
@@ -29,4 +29,4 @@ local function localcheck()
     end
 end
 
-callbacks.Register( "Draw", "localcheck", localcheck )
+callbacks.Register( "Draw",  localcheck )

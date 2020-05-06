@@ -1,70 +1,80 @@
-local ref_gui = gui.Reference("Visuals", "Local", "Helper")
-local msc_ref = gui.Text(ref_gui, "HitMarker on the Center")
-local allenabled = gui.Checkbox(ref_gui, 'lua_healthshot_hitsound_enabled', 'Hitsound/marker lua enabled', 1)
-local hitcross = gui.Checkbox(msc_ref, 'lua_healthshot_hitcross_enabled', 'Enable crosshair marker', 0)
-local hitmarkerColor = gui.ColorPicker(ref_gui, "lua_healthshot_hitcross_color", "", 255, 165, 10, 255);
-hitcross:SetDescription("Drawing a marker on the center of screen") 
-local linesize = gui.Slider(ref_gui, 'lua_healthshot_hitcross_slider', 'Crosshair marker size', 15, 1, 30)
-local hitcrossrotate = gui.Checkbox(ref_gui, 'lua_healthshot_hitcross_rotated', 'Rotate marker by 45', 0)
-
-local CrossTime = 0
-local alpha = 0;
-local screenCenterX, screenCenterY = draw.GetScreenSize();
-screenCenterX = screenCenterX / 2;
-screenCenterY = screenCenterY / 2;
-
-
-local function hitcross_marker()
-	
-if not allenabled:GetValue() then
-	return
-end	
-	
-if (hitcross:GetValue() == true) then
-	CrossTime = globals.RealTime()
-end
-end
-callbacks.Register('FireGameEvent', "hitcross_marker", hitcross_marker)
-
-
-callbacks.Register('Draw', function()
-
-local step = 255 / 0.3 * globals.FrameTime()
-local r,g,b,a = hitmarkerColor:GetValue()
-
-if CrossTime + 0.4 > globals.RealTime() then
-	alpha = 255
-else
-	alpha = alpha - step
+function HitGroup( INT_HITGROUP )
+   if INT_HITGROUP == nil then
+       return;
+   elseif INT_HITGROUP == 0 then
+       return "body";
+   elseif INT_HITGROUP == 1 then
+       return "head";
+   elseif INT_HITGROUP == 2 then
+       return "chest";
+   elseif INT_HITGROUP == 3 then
+       return "belly";
+   elseif INT_HITGROUP == 4 then
+       return "left arm";
+   elseif INT_HITGROUP == 5 then
+       return "right arm";
+   elseif INT_HITGROUP == 6 then
+       return "left leg";
+   elseif INT_HITGROUP == 7 then
+       return "right leg";
+   elseif INT_HITGROUP == 10 then
+       return "body";
+   end
 end
 
-if (alpha > 0) then
-    linesizeValue = linesize:GetValue()
-    draw.Color( r,g,b,alpha)
-	if(hitcrossrotate:GetValue() == true) then
-        draw.Line( screenCenterX - linesizeValue / 2, screenCenterY - linesizeValue / 2, screenCenterX - ( linesizeValue ), screenCenterY - ( linesizeValue ))
-        draw.Line( screenCenterX - linesizeValue / 2, screenCenterY + linesizeValue / 2, screenCenterX - ( linesizeValue ), screenCenterY + ( linesizeValue ))
-        draw.Line( screenCenterX + linesizeValue / 2, screenCenterY + linesizeValue / 2, screenCenterX + ( linesizeValue ), screenCenterY + ( linesizeValue ))
-        draw.Line( screenCenterX + linesizeValue / 2, screenCenterY - linesizeValue / 2, screenCenterX + ( linesizeValue ), screenCenterY - ( linesizeValue ))
-	else
-        draw.Line( screenCenterX, screenCenterY - linesizeValue / 2, screenCenterX, screenCenterY - ( linesizeValue ))
-        draw.Line( screenCenterX - linesizeValue / 2, screenCenterY, screenCenterX - ( linesizeValue ), screenCenterY)
-        draw.Line( screenCenterX, screenCenterY + linesizeValue / 2, screenCenterX, screenCenterY + ( linesizeValue ))
-        draw.Line( screenCenterX + linesizeValue / 2, screenCenterY, screenCenterX + ( linesizeValue ), screenCenterY)
-	end
+local urmom_gay = {};
+local time_until_each_fucking_thing_disappears = 3;
+local number_of_little_squares_between_each_line = 10;
+local textOffsetX = 5;
+local textOffsetY = 2;
+
+local function onAction(Event)
+   local eventType = Event:GetName()
+
+   if eventType == 'player_hurt' then
+       local pLocal = client.GetLocalPlayerIndex();
+       local iAttacker = client.GetPlayerIndexByUserID(Event:GetInt('attacker'));
+       local victimName = client.GetPlayerNameByUserID(Event:GetInt('userid'));
+       local i_wonder_where_did_that_bullet_hit = Event:GetInt('hitgroup');
+       local damage = Event:GetInt('dmg_health');
+      
+       if pLocal == iAttacker then
+           table.insert(urmom_gay, {globals.RealTime(), victimName, HitGroup(i_wonder_where_did_that_bullet_hit), damage,
+           math.max(0, entities.GetByUserID(Event:GetInt('userid')):GetHealth() - damage)});
+       end
+      
+   elseif eventType == 'round_start' then
+       urmom_gay = {}
+   end
 end
 
-if not allenabled:GetValue() then
-	hitcross:SetInvisible( true )
-	linesize:SetInvisible( true )
-	else
-if hitcross:GetValue() == false then
-    linesize:SetInvisible( true )
-    hitcrossrotate:SetInvisible( true )
-	else
-    linesize:SetInvisible( false )
-    hitcrossrotate:SetInvisible( false )
+local function onDraw()
+   local amount_of_things_currently_on_the_screen_lol = 0;
+  
+   for i, j in pairs(urmom_gay) do       
+       if globals.RealTime() > j[1] + time_until_each_fucking_thing_disappears then
+           table.remove(urmom_gay, i);
+       else
+           draw.Text(600, amount_of_things_currently_on_the_screen_lol * number_of_little_squares_between_each_line + 535, string.format( "Hit %s for %s (%s hp)",
+           j[2], j[4], j[5])) -- j[3]
+           draw.TextShadow(600, amount_of_things_currently_on_the_screen_lol * number_of_little_squares_between_each_line + 535, string.format( "Hit %s for %s (%s hp)",
+           j[2],  j[4], j[5])) --j[3],
+
+
+           draw.Text(600, amount_of_things_currently_on_the_screen_lol * number_of_little_squares_between_each_line + 535, string.format( "- %s  %s",
+            j[4], j[3]))
+           draw.TextShadow(600, amount_of_things_currently_on_the_screen_lol * number_of_little_squares_between_each_line + 535, string.format( "- %s  %s",
+           j[4], j[3]))
+
+           amount_of_things_currently_on_the_screen_lol = amount_of_things_currently_on_the_screen_lol + 2;
+       end
+   end
+  
 end
-end
-	hitcross:SetInvisible( not allenabled:GetValue() )
-end);
+
+print("Hitmarker ready")
+
+client.AllowListener('round_start')
+client.AllowListener('player_hurt')
+callbacks.Register('FireGameEvent', 'onAction', onAction)
+callbacks.Register('Draw', 'onDraw', onDraw)
