@@ -84,7 +84,7 @@ local zoom = 0
 callbacks.Register( "Draw", function()
 
 
-if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;	
+if(entities.GetLocalPlayer() ~= nil and engine.GetServerIP() ~= nil and engine.GetMapName() ~= nil) then	
 	local a = 0
     local local_player = entities.GetLocalPlayer();
     
@@ -179,7 +179,7 @@ if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then re
             client.SetConVar("viewmodel_offset_z", Z:GetValue(), true);
             client.SetConVar("viewmodel_offset_y", Y:GetValue(), true)
         end    
-
+end
 end)
 
 --##--##--##--##- END Viewmodel Changer + Zoom Changer + No Zoom -##--##--##--##--

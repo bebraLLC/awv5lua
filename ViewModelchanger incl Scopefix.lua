@@ -15,7 +15,7 @@ local SLIDER_VIEWY = gui.Slider( VIEWFOVBOX, "lua_fov_slider_viewY", "Viewmodel 
 local SLIDER_VIEWZ = gui.Slider( VIEWFOVBOX, "lua_fov_slider_viewZ", "Viewmodel Offset Z", -1, -40, 40 )
 
 callbacks.Register( "Draw", function()
-if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;	
+if(entities.GetLocalPlayer() ~= nil and engine.GetServerIP() ~= nil and engine.GetMapName() ~= nil) then	
 	local a = 0
     local local_player = entities.GetLocalPlayer();
     
@@ -42,6 +42,7 @@ if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then re
     client.SetConVar("viewmodel_offset_x", SLIDER_VIEWX:GetValue(), true);
     client.SetConVar("viewmodel_offset_y", SLIDER_VIEWY:GetValue(), true);
     client.SetConVar("viewmodel_offset_z", SLIDER_VIEWZ:GetValue() + a, true);
-	end)	
+	end
+end)	
 	
 -- End FOVnViewFovModel changer incl Scopefix --
