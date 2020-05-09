@@ -1,9 +1,9 @@
 local guiSet = gui.SetValue
 local guiGet = gui.GetValue
 local b_toggle = input.IsButtonDown
-local rage_ref_extra = gui.Reference("RAGEBOT", "AIMBOT", "AUTOMATION");
+local rage_ref_extra = gui.Reference("RAGEBOT", "ACCURACY", "WEAPON");
 local chengeDamageText = gui.Text(rage_ref_extra, "--- Changer Damage ---");
-local newDamage = gui.Slider(rage_ref_extra, "NewDamage", "Min damage", 1, 0, 100);
+local newDamage = gui.Slider(rage_ref_extra, "NewDamage", "Min damage", 0, 1, 100);
 local changeKey = gui.Keybox(rage_ref_extra, "ChangeDmgKey", "Change damage key", 0);
 local firstTime = 1;
 local auto = guiGet("rbot.accuracy.weapon.asniper.mindmg")
@@ -29,18 +29,18 @@ function changeDmgMain()
             rifle = guiGet("rbot.accuracy.weapon.rifle.mindmg")
             shotgun = guiGet("rbot.accuracy.weapon.shotgun.mindmg")
             scout = guiGet("rbot.accuracy.weapon.scout.mindmg")
-			lmg = guiGet("rbot.accuracy.weapon.lmg.mindmg")
+    lmg = guiGet("rbot.accuracy.weapon.lmg.mindmg")
 
-        guiSet("rbot.accuracy.weapon.asniper.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.sniper.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.pistol.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.hpistol.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.smg.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.rifle.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.shotgun.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.scout.mindmg", math.floor(newDamage:GetValue()))
-        guiSet("rbot.accuracy.weapon.lmg.mindmg", math.floor(newDamage:GetValue()))
-        firstTime = 0
+            guiSet("rbot.accuracy.weapon.asniper.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.sniper.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.pistol.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.hpistol.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.smg.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.rifle.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.shotgun.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.scout.mindmg", math.floor(newDamage:GetValue()))
+            guiSet("rbot.accuracy.weapon.lmg.mindmg", math.floor(newDamage:GetValue()))
+            firstTime = 0
         end
     elseif (b_toggle(changeKey:GetValue())) then
         -- do nothing ;)
