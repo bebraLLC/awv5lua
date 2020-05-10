@@ -2,7 +2,7 @@ local alpha = 0
 local linesize = 7
 local speed = 4
 local ref = gui.Reference('VISUALS', 'Other', 'Extra')
-local rainbowxhairhitmarker_color = gui.ColorPicker(ref, "rainbowxhairhitmarker_color", "RainbowXhair Hitmarker Color", 0, 0, 0 ,0)
+local rainbowxhairhitmarker_color = gui.ColorPicker(ref, "rainbowxhairhitmarker_color", "RainbowXhair Hitmarker Color", 0, 0, 0, 0)
 
 
 local function hitmarker() 
@@ -13,7 +13,7 @@ draw.Color(rainbowxhairhitmarker_color:GetValue())
  local r = math.floor(math.sin(globals.RealTime() * speed) * 127 + 128)
  local g = math.floor(math.sin(globals.RealTime() * speed + 2) * 127 + 128)
  local b = math.floor(math.sin(globals.RealTime() * speed + 4) * 127 + 128)
- local a = 0
+ local a = 255
     
     for k,v in pairs({"esp.other.rainbowxhairhitmarker_color"}) do
                         
