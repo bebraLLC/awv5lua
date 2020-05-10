@@ -1,4 +1,4 @@
--- settings
+-- Settings
 local initial_height_modifier = 0.0725 -- vanilla is 0.0725
 local display_local_only = true
 local display_team_only = false

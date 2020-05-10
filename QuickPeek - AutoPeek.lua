@@ -4,7 +4,7 @@ local is_peeking = false
 local has_shot = false
 
 -- gui
-local ui_groupbox = gui.Groupbox(gui.Reference("MISC", "Movement"), "Auto Peek", 15, 573, 297, 900)
+local ui_groupbox = gui.Groupbox(gui.Reference("MISC", "Movement"), "Auto Peek", 15, 728, 297, 900)
 local ui_checkbox = gui.Checkbox(gui.Reference("MISC", "Movement", "Auto Peek"), "lua_autopeek_enable", "Enable Auto Peek", false);
 local ui_keybox = gui.Keybox(gui.Reference("MISC", "Movement", "Auto Peek"), "lua_autopeek_key", "Auto Peek Bind", "A");
 local ui_checkbox_visualize = gui.Checkbox(gui.Reference("MISC", "Movement", "Auto Peek"), "lua_autopeek_visualize", "Visualize", false);
@@ -47,7 +47,9 @@ end
 
 callbacks.Register( "Draw", function()
     
-    local m_local = entities.GetLocalPlayer()
+local m_local = entities.GetLocalPlayer()
+
+	if not m_local then return end;
 
     if input.IsButtonDown(ui_keybox:GetValue()) and not is_peeking then
         peek_abs_origin = m_local:GetAbsOrigin()
@@ -78,7 +80,7 @@ callbacks.Register("CreateMove", function(cmd)
         if vector.Length(world_forward) < 10 then
             has_shot = false
         end
-    end
+   end
 end)
 
 client.AllowListener( "player_hurt" );

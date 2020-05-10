@@ -1,7 +1,7 @@
 local SCRIPT_FILE_NAME = GetScriptName()
 local SCRIPT_FILE_ADDR = "https://raw.githubusercontent.com/Cheese0t/Aimware-Luas/master/AdvancedChams/AdvancedChams.lua"
 local VERSION_FILE_ADDR = "https://raw.githubusercontent.com/Cheese0t/Aimware-Luas/master/AdvancedChams/Version.txt"
-local VERSION_NUMBER = "3.0"
+local VERSION_NUMBER = "3.2"
 local version_check_done = false
 local update_downloaded = false
 local update_available = false
@@ -148,6 +148,30 @@ basetext:SetPosY(-30)
 bumptext:SetPosY(70)
 overlaytext:SetPosY(170)
 
+local scopeblendgroup = gui.Groupbox(ref, "", 16,150)
+local scopeblendbox = gui.Checkbox(scopeblendgroup, "chams.scopeblendbox", "", 0)
+local scopeblendtext = gui.Text(scopeblendgroup, "Enable scope blend")
+local scopeblendselector = gui.Multibox( scopeblendgroup, "Materials to blend")
+local blendmodel = gui.Checkbox(scopeblendselector, "chams.blendmodel", "Model", 0)
+local blendmodeloverlay = gui.Checkbox(scopeblendselector, "chams.blendmodeloverlay", "Model Overlay", 0)
+local blendattachment = gui.Checkbox(scopeblendselector, "chams.blendattachment", "Attachment", 0)
+local blendattachmentoverlay = gui.Checkbox(scopeblendselector, "chams.blendattachmentoverlay", "Attachment Overlay", 0)
+local blendghost = gui.Checkbox(scopeblendselector, "chams.blendghost", "Ghost", 0)
+local blendghostoverlay = gui.Checkbox(scopeblendselector, "chams.blendghostoverlay", "Ghost Overlay", 0)
+local scopeblendslider = gui.Slider(scopeblendgroup, "chams.scopeblend", "Blend amount", 100, 0, 100)
+
+scopeblendbox:SetPosX(568)
+scopeblendbox:SetPosY(-43)
+scopeblendtext:SetPosX(464)
+scopeblendtext:SetPosY(-38)
+scopeblendselector:SetWidth(264)
+scopeblendselector:SetPosY(-25)
+scopeblendslider:SetWidth(264)
+scopeblendslider:SetPosX(316)
+scopeblendslider:SetPosY(-25)
+
+local IsScoped, HeldWeapon, Modulated = nil, nil, false
+
 local EnemyVisMat, EnemyIzMat, EnemyVisOverMat, EnemyIzOverMat = nil, nil, nil, nil
 local BtVisMat, BtIzMat, BtVisOverMat, BtIzOverMat = nil, nil, nil, nil
 local FriendVisMat, FriendIzMat, FriendVisOverMat, FriendIzOverMat = nil, nil, nil, nil
@@ -211,7 +235,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "enemy.vis.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "enemy.vis.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "enemy.vis.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "enemy.vis.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "enemy.vis.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "enemy.vis.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 	   	},
 	   	iz = {
 			base = gui.Combobox(group, "enemy.iz.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -241,7 +267,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "enemy.iz.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "enemy.iz.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "enemy.iz.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "enemy.iz.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "enemy.iz.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "enemy.iz.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 		   },
 		attvis = {
 			base = gui.Combobox(group, "enemy.attvis.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -331,7 +359,11 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "enemy.btvis.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "enemy.btvis.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "enemy.btvis.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "enemy.btvis.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "enemy.btvis.overlaytexture", " "),
+			speedbased = gui.Checkbox(group, "enemy.btvis.speedbased", "", 0),
+			speedbasedtext = gui.Text(group, "Speed based"),
+			speedbasedover = gui.Checkbox(group, "enemy.btvis.speedbasedoverlay", "", 0),
+			speedbasedtextover = gui.Text(group, "Speed based")
 		},
 		btiz = {
 			base = gui.Combobox(group, "enemy.btiz.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -361,7 +393,11 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "enemy.btiz.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "enemy.btiz.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "enemy.btiz.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "enemy.btiz.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "enemy.btiz.overlaytexture", " "),
+			speedbased = gui.Checkbox(group, "enemy.btiz.speedbased", "", 0),
+			speedbasedtext = gui.Text(group, "Speed based"),
+			speedbasedover = gui.Checkbox(group, "enemy.btiz.speedbasedoverlay", "", 0),
+			speedbasedtextover = gui.Text(group, "Speed based")
   		}
    	},
    friend = {
@@ -393,7 +429,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "friend.vis.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "friend.vis.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "friend.vis.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "friend.vis.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "friend.vis.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "friend.vis.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 	   	},
 	   	iz = {
 			base = gui.Combobox(group, "friend.iz.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -423,7 +461,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "friend.iz.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "friend.iz.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "friend.iz.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "friend.iz.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "friend.iz.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "friend.iz.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 	   	},
 	   	attvis = {
 			base = gui.Combobox(group, "friend.attvis.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -515,7 +555,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "loc.vis.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "loc.vis.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "loc.vis.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "loc.vis.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "loc.vis.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "loc.vis.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 	   	},
 		iz = {
 			base = gui.Combobox(group, "loc.iz.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -545,7 +587,9 @@ local settings = {
 			overlaywireframe = gui.Checkbox(advancedgroup, "loc.iz.overlaywireframe", "Wireframe", 0),
 			overlayspeed = gui.Slider(advancedgroup, "loc.iz.overlayspeed", "Animation Speed", 0, 0, 1, 0.01 ),
 			overlayangle = gui.Slider(advancedgroup, "loc.iz.overlayangle", "Animation Angle", 90, -180, 180, 1 ),
-			overlaytexture = gui.Editbox(advancedgroup, "loc.iz.overlaytexture", " ")
+			overlaytexture = gui.Editbox(advancedgroup, "loc.iz.overlaytexture", " "),
+			healthbased = gui.Checkbox(group, "loc.iz.healthbased", "", 0),
+			healthbasedtext = gui.Text(group, "Health based")
 	   	},
 	   	attvis = {
 			base = gui.Combobox(group, "loc.attvis.base", "Base", "Off", "Color", "Flat", "Invisible"),
@@ -762,7 +806,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 	   	},
 	   	iz = {
 			base = nil,
@@ -792,7 +837,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 	   	},
 	   	attvis = {
 			base = nil,
@@ -882,7 +928,9 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			speedbased = nil,
+			speedbasedover = nil
 		},
 	   	btiz = {
 			base = nil,
@@ -912,7 +960,9 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			speedbased = nil,
+			speedbasedover = nil
    		}  
    	},
    	friend = {
@@ -944,7 +994,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 	   	},
 	   	iz = {
 			base = nil,
@@ -974,7 +1025,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 		},
 		attvis = {
 			base = nil,
@@ -1066,7 +1118,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 	   	},
 	   	iz = {
 			base = nil,
@@ -1096,7 +1149,8 @@ local cached = {
 			overlaywireframe = nil,
 			overlayspeed = nil,
 			overlayangle = nil,
-			overlaytexture = nil
+			overlaytexture = nil,
+			healthbased = nil
 		},
 		attvis = {
 			base = nil,
@@ -1283,7 +1337,7 @@ local cached = {
 	}
 }
 
-local lastmode, lasttype, lastvis, lasttypevm, lasttypeenemy, lasttypelocal, lastbase, lastoverlay, lastadvanced = nil, nil, nil, nil, nil, nil, nil, nil, nil
+local lastmode, lasttype, lastvis, lasttypevm, lasttypeenemy, lasttypelocal, lastbase, lastoverlay, lastadvanced, lastblend = nil, nil, nil, nil, nil, nil, nil, nil, nil, nil
 local selectedmode, selectedtype, selectedvis, modename, typename, basemode, overlaymode = nil, nil, nil, nil, nil, nil, nil
 
 local function SetSelections()
@@ -1339,7 +1393,7 @@ local function SetupMenu()
 			setting.base:SetPosY(6)
 			setting.baseclr:SetPosX(-312)
 			setting.baseclr:SetPosY(10)
-			setting.overlay:SetDescription("Applied over previous materials.")
+			setting.overlay:SetDescription("Applied over base.")
 			setting.overlay:SetWidth(264)
 			setting.overlay:SetPosX(312)
 			setting.overlay:SetPosY(6)
@@ -1399,6 +1453,22 @@ local function SetupMenu()
 			setting.overlayangle:SetPosY(187)
 			setting.overlaytexture:SetPosY(215)
 			setting.overlaytexture:SetValue("models/inventory_items/music_kit/darude_01/mp3_detail")
+			if setting.speedbased ~= nil then
+				setting.speedbased:SetPosX(200)
+				setting.speedbased:SetPosY(7)
+				setting.speedbasedtext:SetPosX(130)
+				setting.speedbasedtext:SetPosY(11)
+				setting.speedbasedover:SetPosX(512)
+				setting.speedbasedover:SetPosY(7)
+				setting.speedbasedtextover:SetPosX(442)
+				setting.speedbasedtextover:SetPosY(11)
+			end
+			if setting.healthbased ~= nil then
+				setting.healthbased:SetPosX(200)
+				setting.healthbased:SetPosY(7)
+				setting.healthbasedtext:SetPosX(128)
+				setting.healthbasedtext:SetPosY(11)
+			end
 		end
 	end
 end
@@ -1459,8 +1529,18 @@ local function HideSettings(i)
 			settings[modename][typename]["glowz"]:SetPosY(290)
 			if overlaymode == 1 or overlaymode == 3 then
 				advancedgroup:SetPosY(416)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(798)
+				else
+					scopeblendgroup:SetPosY(416)
+				end
 			else
 				advancedgroup:SetPosY(363)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(745)
+				else
+					scopeblendgroup:SetPosY(363)
+				end
 			end
 		elseif basemode == 2 then
 			settings[modename][typename]["reflect"]:SetInvisible(false)
@@ -1477,8 +1557,18 @@ local function HideSettings(i)
 			settings[modename][typename]["glowz"]:SetPosY(130)
 			if overlaymode == 1 or overlaymode == 3 then
 				advancedgroup:SetPosY(261)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(646)
+				else
+					scopeblendgroup:SetPosY(261)
+				end
 			else
 				advancedgroup:SetPosY(208)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(590)
+				else
+					scopeblendgroup:SetPosY(208)
+				end
 			end
 		else
 			settings[modename][typename]["reflect"]:SetInvisible(true)
@@ -1495,8 +1585,18 @@ local function HideSettings(i)
 			settings[modename][typename]["glowz"]:SetPosY(80)
 			if overlaymode == 1 or overlaymode == 3 then
 				advancedgroup:SetPosY(208)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(590)
+				else
+					scopeblendgroup:SetPosY(208)
+				end
 			else
 				advancedgroup:SetPosY(155)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(537)
+				else
+					scopeblendgroup:SetPosY(155)
+				end
 			end
 		end
 		if basemode == 0 or basemode == 3 then
@@ -1508,6 +1608,8 @@ local function HideSettings(i)
 			settings[modename][typename]["bumpmap"]:SetDisabled(true)
 			settings[modename][typename]["bumpspeed"]:SetDisabled(true)
 			settings[modename][typename]["bumpangle"]:SetDisabled(true)
+			basetext:SetDisabled(true)
+			bumptext:SetDisabled(true)
 		else
 			if basemode == 1 then
 				settings[modename][typename]["basetexturecheck"]:SetDisabled(false)
@@ -1518,6 +1620,8 @@ local function HideSettings(i)
 				settings[modename][typename]["bumpmap"]:SetDisabled(false)
 				settings[modename][typename]["bumpspeed"]:SetDisabled(false)
 				settings[modename][typename]["bumpangle"]:SetDisabled(false)
+				basetext:SetDisabled(false)
+				bumptext:SetDisabled(false)
 			else
 				settings[modename][typename]["basetexturecheck"]:SetDisabled(false)
 				settings[modename][typename]["basetexture"]:SetDisabled(false)
@@ -1527,6 +1631,8 @@ local function HideSettings(i)
 				settings[modename][typename]["bumpmap"]:SetDisabled(true)
 				settings[modename][typename]["bumpspeed"]:SetDisabled(true)
 				settings[modename][typename]["bumpangle"]:SetDisabled(true)
+				basetext:SetDisabled(false)
+				bumptext:SetDisabled(true)
 			end
 		end
 	elseif i == 3 then
@@ -1536,10 +1642,25 @@ local function HideSettings(i)
 			settings[modename][typename]["glowz"]:SetInvisible(false)
 			if basemode == 1 then
 				advancedgroup:SetPosY(416)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(798)
+				else
+					scopeblendgroup:SetPosY(416)
+				end
 			elseif basemode == 2 then
 				advancedgroup:SetPosY(261)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(643)
+				else
+					scopeblendgroup:SetPosY(261)
+				end
 			else
 				advancedgroup:SetPosY(208)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(590)
+				else
+					scopeblendgroup:SetPosY(208)
+				end
 			end
 		else
 			settings[modename][typename]["glowx"]:SetInvisible(true)
@@ -1547,10 +1668,25 @@ local function HideSettings(i)
 			settings[modename][typename]["glowz"]:SetInvisible(true)
 			if basemode == 1 then
 				advancedgroup:SetPosY(363)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(745)
+				else
+					scopeblendgroup:SetPosY(363)
+				end
 			elseif basemode == 2 then
 				advancedgroup:SetPosY(208)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(590)
+				else
+					scopeblendgroup:SetPosY(208)
+				end
 			else
 				advancedgroup:SetPosY(155)
+				if advancedcheck:GetValue() then
+					scopeblendgroup:SetPosY(537)
+				else
+					scopeblendgroup:SetPosY(155)
+				end
 			end
 		end
 		if overlaymode == 4 then
@@ -1558,11 +1694,13 @@ local function HideSettings(i)
 			settings[modename][typename]["overlayangle"]:SetDisabled(false)
 			settings[modename][typename]["overlayspeed"]:SetDisabled(false)
 			settings[modename][typename]["overlaytexture"]:SetDisabled(false)
+			overlaytext:SetDisabled(false)
 		else
 			settings[modename][typename]["overlaywireframe"]:SetDisabled(true)
 			settings[modename][typename]["overlayangle"]:SetDisabled(true)
 			settings[modename][typename]["overlayspeed"]:SetDisabled(true)
 			settings[modename][typename]["overlaytexture"]:SetDisabled(true)
+			overlaytext:SetDisabled(true)
 		end
 	end
 end
@@ -1617,32 +1755,75 @@ local function DispatchMaterial(i, dmode, dtype)
 			end
 		end
 
+		local alphaparam = [["$alpha" 					"]].. a/255 ..[["]]
 		local proxies = ""
 
-		local healthproxy =[[ 
-		Health
-			{
-				scale       "1"
-				resultVar   "$enthealth"
-			}
-				Subtract
-			{
-				srcVar1     "$tempVar"
-				srcVar2     "$enthealth"
-				resultVar   "$color[0]"
-			}
-			Subtract
-			{
-				srcVar1     "$tempVar"
-				srcVar2     "$tempVar"
-				resultVar   "$color[2]"
-			}
-			Equals
-			{
-				srcVar1     "$enthealth"
-				resultVar   "$color[1]"
-			}
-		]]
+		if settings[dmode][dtype]["healthbased"] ~= nil then
+			if settings[dmode][dtype]["healthbased"]:GetValue() then
+				proxies = proxies .. [[ 
+					"Health"
+					{
+						"scale"       "1"
+						"resultVar"   "$enthealth"
+					}
+					"Subtract"
+					{
+						"srcVar1"     "$tempVar"
+						"srcVar2"     "$enthealth"
+						"resultVar"   "$color[0]"
+					}
+					"Subtract"
+					{
+						"srcVar1"     "$tempVar"
+						"srcVar2"     "$tempVar"
+						"resultVar"   "$color[2]"
+					}
+					"Equals"
+					{
+						"srcVar1"     "$enthealth"
+						"resultVar"   "$color[1]"
+					}
+				]]
+			end
+		end
+
+		if dtype == "btiz" or dtype == "btvis" then
+			if settings[dmode][dtype]["speedbased"]:GetValue() then
+
+				proxies = proxies .. [[
+					"EntitySpeed"
+					{
+						"resultVar" 		"$entspeed"
+					}
+					"Divide"
+					{
+						"srcVar1" 			"$entspeed"
+						"srcVar2" 			"$maxspeed"
+						"resultVar" 		"$alpha_unclamped"
+					}
+					"Clamp"
+					{
+						"min"         		"0.0"
+						"max"        		"]].. a/255 ..[["
+						"srcVar1"   		"$alpha_unclamped"
+						"resultVar"  		"$alpha"
+					}
+				]]
+					
+				alphaparam = ""
+
+			end
+		end
+
+		if settings[dmode][dtype]["base"]:GetValue() == 1 then
+			proxies = proxies .. [[
+				"TextureScroll"
+				{
+					"textureScrollVar" 		"$bumptransform"
+					"textureScrollRate" 	"]].. bumpspeed ..[["
+					"textureScrollAngle" 	"]].. bumpangle ..[["
+				}]]
+		end
 
 		local vmt =[[]].. materialtype ..[[ {
 			"$basetexture" 				"]].. texture ..[["
@@ -1659,27 +1840,36 @@ local function DispatchMaterial(i, dmode, dtype)
 			"$rimlightexponent" 		"9999999"
 			"$rimlightboost" 			"]].. rimvalue ..[["
 			"$pearlescent" 				"]].. pearlvalue ..[["
-			"$alpha" 					"]].. a/255 ..[["
+			]].. alphaparam ..[[
 			"$ignorez"					"]].. ignorez ..[["
 			"$selfillum" 				"1"
+
 			"$enthealth"    			"0"
 			"$tempVar"    				"1"
 			"$resVal"         			"0"
+
+			"$entspeed"					"0"
+			"$maxspeed"					"200"
+			"$alpha_unclamped"			"0.0"
+
+			"$translate"				"[0.0 0.0]"
+			"$angle" 					"0"
 
 			"Proxies"
 			{
 				"TextureScroll"
 				{
-					"textureScrollVar" "$basetexturetransform"
-					"textureScrollRate" "]].. basespeed ..[["
-					"textureScrollAngle" "]].. baseangle ..[["
+					"textureScrollVar" 		"$translate"
+					"textureScrollRate" 	"]].. basespeed ..[["
+					"textureScrollAngle" 	"]].. baseangle ..[["
 				}
 
-				"TextureScroll"
+				"TextureTransform"
 				{
-					"textureScrollVar" "$bumptransform"
-					"textureScrollRate" "]].. bumpspeed ..[["
-					"textureScrollAngle" "]].. bumpangle ..[["
+					"translateVar" 			"$translate"
+					"rotateVar" 			"$angle"
+					"centerVar" 			"[-0.5 -0.5]"
+					"resultVar" 			"$basetexturetransform"
 				}
 
 				]].. proxies ..[[
@@ -1688,7 +1878,12 @@ local function DispatchMaterial(i, dmode, dtype)
 		}]]
 		return vmt
 	elseif i == 2 then
+
+		local r, g, b, a = settings[dmode][dtype]["overlayclr"]:GetValue()
+		local x, y, z = settings[dmode][dtype]["glowx"]:GetValue(), settings[dmode][dtype]["glowy"]:GetValue(), settings[dmode][dtype]["glowz"]:GetValue()
+		local wireframe = 0
 		local overlaytype = settings[dmode][dtype]["overlay"]:GetValue()
+		if overlaytype == 3 then wireframe = 1 else wireframe = 0 end
 		local ignorez = 0
 		if dmode == "viewmodel" then
 			ignorez = 0
@@ -1699,11 +1894,46 @@ local function DispatchMaterial(i, dmode, dtype)
 				ignorez = 0
 			end
 		end
+		local overlaytexture = settings[dmode][dtype]["overlaytexture"]:GetValue()
+		local overlaywireframe = 0
+		if settings[dmode][dtype]["overlaywireframe"]:GetValue() then
+			overlaywireframe = 1
+		end
+		local overlayspeed = settings[dmode][dtype]["overlayspeed"]:GetValue()
+		local overlayangle = settings[dmode][dtype]["overlayangle"]:GetValue()
+
+		local alphaparam = [["$alpha" 					"]].. a/255 ..[["]]
+		local proxies = ""
+
+		if dtype == "btiz" or dtype == "btvis" then
+			if settings[dmode][dtype]["speedbasedover"]:GetValue() then
+
+				proxies = proxies .. [[
+					"EntitySpeed"
+					{
+						"resultVar" 		"$entspeed"
+					}
+					"Divide"
+					{
+						"srcVar1" 			"$entspeed"
+						"srcVar2" 			"$maxspeed"
+						"resultVar" 		"$alpha_unclamped"
+					}
+					"Clamp"
+					{
+						"min"         		"0.0"
+						"max"        		"]].. a/255 ..[["
+						"srcVar1"   		"$alpha_unclamped"
+						"resultVar"  		"$alpha"
+					}
+				]]
+					
+				alphaparam = ""
+
+			end
+		end
+
 		if	overlaytype == 1 or overlaytype == 3 then
-			local r, g, b, a = settings[dmode][dtype]["overlayclr"]:GetValue()
-			local x, y, z = settings[dmode][dtype]["glowx"]:GetValue(), settings[dmode][dtype]["glowy"]:GetValue(), settings[dmode][dtype]["glowz"]:GetValue()
-			local wireframe = 0
-			if overlaytype == 3 then wireframe = 1 else wireframe = 0 end
 			local vmt = [["VertexLitGeneric" {
 				"$additive" 				"1"
 				"$envmap" 					"models/effects/cube_white"
@@ -1713,47 +1943,79 @@ local function DispatchMaterial(i, dmode, dtype)
 				"$selfillum" 				"1"
 				"$wireframe"				"]].. wireframe ..[["
 				"$ignorez"					"]].. ignorez ..[["
+
+				"$entspeed"					"0"
+				"$maxspeed"					"200"
+				"$alpha_unclamped"			"0.0"
+
+				"Proxies"
+				{
+					
+					]].. proxies ..[[
+
+				}
+
 				}]]
 			return vmt
 		elseif overlaytype == 2 then
-			local r, g, b, a = settings[dmode][dtype]["overlayclr"]:GetValue()
 			local vmt = [["UnlitGeneric" {
 				"$color" 					"[]].. r/255 .. " " .. g/255 .. " " .. b/255 ..[[]"
-				"$alpha" 					"]].. a/255 ..[["
+				]].. alphaparam ..[[
 				"$selfillum" 				"1"
 				"$wireframe"				"1"
 				"$ignorez"					"]].. ignorez ..[["
+
+				"$entspeed"					"0"
+				"$maxspeed"					"200"
+				"$alpha_unclamped"			"0.0"
+
+				"Proxies"
+				{
+					
+					]].. proxies ..[[
+
+				}
+
 				}]]
 			return vmt
 		elseif overlaytype == 4 then
-			local r, g, b, a = settings[dmode][dtype]["overlayclr"]:GetValue()
-			local overlaytexture = settings[dmode][dtype]["overlaytexture"]:GetValue()
-			local overlaywireframe = 0
-			if settings[dmode][dtype]["overlaywireframe"]:GetValue() then
-				overlaywireframe = 1
-			end
-			local overlayspeed = settings[dmode][dtype]["overlayspeed"]:GetValue()
-			local overlayangle = settings[dmode][dtype]["overlayangle"]:GetValue()
 			local vmt = [["UnlitGeneric" {
 				"$basetexture"				"]].. overlaytexture ..[["
 				"$color" 					"[]].. r/255 .. " " .. g/255 .. " " .. b/255 ..[[]"
-				"$alpha" 					"]].. a/255 ..[["
+				]].. alphaparam ..[[
 				"$additive"					"1"
 				"$selfillum" 				"1"
 				"$wireframe"				"]].. overlaywireframe ..[["
 				"$ignorez"					"]].. ignorez ..[["
 
+				"$entspeed"					"0"
+				"$maxspeed"					"200"
+				"$alpha_unclamped"			"0.0"
+
+				"$translate"				"[0.0 0.0]"
+				"$angle" 					"0"
+
 				"Proxies"
 				{
 					"TextureScroll"
 					{
-						"textureScrollVar" "$basetexturetransform"
+						"textureScrollVar" "$translate"
 						"textureScrollRate" "]].. overlayspeed ..[["
 						"textureScrollAngle" "]].. overlayangle ..[["
 					}
-				
-			}
-				}]]
+					
+					"TextureTransform"
+					{
+						"translateVar" "$translate"
+						"rotateVar" "$angle"
+						"centerVar" "[-0.5 -0.5]"
+						"resultVar" "$basetexturetransform"
+					}
+
+					]].. proxies ..[[
+
+				}
+			}]]
 			return vmt
 		end
 	end
@@ -1798,6 +2060,16 @@ local function MenuHandler()
 		SetSelections()
 		HideSettings(3)
 		lastoverlay = setting.overlay:GetValue()
+	end
+	if lastblend ~= scopeblendbox:GetValue() then
+		if scopeblendbox:GetValue() then
+			scopeblendselector:SetDisabled(0)
+			scopeblendslider:SetDisabled(0)
+		else
+			scopeblendselector:SetDisabled(1)
+			scopeblendslider:SetDisabled(1)
+		end
+		lastblend = scopeblendbox:GetValue()
 	end
 end
 
@@ -1853,6 +2125,27 @@ local function CheckChanges()
 		local reflectr, reflectg, reflectb = setting.reflectclr:GetValue()
 		local shiner, shineg, shineb = setting.shineclr:GetValue()
 
+		local speedbasedchange = false
+		if setting.speedbased ~= nil then
+			if cache.speedbased ~= setting.speedbased:GetValue() then
+				speedbasedchange = true
+			end
+		end
+
+		local speedbasedoverchange = false
+		if setting.speedbasedover ~= nil then
+			if cache.speedbasedover ~= setting.speedbasedover:GetValue() then
+				speedbasedoverchange = true
+			end
+		end
+
+		local healthbasedchange = false
+		if setting.healthbased ~= nil then
+			if cache.healthbased ~= setting.healthbased:GetValue() then
+				healthbasedchange = true
+			end
+		end
+
 		if cache.base ~= setting.base:GetValue() or
 		cache.baseclr.r ~= baser or cache.baseclr.g ~= baseg or cache.baseclr.b ~= baseb or cache.baseclr.a ~= basea or
 		cache.reflect ~= setting.reflect:GetValue() or
@@ -1871,7 +2164,8 @@ local function CheckChanges()
 		cache.bumpcheck ~= setting.bumpcheck:GetValue() or
 		cache.bumpmap ~= setting.bumpmap:GetValue() or
 		cache.bumpangle ~= setting.bumpangle:GetValue() or
-		cache.bumpspeed ~= setting.bumpspeed:GetValue() then
+		cache.bumpspeed ~= setting.bumpspeed:GetValue()	or
+		speedbasedchange or healthbasedchange then
 
 			RemoveDefaults()
 
@@ -2031,6 +2325,12 @@ local function CheckChanges()
 			cache.bumpmap = setting.bumpmap:GetValue()
 			cache.bumpangle = setting.bumpangle:GetValue()
 			cache.bumpspeed = setting.bumpspeed:GetValue()
+			if setting.speedbased ~= nil then
+				cache.speedbased = setting.speedbased:GetValue()
+			end
+			if setting.healthbased ~= nil then
+				cache.healthbased = setting.healthbased:GetValue()
+			end
 		end
 
 		local overlayr, overlayg, overlayb, overlaya = setting.overlayclr:GetValue()
@@ -2043,7 +2343,8 @@ local function CheckChanges()
 		cache.overlaywireframe ~= setting.overlaywireframe:GetValue() or
 		cache.overlaytexture ~= setting.overlaytexture:GetValue() or
 		cache.overlayspeed ~= setting.overlayspeed:GetValue() or
-		cache.overlayangle ~= setting.overlayangle:GetValue() then
+		cache.overlayangle ~= setting.overlayangle:GetValue() or
+		speedbasedoverchange then
 
 			RemoveDefaults()
 
@@ -2189,6 +2490,9 @@ local function CheckChanges()
 			cache.overlaytexture = setting.overlaytexture:GetValue()
 			cache.overlayspeed = setting.overlayspeed:GetValue()
 			cache.overlayangle = setting.overlayangle:GetValue()
+			if setting.speedbasedover ~= nil then
+				cache.speedbasedover = setting.speedbasedover:GetValue()
+			end
 		end
 		end
 		end
@@ -2198,6 +2502,152 @@ local function CheckChanges()
 end
 
 callbacks.Register("Draw", CheckChanges)
+
+local function DoScopeBlend()
+	local lp = entities.GetLocalPlayer()
+	if lp~= nil then
+		IsScoped = lp:GetProp("m_bIsScoped");
+		if IsScoped == 256 then IsScoped = 0 end
+		if IsScoped == 257 then IsScoped = 1 end
+
+		HeldWeapon = string.gsub(lp:GetPropEntity("m_hActiveWeapon"):GetClass(), "CWeapon", "")
+
+		local blendvalue = scopeblendslider:GetValue() / 100
+
+		if scopeblendbox:GetValue() and blendvalue ~= 1 then
+			if not Modulated and IsScoped == 1 then
+				
+				if blendmodel:GetValue() then
+					if LocalVisMat ~= nil then
+						if cached.loc.vis.base ~= 3 then
+							LocalVisMat:AlphaModulate(cached.loc.vis.baseclr.a/255 * blendvalue)
+						end
+					end
+					if LocalIzMat ~= nil then
+						if cached.loc.iz.base ~= 3 then
+							LocalIzMat:AlphaModulate(cached.loc.iz.baseclr.a/255 * blendvalue)
+						end
+					end
+				end
+
+				if blendmodeloverlay:GetValue() then
+					if LocalVisOverMat ~= nil then
+						LocalVisOverMat:AlphaModulate(cached.loc.vis.overlayclr.a/255 * blendvalue)
+					end
+					if LocalIzOverMat ~= nil then
+						LocalIzOverMat:AlphaModulate(cached.loc.iz.overlayclr.a/255 * blendvalue)
+					end
+				end
+
+				if blendattachment:GetValue() then
+					if LocalAttVisMat ~= nil then
+						if cached.loc.attvis.base ~= 3 then
+							LocalAttVisMat:AlphaModulate(cached.loc.attvis.baseclr.a/255 * blendvalue)
+						end
+					end
+					if LocalAttIzMat ~= nil then
+						if cached.loc.attiz.base ~= 3 then
+							LocalAttIzMat:AlphaModulate(cached.loc.attiz.baseclr.a/255 * blendvalue)
+						end
+					end
+				end
+
+				if blendattachmentoverlay:GetValue() then
+					if LocalAttVisOverMat ~= nil then
+						LocalAttVisOverMat:AlphaModulate(cached.loc.attvis.overlayclr.a/255 * blendvalue)
+					end
+					if LocalAttIzOverMat ~= nil then
+						LocalAttIzOverMat:AlphaModulate(cached.loc.attiz.overlayclr.a/255 * blendvalue)
+					end
+				end
+
+				if blendghost:GetValue() then
+					if GhostVisMat ~= nil then
+						if cached.loc.ghostvis.base ~= 3 then
+							GhostVisMat:AlphaModulate(cached.loc.ghostvis.baseclr.a/255 * blendvalue)
+						end
+					end
+					if GhostIzMat ~= nil then
+						if cached.loc.vis.base ~= 3 then
+							GhostIzMat:AlphaModulate(cached.loc.ghostiz.baseclr.a/255 * blendvalue)
+						end
+					end
+				end
+
+				if blendghostoverlay:GetValue() then
+					if GhostVisOverMat ~= nil then
+						GhostVisOverMat:AlphaModulate(cached.loc.ghostvis.overlayclr.a/255 * blendvalue)
+					end
+					if GhostIzOverMat ~= nil then
+						GhostIzOverMat:AlphaModulate(cached.loc.ghostiz.overlayclr.a/255 * blendvalue)
+					end
+				end
+
+				Modulated = true
+			end
+		end
+		if Modulated and IsScoped ~= 1 then
+
+			if LocalVisMat ~= nil then
+				if cached.loc.vis.base ~= 3 then
+					LocalVisMat:AlphaModulate(cached.loc.vis.baseclr.a/255)
+				end
+			end
+			if LocalIzMat ~= nil then
+				if cached.loc.iz.base ~= 3 then
+					LocalIzMat:AlphaModulate(cached.loc.iz.baseclr.a/255)
+				end
+			end
+
+			if LocalVisOverMat ~= nil then
+				LocalVisOverMat:AlphaModulate(cached.loc.vis.overlayclr.a/255)
+			end
+			if LocalIzOverMat ~= nil then
+				LocalIzOverMat:AlphaModulate(cached.loc.iz.overlayclr.a/255)
+			end
+
+			if LocalAttVisMat ~= nil then
+				if cached.loc.attvis.base ~= 3 then
+					LocalAttVisMat:AlphaModulate(cached.loc.attvis.baseclr.a/255)
+				end
+			end
+			if LocalAttIzMat ~= nil then
+				if cached.loc.attiz.base ~= 3 then
+					LocalAttIzMat:AlphaModulate(cached.loc.attiz.baseclr.a/255)
+				end
+			end
+
+			if LocalAttVisOverMat ~= nil then
+				LocalAttVisOverMat:AlphaModulate(cached.loc.attvis.overlayclr.a/255)
+			end
+			if LocalAttIzOverMat ~= nil then
+				LocalAttIzOverMat:AlphaModulate(cached.loc.attiz.overlayclr.a/255)
+			end
+
+			if GhostVisMat ~= nil then
+				if cached.loc.ghostvis.base ~= 3 then
+					GhostVisMat:AlphaModulate(cached.loc.ghostvis.baseclr.a/255)
+				end
+			end
+			if GhostIzMat ~= nil then
+				if cached.loc.vis.base ~= 3 then
+					GhostIzMat:AlphaModulate(cached.loc.ghostiz.baseclr.a/255)
+				end
+			end
+
+			if GhostVisOverMat ~= nil then
+				GhostVisOverMat:AlphaModulate(cached.loc.ghostvis.overlayclr.a/255)
+			end
+			if GhostIzOverMat ~= nil then
+				GhostIzOverMat:AlphaModulate(cached.loc.ghostiz.overlayclr.a/255)
+			end
+
+			Modulated = false
+		end
+	end
+end
+
+callbacks.Register("Draw", DoScopeBlend)
 
 local function ApplyChams(Model)
 	local ent = Model:GetEntity()
@@ -2215,12 +2665,24 @@ local function ApplyChams(Model)
 				end
 			end
 			if class == "CPredictedViewModel" then
-				if WeaponMat ~= nil then
-					Model:ForcedMaterialOverride(WeaponMat)
-				end
-				if WeaponOverMat ~= nil then
-					Model:DrawExtraPass()
-					Model:ForcedMaterialOverride(WeaponOverMat)
+				if IsScoped == 1 then
+					if HeldWeapon ~= "Aug" and HeldWeapon ~= "SG556" then
+						if WeaponMat ~= nil then
+							Model:ForcedMaterialOverride(WeaponMat)
+						end
+						if WeaponOverMat ~= nil then
+							Model:DrawExtraPass()
+							Model:ForcedMaterialOverride(WeaponOverMat)
+						end
+					end
+				else
+					if WeaponMat ~= nil then
+						Model:ForcedMaterialOverride(WeaponMat)
+					end
+					if WeaponOverMat ~= nil then
+						Model:DrawExtraPass()
+						Model:ForcedMaterialOverride(WeaponOverMat)
+					end
 				end
 			end
 		end

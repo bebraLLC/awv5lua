@@ -1,11 +1,10 @@
 local guiRef1 = gui.Reference( "Ragebot", "Accuracy", "Movement" )
---local guiRef2 = gui.Reference( "Ragebot", "Anti-Aim", "Advanced" )
 local Checkbox = gui.Checkbox( guiRef1, "fakewalk", "Fakewalk", false )
 Checkbox:SetDescription("Use Fakewalk instead of Slowwalk");
-local 
-fakewalkkey = gui.Keybox(guiRef1, "fakewalkkey", "Fakewalkkey", 0)
+local fakewalkkey = gui.Keybox(guiRef1, "fakewalkkey", "Fakewalkkey", 0)
+fakewalkkey:SetDescription("Start Fakewalking when holding down this Key");
 
-fakewalkkey:SetDescription("Start Fakewalking when holding down this Key");
+
 local function createMoveHook(cmd)
 
     if gui.GetValue("rbot.accuracy.movement.fakewalk") then

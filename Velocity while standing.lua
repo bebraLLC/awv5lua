@@ -1,6 +1,6 @@
 local misc_movement_other_ref = gui.Reference("MISC", "MOVEMENT", "Other")
 local velocity_on_stand_enable = gui.Checkbox( misc_movement_other_ref,  "velocity_on_stand_enabled", "Enable velocity on stand", false)
-local velocity_on_stand = gui.Slider(misc_movement_other_ref, "velocity_on_stand","Velocity while standing", 5, 1, 10);
+local velocity_on_stand = gui.Slider(misc_movement_other_ref, "velocity_on_stand","Velocity while standing", 5, 1, 10, 0.01);
 
 delay = globals.CurTime() + 0.05
 

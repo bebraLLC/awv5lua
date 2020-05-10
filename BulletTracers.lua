@@ -13,7 +13,7 @@
 -------------------------------------GUI setup-------------------------------------
 local ref = gui.Reference("Visuals", "World");
 local tracerSettings = gui.Groupbox(ref, "Tracer Settings", 328, 216, 296, 400); -- This looks lines up properly idk why values are so disgusting
-local tracerColors = gui.Groupbox(ref, "Tracer Colors", 16, 390, 296, 400);
+local tracerColors = gui.Groupbox(ref, "Tracer Colors", 16, 600, 296, 400);
 
 local refSettings = gui.Reference("Visuals", "World", "Tracer Settings");
 local refColor = gui.Reference("Visuals", "World", "tracer Colors");

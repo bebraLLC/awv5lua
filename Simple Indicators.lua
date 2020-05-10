@@ -9,7 +9,7 @@ callbacks.Register("Draw", function()
 
 local hc = gui.GetValue("rbot.accuracy.weapon.asniper.hitchance")    
 local mindmg = gui.GetValue("rbot.accuracy.weapon.asniper.mindmg")   
-local fakewalkkey = gui.GetValue("rbot.accuracy.movement.fakewalkkey")
+local fakewalkkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
 local button_held = input.IsButtonDown
     
 		draw.SetFont(draw.CreateFont("Tahoma", 20, 700))
