@@ -14,8 +14,6 @@ local onion_window = gui.Tab(gui.Reference("Settings"), 'onion_window_hud', "Oni
 local onion_window_groupbox_1 = gui.Groupbox(onion_window, 'Gradient Settings', 15, 15)
 local onion_window_groupbox_2 = gui.Groupbox(onion_window, 'HUD Settings', 15, 295)
 local onion_window_groupbox_3 = gui.Groupbox(onion_window, 'Side HUD Settings', 15, 1010)
-local onion_window_groupbox_4 = gui.Groupbox(onion_window, 'Chatbox Settings', 15, 1745)
-local onion_window_groupbox_5 = gui.Groupbox(onion_window, 'Crosshair Settings', 15, 2090)
 
 -- Checkboxes
 local onion_gradient_enabled = gui.Checkbox(onion_window_groupbox_1, 'onion_gradient_enabled', 'Enabled', true)
@@ -26,9 +24,6 @@ local onion_hud_enabled_ingame = gui.Checkbox(onion_window_groupbox_2, 'onion_hu
 local onion_hud_side_enabled = gui.Checkbox(onion_window_groupbox_3, 'onion_hud_side_enabled', 'Enabled', true)
 local onion_hud_side_enabled_ingame = gui.Checkbox(onion_window_groupbox_3, 'onion_hud_side_enabled_ingame', 'Ingame Check', true)
 local onion_hud_side_position_draggable = gui.Checkbox(onion_window_groupbox_3, 'onion_hud_side_position_draggable', 'Draggable', true)
-local onion_crosshair_enabled = gui.Checkbox(onion_window_groupbox_5, 'onion_crosshair_enabled', 'Enabled', false)
-local onion_crosshair_enabled_velocity = gui.Checkbox(onion_window_groupbox_5, 'onion_crosshair_enabled_velocity', 'Disable on Velocity', false)
-local onion_chatbox_enabled = gui.Checkbox(onion_window_groupbox_4, 'onion_chatbox_enabled', 'Enabled', false)
 
 -- Sliders
 local onion_gradient_height = gui.Slider(onion_window_groupbox_1, 'onion_gradient_height', 'Gradient Height', 5, 1, 20)
@@ -37,17 +32,13 @@ local onion_hud_position_y = gui.Slider(onion_window_groupbox_2, 'onion_hud_posi
 local onion_hud_side_position_y = gui.Slider(onion_window_groupbox_3, 'onion_hud_side_position_y', 'Y Offset', 0, -200, 200)
 local onion_hud_side_position_x = gui.Slider(onion_window_groupbox_3, 'onion_hud_side_position_x', 'X Offset', 15, 0, 75)
 local onion_hud_side_distance_y = gui.Slider(onion_window_groupbox_3, 'onion_hud_side_distance_y', 'Vertical Distance', 10, 0, 50)
-local onion_crosshair_enabled_velocity_max = gui.Slider(onion_window_groupbox_5, 'onion_crosshair_enabled_velocity_max', 'Max Velocity', 200, 0, 1000)
-local onion_crosshair_line_width = gui.Slider(onion_window_groupbox_5, 'onion_crosshair_line_width', 'Line Width', 2, 1, 20)
-local onion_crosshair_size = gui.Slider(onion_window_groupbox_5, 'onion_crosshair_size', 'Crosshair Size', 12, 2, 100, 2)
-local onion_chatbox_position_y = gui.Slider(onion_window_groupbox_4, 'onion_chatbox_position_y', 'Y Offset', 15, 0, 400, 5)
-local onion_chatbox_position_x = gui.Slider(onion_window_groupbox_4, 'onion_chatbox_position_x', 'X Offset', 15, 0, 400, 5)
+
 
 -- Comboboxs
 local onion_hud_position = gui.Combobox(onion_window_groupbox_2, 'onion_hud_position', 'HUD Position', "Draggable", "Top Right", "Top Left", "Bottom Right", "Bottom Left")
 local onion_hud_style = gui.Combobox(onion_window_groupbox_2, 'onion_hud_style', 'HUD Style', "Sypher", "Skeet", "Onetap")
 local onion_hud_side_style = gui.Combobox(onion_window_groupbox_3, 'onion_hud_side_style', 'Side HUD Style', "Sypher", "Skeet", "Onetap")
-local onion_crosshair_style = gui.Combobox(onion_window_groupbox_5, 'onion_crosshair_style', 'Crosshair Style', "Spread Line", "Spread Circle", "Line", "Circle")
+
 
 -- Color Pickers
 local onion_gradient_col_1 = gui.ColorPicker(onion_window_groupbox_1, 'onion_gradient_col_1', 'Gradient Color 1', 59, 175, 222, 255)
@@ -59,10 +50,7 @@ local onion_hud_color_text = gui.ColorPicker(onion_window_groupbox_2, 'onion_hud
 local onion_hud_side_color_bordercolor = gui.ColorPicker(onion_window_groupbox_3, 'onion_hud_side_color_bordercolor', 'HUD Border Color', 0, 183, 255, 255)
 local onion_hud_side_color_bordercolor2 = gui.ColorPicker(onion_window_groupbox_3, 'onion_hud_side_color_bordercolor2', 'HUD Border Color 2', 0, 137, 191, 255)
 local onion_hud_side_color_text = gui.ColorPicker(onion_window_groupbox_3, 'onion_hud_side_color_text', 'HUD Text Color', 255, 255, 255, 255)
-local onion_crosshair_color = gui.ColorPicker(onion_window_groupbox_5, 'onion_crosshair_color', 'Crosshair Color', 66, 152, 245, 150)
-local onion_chatbox_color_text = gui.ColorPicker(onion_window_groupbox_4, 'onion_chatbox_color_text', 'Text Color', 255, 255, 255, 255)
-local onion_chatbox_color_text = gui.ColorPicker(onion_window_groupbox_4, 'onion_chatbox_color_text', 'Header Color', 255, 0, 255, 200)
-local onion_chatbox_color_text = gui.ColorPicker(onion_window_groupbox_4, 'onion_chatbox_color_text', 'Background Color', 60, 60, 60, 150)
+
 
 -- HUD Options
 local onion_window_groupbox_2_groupbox_1 = gui.Groupbox(onion_window_groupbox_2, 'HUD Options', 0, 415)
@@ -78,11 +66,6 @@ local onion_hud_side_options_information = gui.Checkbox(onion_window_groupbox_3_
 local onion_hud_side_options_velocity = gui.Checkbox(onion_window_groupbox_3_groupbox_1, 'onion_hud_side_options_velocity', 'Velocity', true)
 local onion_hud_side_options_server = gui.Checkbox(onion_window_groupbox_3_groupbox_1, 'onion_hud_side_options_server', 'Server', true)
 
--- Chat Box
-local onion_chatbox_groupbox_4_groupbox_1 = gui.Groupbox(onion_window_groupbox_4, 'Chatbox Components', 0, 225)
-local onion_chatbox_options_time = gui.Checkbox(onion_window_groupbox_3_groupbox_1, 'onion_chatbox_options_time', 'Time', true)
-local onion_chatbox_options_user = gui.Checkbox(onion_window_groupbox_3_groupbox_1, 'onion_chatbox_options_user', 'User', true)
-local onion_hud_side_options_text = gui.Checkbox(onion_window_groupbox_3_groupbox_1, 'onion_hud_side_options_text', 'Text', true)
 
 -- Fonts
 local textFont = draw.CreateFont( "Tahoma", 16 )
@@ -96,8 +79,8 @@ local localplayer
 local username = ""
 local ping = ""
 local server = ""
-local maxVelocity
-local curVelocity
+local maxVelocity = {}
+local curVelocity = {}
 local playerResources
 local curTime = ""
 local map
@@ -432,48 +415,6 @@ function drawSideHUD()
 	end
 end
 
-local function drawCrosshair()
-	local crosshairStyle = onion_crosshair_style:GetValue()
-
-	if (localPlayer == nil or onion_crosshair_enabled:GetValue() == false) then
-		return
-	end
-
-	local curWeapon = localPlayer:GetPropEntity("m_hActiveWeapon")
-
-	if (curWeapon == nil) then 
-		return
-	end
-
-	local inaccuracy = curWeapon:GetWeaponInaccuracy() * 500
-	local r, g, b, a = onion_crosshair_color:GetValue()
-
-	if (crosshairStyle == 0) then -- Sypher
-		if (curVelocity >= onion_crosshair_enabled_velocity_max:GetValue() and onion_crosshair_enabled_velocity:GetValue()) then
-			return;
-		end
-
-		lineWidth = onion_crosshair_line_width:GetValue()
-		drawFilledRect(r, g, b, a, (scrW / 2) - (inaccuracy / 2), (scrH / 2) - (lineWidth / 2), inaccuracy, lineWidth)
-		drawFilledRect(r, g, b, a, (scrW / 2) - (lineWidth / 2), (scrH / 2) - (inaccuracy / 2), lineWidth, inaccuracy)
-	elseif (crosshairStyle == 1) then
-		if (curVelocity >= onion_crosshair_enabled_velocity_max:GetValue() and onion_crosshair_enabled_velocity:GetValue()) then
-			return;
-		end
-
-		draw.Color(r, g, b, a)
-		draw.FilledCircle(scrW / 2, scrH / 2, inaccuracy)
-	elseif (crosshairStyle == 2) then
-		lineWidth = onion_crosshair_line_width:GetValue()
-		size = onion_crosshair_size:GetValue()
-		drawFilledRect(r, g, b, a, (scrW / 2) - (size / 2), (scrH / 2) - (lineWidth / 2), size, lineWidth)
-		drawFilledRect(r, g, b, a, (scrW / 2) - (lineWidth / 2), (scrH / 2) - (size / 2), lineWidth, size)
-	else
-		size = onion_crosshair_size:GetValue()
-		draw.Color(r, g, b, a)
-		draw.FilledCircle(scrW / 2, scrH / 2, size)
-	end
-end
 
 --
 -- Callback Functions
@@ -549,7 +490,7 @@ function drawHUD()
 	if (onion_hud_enabled:GetValue() == true) then
 		drawTopHUD()
 		drawSideHUD()
-		drawCrosshair()
+	
 	end
 end
 

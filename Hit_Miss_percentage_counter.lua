@@ -1,4 +1,4 @@
-local color = gui.ColorPicker(gui.Reference("Visuals", "Other", "Extra"), "cPicker", "Hit Miss Percentage Counter Color", 124,176,34,200)
+local color = gui.ColorPicker(gui.Reference("Visuals", "Other", "Extra"), "HitMiss.Text.cPicker", "Hit Miss Percentage Counter Color", 124,176,34,200)
 
 local s = 0;
 local h = 0;

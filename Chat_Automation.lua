@@ -3,8 +3,10 @@
 -- Onetap improvement by Sultao
 
 local CHAT_SAVE_FILE_NAME = "chat_data.dat";
-local ref = gui.Reference("MISC", "AUTOMATION", "Other")
-local CHAT_CB = gui.Checkbox(ref, "CHAT_ENABLED", "Chat Automation", false);
+local refb = gui.Reference("MISC")
+local Translator_tab = gui.Tab(refb, "translator_lua_tab", "Chat Extensions")
+local CHAT_GB = gui.Groupbox(Translator_tab, "CHAT_ENABLED", "Chat Automation", 15, 15, 600, 600);
+local CHAT_CB = gui.Checkbox(CHAT_GB, "CHAT_ENABLED", "Chat Automation", true);
 local show, pressed = false, true
 local hits = {};
 
@@ -105,7 +107,7 @@ end
 local function press()
     show = CHAT_CB:GetValue();
 
-    if input.IsButtonPressed(gui.GetValue("MENU")) then
+    if input.IsButtonPressed(gui.GetValue("adv.menukey")) then
         pressed = not pressed;
     end
 end
@@ -373,4 +375,4 @@ client.AllowListener('player_death');
 callbacks.Register("Draw", "pressed", press);
 callbacks.Register("Draw", "Chat Normal Spammer", normalSpam);
 callbacks.Register("FireGameEvent", "Chat FireGameEvent", eventHandler);
-callbacks.Register("Draw", "Draw Menu", drawMenu);
+callbacks.Register("Draw", "drawMenu", drawMenu);

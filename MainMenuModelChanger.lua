@@ -192,7 +192,7 @@ local dances = {
 local lastModel = models[1][1]
 
 local REFERENCE = gui.Reference( "Visuals", "Other" )
-local GBOX = gui.Groupbox( REFERENCE, "Main Menu Model Changer", 328, 365, 298, 0 )
+local GBOX = gui.Groupbox( REFERENCE, "Main Menu Model Changer", 328, 820, 298, 0 )
 
 local MODEL = gui.Combobox( GBOX, "model.change", "Main Menu Model", "" )
 

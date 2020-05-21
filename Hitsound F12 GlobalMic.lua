@@ -1,4 +1,6 @@
 --kill_sound
+local killssound = "f12 Killsounds/voice_input.wav"
+local hitcmd = ('play' .. killssound);
 local snd_time = 2.200 -- set sound file length default f12 sound = 1.100 .
 local currentTime = 0
 local timer = 0
@@ -52,7 +54,7 @@ gui.SetValue("misc.fakelag.enable", 0)
 gui.SetValue("misc.fakelag.peek", 0)
 client.SetConVar("voice_loopback", 1, true)
 client.SetConVar("voice_inputfromfile", 1, true)
-client.Command('play f12 Killsounds/voice_input.wav', true)
+client.Command(hitcmd, true)
 client.Command("+voicerecord", true)
 timer, enabled = globals.RealTime() + snd_time, true
 

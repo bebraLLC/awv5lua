@@ -628,7 +628,7 @@ m_x, m_y = input.GetMousePos();
 end
 
 mgui.color_aw = function(items) 
---r,g,b,a = gui.GetValue("clr_"..items)
+r,g,b,a = gui.GetValue("clr."..items)
 draw.Color( r, g, b, a )
 end
 

@@ -11,7 +11,7 @@ local blacklisted_weapons = {
 "hegrenade"
 }
 
-local weapon_class = ply:GetPropEntity("m_hActiveWeapon"):GetClass()
+local weapon_class = entities.GetLocalPlayer:GetPropEntity("m_hActiveWeapon"):GetClass()
 for k, blacklisted_weapon in pairs(blacklisted_weapons) do
 if weapon_class == blacklisted_weapon or weapon_dmg == blacklisted_weapon then
 return true

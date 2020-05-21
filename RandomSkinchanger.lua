@@ -142,6 +142,6 @@ local function main(event)
         client.Command('cl_fullupdate', true)
     end
 end
-end
+
 client.AllowListener('player_spawn')
 callbacks.Register('FireGameEvent', 'random_skins', main)
