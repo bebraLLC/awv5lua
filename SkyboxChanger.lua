@@ -45,6 +45,31 @@ local skybox_list = {
     {"polluted_atm_", "Polluted"},
     {"toxic_atm_", "Toxic"},
     {"water_sunset_", "Water Sunset"},
+	{"cs_tibet","Tibet"},
+	{"embassy","Embassy"},
+	{"italy","Italy"},
+	{"jungle","Jungle"},
+	{"office","Office"},
+	{"sky_cs15_daylight01_hdr","CS15 Daylight HDR"},
+	{"sky_csgo_cloudy01","Cloudy 1"},
+	{"sky_csgo_night02","Night 2"},
+	{"sky_csgo_night02b","Night 2B"},
+	{"sky_day02_05_hdr","Day 2 5 HDR"},
+	{"sky_day02_05","Day 2 5"},
+	{"sky_dust","Dust"},
+	{"vertigo_hdr","Vertigo HDR"},
+	{"vertigoblue_hdr","Vertigoblue HDR"},
+	{"vertigo","Vertigo"},
+	{"vietnam","Vietnam"},
+	{"space_1","Space 1"},
+	{"space_3","Space 2"},
+	{"space_4","Space 3"},
+	{"space_5","Space 4"},
+	{"space_6","Space 5"},
+	{"space_7","Space 6"},
+	{"space_8","Space 7"},
+	{"space_9","Space 8"}
+	
 }
 
 
@@ -83,3 +108,5 @@ function SkyBox()
 end
 
 callbacks.Register("Draw", "SkyBox", SkyBox)
+
+

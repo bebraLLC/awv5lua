@@ -6,6 +6,8 @@ local rainbowxhairhitmarker_color = gui.ColorPicker(ref, "rainbowxhairhitmarker_
 
 
 local function hitmarker() 
+if not entities.GetLocalPlayer() then return end;
+
 local screencenterX, screencenterY = draw.GetScreenSize() --getting the full screensize
 screencenterX = screencenterX / 2; screencenterY = screencenterY / 2 --dividing the screensize by 2 will place it perfectly in the center no matter what resolution
 draw.Color(rainbowxhairhitmarker_color:GetValue())
@@ -13,7 +15,7 @@ draw.Color(rainbowxhairhitmarker_color:GetValue())
  local r = math.floor(math.sin(globals.RealTime() * speed) * 127 + 128)
  local g = math.floor(math.sin(globals.RealTime() * speed + 2) * 127 + 128)
  local b = math.floor(math.sin(globals.RealTime() * speed + 4) * 127 + 128)
- local a = 255
+ local a = 0
     
     for k,v in pairs({"esp.other.rainbowxhairhitmarker_color"}) do
                         

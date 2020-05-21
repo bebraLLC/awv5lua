@@ -1,10 +1,10 @@
 local primaryWeapons = {
     { "None", nil, nil };
-    {"SCAR 20 | G3SG1", "scar20" };
-    { "SG 008", "ssg08" };
+    { "AutoSniper", "scar20" };
+    { "Scout", "ssg08" };
     { "AWP", "awp" };
-    { "G3 SG1 | AUG", "sg556" };
-    { "AK 47 | M4A1", "ak47" };
+    { "AUG | SG553", "aug" };
+    { "AK-47 | M4A1", "ak47" };
 };
 local secondaryWeapons = {
     { "None", nil, nil };
@@ -30,7 +30,7 @@ local TAB = gui.Tab(gui.Reference("Misc"), "autobuy.tab", "Autobuy")
 local GROUP = gui.Groupbox(gui.Reference("Misc", "Autobuy"), "Settings", 15, 15, 600, 600);
 local ENABLED = gui.Checkbox(GROUP, "autobuy.active", "Enable Auto Buy", false);
 local PRINT_LOGS = gui.Checkbox(GROUP, "autobuy.printlogs", "Print Logs To Aimware Console", false);
-local PRIMARY_WEAPON = gui.Combobox(GROUP, "autobuy.primary", "Primary Weapon", primaryWeapons[1][1], primaryWeapons[2][1], primaryWeapons[3][1], primaryWeapons[4][1], primaryWeapons[5][1]);
+local PRIMARY_WEAPON = gui.Combobox(GROUP, "autobuy.primary", "Primary Weapon", primaryWeapons[1][1], primaryWeapons[2][1], primaryWeapons[3][1], primaryWeapons[4][1], primaryWeapons[5][1], primaryWeapons[6][1]);
 local SECONDARY_WEAPON = gui.Combobox(GROUP, "autobuy.secondary", "Secondary Weapon", secondaryWeapons[1][1], secondaryWeapons[2][1], secondaryWeapons[3][1], secondaryWeapons[4][1]);
 local ARMOR = gui.Combobox(GROUP, "autobuy.armor", "Armor", armors[1][1], armors[2][1], armors[3][1]);
 local GRENADE_SLOT1 = gui.Combobox(GROUP, "autobuy.grenade1", "Grenade Slot #1", granades[1][1], granades[2][1], granades[3][1], granades[4][1], granades[5][1], granades[6][1]);

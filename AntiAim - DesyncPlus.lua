@@ -51,7 +51,7 @@ end
 local DESYNCPLUS_WINDOW = gui.Window("desyncplus", windowName, 100, 100, 790, 610)
 
 
-local DESYNCPLUS_GBOX = gui.Groupbox(gui.Reference("Ragebot", "Anti-Aim"), "Manual Anti-Aim", 15,1000, 298, 0)
+local DESYNCPLUS_GBOX = gui.Groupbox(gui.Reference("Ragebot", "Anti-Aim", "Advanced"), "Manual Anti-Aim")
 local DESYNCPLUS_MANUAL_LEFT = gui.Keybox(DESYNCPLUS_GBOX, "desyncplus.manual.left", "Left Button", 0)
 local DESYNCPLUS_MANUAL_LEFTVALUE = gui.Slider(DESYNCPLUS_GBOX, "desyncplus.manual.leftvalue", "Left Value", 90, 0, 180)
 local DESYNCPLUS_MANUAL_RIGHT = gui.Keybox(DESYNCPLUS_GBOX, "desyncplus.manual.right", "Right Button", 0)

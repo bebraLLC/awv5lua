@@ -3,7 +3,7 @@
 local updatetick = 0;
 local grenades = {};
 
-local function EventHook(Event)
+function EventHook(Event)
 -- Clean table on round start
 if Event:GetName() == "round_start" then
 grenades = {};
@@ -21,32 +21,32 @@ end
 
 end
 
-local function ESPHook(Builder)
+function ESPHook(Builder)
 -- Smoke Grenades
-if espentities.FindByClass() == "CSmokeGrenadeProjectile" 
-and espEntity():GetProp("m_nSmokeEffectTickBegin") ~= 0 then
-delta = (globals.TickCount() - espEntity():GetProp("m_nSmokeEffectTickBegin")) * globals.TickInterval();
-espBuilder:AddBarBottom( 1 - (delta/17.5) )
+if Builder:GetEntity():GetClass() == "CSmokeGrenadeProjectile" 
+and Builder:GetEntity():GetProp("m_nSmokeEffectTickBegin") ~= 0 then
+delta = (globals.TickCount() - Builder:GetEntity():GetProp("m_nSmokeEffectTickBegin")) * globals.TickInterval();
+Builder:AddBarBottom( 1 - (delta/17.5) )
 -- Flash and HE Grenades
-elseif espEntity():GetClass() == "CBaseCSGrenadeProjectile" then
+elseif Builder:GetEntity():GetClass() == "CBaseCSGrenadeProjectile" then
 local found = false;
 for index,value in pairs(grenades) do
-if value[1] == espEntity():GetIndex() then
+if value[1] == Builder:GetEntity():GetIndex() then
 DeltaT = (globals.TickCount() - grenades[index][2]) * globals.TickInterval();
-espBuilder:AddBarBottom( 1 - (DeltaT/1.65) )
+Builder:AddBarBottom( 1 - (DeltaT/1.65) )
 found = true;
 break;
 end
 end
 if found == false and globals.TickCount() > updatetick then
-local gMatrix = {espEntity():GetIndex(), globals.TickCount()};
+local gMatrix = {Builder:GetEntity():GetIndex(), globals.TickCount()};
 table.insert(grenades, gMatrix);
 end
 end
 
 end
 
-local function DrawingHook()
+function DrawingHook() 
 for indexF,valueF in pairs(entities.FindByClass("CInferno")) do
 local found = false;
 for indexT,valueT in pairs(grenades) do
@@ -87,6 +87,6 @@ client.AllowListener("molotov_detonate");
 client.AllowListener("hegrenade_detonate");
 client.AllowListener("flashbang_detonate");
 
-callbacks.Register( "FireGameEvent", "EventHook", EventHook);
-callbacks.Register( "Draw", "DrawingHook", DrawingHook );
-callbacks.Register( "DrawESP", "ESPHook", ESPHook );
+callbacks.Register("FireGameEvent", "EventHookG", EventHook);
+callbacks.Register( "Draw", "DrawingHookG", DrawingHook );
+callbacks.Register( "DrawESP", "ESPHookG", ESPHook );

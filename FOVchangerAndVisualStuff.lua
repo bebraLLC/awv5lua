@@ -7,44 +7,47 @@ local TAB = gui.Tab(visuals_menu, "lua_fov_tab", "Fov Changer")
 
 local FOVBOX = gui.Groupbox(TAB, "FOV", 15, 15, 605, 500)
 local SLIDER = gui.Slider( FOVBOX, "lua_fov_slider", "Field of View", 90, 0, 180 )
-local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 80, 0, 180 )
-local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 45, 0, 180 )
+local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 40, 0, 180 )
+local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 15, 0, 180 )
+local FOVBETWEENCHECK = gui.Checkbox( FOVBOX, "lua_fov_between__shot_checkbox", "Reset FOV between scoped shots" , 0 )
 
-local VIEWFOVBOX = gui.Groupbox(TAB, "Viewmodel", 15, 220, 605, 500)
-local SLIDER_VIEW = gui.Slider( VIEWFOVBOX, "lua_fov_slider_view", "Viewmodel Field of View", 64, 0, 180 )
-local SLIDER_VIEWX = gui.Slider( VIEWFOVBOX, "lua_fov_slider_viewX", "Viewmodel Offset X", 1, -40, 40 )
-local SLIDER_VIEWY = gui.Slider( VIEWFOVBOX, "lua_fov_slider_viewY", "Viewmodel Offset Y", 1, -40, 40 )
-local SLIDER_VIEWZ = gui.Slider( VIEWFOVBOX, "lua_fov_slider_viewZ", "Viewmodel Offset Z", -1, -40, 40 )
+local VIEWBOX = gui.Groupbox(TAB, "Viewmodel", 15, 260, 605, 500)
+local SLIDER_VIEW = gui.Slider( VIEWBOX, "lua_fov_slider_view", "Viewmodel Field of View", 60, 0, 180 )
+local SLIDER_VIEWX = gui.Slider( VIEWBOX, "lua_fov_slider_viewX", "Viewmodel Offset X", 1, -40, 40 )
+local SLIDER_VIEWY = gui.Slider( VIEWBOX, "lua_fov_slider_viewY", "Viewmodel Offset Y", 1, -40, 40 )
+local SLIDER_VIEWZ = gui.Slider( VIEWBOX, "lua_fov_slider_viewZ", "Viewmodel Offset Z", -1, -40, 40 )
+
+local betweenshot
 
 callbacks.Register( "Draw", function()
-if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;	
-	local a = 0
-    local local_player = entities.GetLocalPlayer();
-    
-	local scoped = local_player:GetProp("m_bIsScoped")
-    if scoped ~= 0 and scoped ~= 256 then
-	local gWeapon = local_player:GetPropEntity("m_hActiveWeapon")
-	local zoomLevel = gWeapon:GetProp("m_zoomLevel")
-    if zoomLevel == 1 then
-        if SLIDER_ONE:GetValue() == 90 then
-            a = -40
-        end
-        client.SetConVar( "fov_cs_debug", SLIDER_ONE:GetValue(), true )
-    elseif zoomLevel == 2 then
-        if SLIDER_TWO:GetValue() == 90 then
-            a = -40
-        end
-        client.SetConVar( "fov_cs_debug", SLIDER_TWO:GetValue(), true )
-		end
-    else
-        client.SetConVar( "fov_cs_debug", SLIDER:GetValue(), true )
-    end
+    if(entities.GetLocalPlayer() ~= nil and engine.GetServerIP() ~= nil and engine.GetMapName() ~= nil) then
+        local a = 0
+        local player_local = entities.GetLocalPlayer();
+        local scoped = player_local:GetProp("m_bIsScoped")
 
-    client.SetConVar("viewmodel_fov", SLIDER_VIEW:GetValue(), true)
-    client.SetConVar("viewmodel_offset_x", SLIDER_VIEWX:GetValue(), true);
-    client.SetConVar("viewmodel_offset_y", SLIDER_VIEWY:GetValue(), true);
-    client.SetConVar("viewmodel_offset_z", SLIDER_VIEWZ:GetValue() + a, true);
-	end)	
+        if scoped ~= 0 and scoped ~= 256 and (FOVBETWEENCHECK:GetValue() and tostring(scoped) == "65536") ~= true then
+            local gWeapon = player_local:GetPropEntity("m_hActiveWeapon")
+            local zoomLevel = gWeapon:GetProp("m_zoomLevel")
+            if zoomLevel == 1 then 
+                if SLIDER_ONE:GetValue() == 90 then
+                    a = -40
+                end
+                client.SetConVar( "fov_cs_debug", SLIDER_ONE:GetValue(), true )
+            elseif zoomLevel == 2 then 
+                if SLIDER_TWO:GetValue() == 90 then
+                    a = -40
+                end
+                client.SetConVar( "fov_cs_debug", SLIDER_TWO:GetValue(), true )
+            end
+        else
+            client.SetConVar( "fov_cs_debug", SLIDER:GetValue(), true )
+        end
+        client.SetConVar("viewmodel_fov", SLIDER_VIEW:GetValue(), true)
+        client.SetConVar("viewmodel_offset_x", SLIDER_VIEWX:GetValue(), true);
+        client.SetConVar("viewmodel_offset_y", SLIDER_VIEWY:GetValue(), true);
+        client.SetConVar("viewmodel_offset_z", SLIDER_VIEWZ:GetValue() + a, true);
+    end
+end)	
 	
 -- End FOVnViewFovModel changer incl Scopefix --
 --]]
@@ -645,23 +648,96 @@ local vis_other_effects_title_SpaceLine = gui.Text(nisc, "");
 
 local vis_other_effects_title = gui.Text(nisc, "# HvH Visuals #");
 local EngineRadarchk = gui.Checkbox ( nisc, "lua_engine_radar", "Enable EngineRadar", 0 );
-local ShowImpactsCheckbox = gui.Checkbox( nisc, "lua_showimpacts", "Show Impacts", 0 );
+local SHOW = gui.Checkbox( nisc, "bulletimpacts", "Server-Side Bullet Impacts", false )
+SHOW:SetDescription("Show server-side bullet impacts.")
+local SHOW_CLIENT = gui.Checkbox( nisc, "bulletimpacts", "Client-Side Bullet Impacts", false )
+SHOW_CLIENT:SetDescription("Show client-side bullet impacts.")
+local COLOR = gui.ColorPicker( SHOW, "bulletimpacts.color", "cock", 0, 0, 255, 50 )
 local impactpenCheckbox = gui.Checkbox( nisc, "lua_impactpen", "Bullet Penetration Impacts", 0 );
 local showlagcompensationCheckbox = gui.Checkbox( nisc, "showlagcompensation", "Show Lagcompensation", 0 );
 local FullbrightCheckbox = gui.Checkbox( nisc, "lua_fullbright", "Full Brightness", 0 );
 local panorama_blur_off = gui.Checkbox(nisc,'lua_disable_panorama_blur', 'Disable Panorama Blur', 0)
 local DisableWorldShadowsChkbox = gui.Checkbox(nisc, "lua_disable_shadows", "Disable WorldShadows", 0 );
 
+local bulletImpacts = {}
+callbacks.Register( "Draw", function()
+    if not SHOW:GetValue() then return end
+    if not entities.GetLocalPlayer() then return end
+    if table.getn(bulletImpacts) == 0 then return end
+
+    if globals.CurTime() >= bulletImpacts[1][2] then
+        table.remove(bulletImpacts, 1)
+    end
+
+    for i = 1, #bulletImpacts do
+        local vecBullet = bulletImpacts[i][1]
+
+        local topLeftBottomX, topLeftBottomY = client.WorldToScreen( vecBullet + Vector3(2, -2, 2) )
+        local topLeftTopX, topLeftTopY = client.WorldToScreen( vecBullet + Vector3(-2, -2, 2) )
+        local topRightBottomX, topRightBottomY = client.WorldToScreen( vecBullet + Vector3(2, 2, 2) )
+        local topRightTopX, topRightTopY = client.WorldToScreen( vecBullet + Vector3(-2, 2, 2) )
+
+        local botLeftBottomX, botLeftBottomY = client.WorldToScreen( vecBullet + Vector3(2, -2, -2) )
+        local botLeftTopX, botLeftTopY = client.WorldToScreen( vecBullet + Vector3(-2, -2, -2) )
+        local botRightBottomX, botRightBottomY = client.WorldToScreen( vecBullet + Vector3(2, 2, -2) )
+        local botRightTopX, botRightTopY = client.WorldToScreen( vecBullet + Vector3(-2, 2, -2) )
+
+        if topLeftBottomX == nil or topLeftTopX == nil or topRightBottomX == nil or topRightTopX == nil or botLeftBottomX == nil or botLeftTopX == nil or botRightBottomX == nil or botRightTopX == nil then 
+            goto continue 
+        end
+
+        draw.Color( 0, 0, 0, 100)
+        draw.Line( topLeftBottomX, topLeftBottomY, topLeftTopX, topLeftTopY )
+        draw.Line( topLeftTopX, topLeftTopY, topRightTopX, topRightTopY )
+        draw.Line( topRightTopX, topRightTopY, topRightBottomX, topRightBottomY )
+        draw.Line( topRightBottomX, topRightBottomY, topLeftBottomX, topLeftBottomY )
+        draw.Line( botLeftBottomX, botLeftBottomY, botLeftTopX, botLeftTopY )
+        draw.Line( botLeftTopX, botLeftTopY, botRightTopX, botRightTopY )
+        draw.Line( botRightTopX, botRightTopY, botRightBottomX, botRightBottomY )
+        draw.Line( botRightBottomX, botRightBottomY, botLeftBottomX, botLeftBottomY )
+        draw.Line( topLeftBottomX, topLeftBottomY, botLeftBottomX, botLeftBottomY )
+        draw.Line( topLeftTopX, topLeftTopY, botLeftTopX, botLeftTopY )
+        draw.Line( topRightTopX, topRightTopY, botRightTopX, botRightTopY )
+        draw.Line( topRightBottomX, topRightBottomY, botRightBottomX, botRightBottomY )
+
+        draw.Color( COLOR:GetValue() )  
+        draw.Triangle( topLeftTopX, topLeftTopY, botLeftTopX, botLeftTopY, botLeftBottomX, botLeftBottomY )
+        draw.Triangle( topLeftTopX, topLeftTopY, topLeftBottomX, topLeftBottomY, botLeftBottomX, botLeftBottomY )
+        draw.Triangle( topRightTopX, topRightTopY, botRightTopX, botRightTopY, botRightBottomX, botRightBottomY )
+        draw.Triangle( topRightTopX, topRightTopY, topRightBottomX, topRightBottomY, botRightBottomX, botRightBottomY )
+        draw.Triangle( topLeftTopX, topLeftTopY, botLeftTopX, botLeftTopY, botRightTopX, botRightTopY )
+        draw.Triangle( topLeftTopX, topLeftTopY, topRightTopX, topRightTopY, botRightTopX, botRightTopY )
+        draw.Triangle( topLeftBottomX, topLeftBottomY, botLeftBottomX, botLeftBottomY, botRightBottomX, botRightBottomY )
+        draw.Triangle( topLeftBottomX, topLeftBottomY, topRightBottomX, topRightBottomY, botRightBottomX, botRightBottomY )
+        draw.Triangle( topLeftTopX, topLeftTopY, topLeftBottomX, topLeftBottomY, topRightBottomX, topRightBottomY )
+        draw.Triangle( topLeftTopX, topLeftTopY, topRightTopX, topRightTopY, topRightBottomX, topRightBottomY )
+        draw.Triangle( botLeftTopX, botLeftTopY, botLeftBottomX, botLeftBottomY, botRightBottomX, botRightBottomY )
+        draw.Triangle( botLeftTopX, botLeftTopY, botRightTopX, botRightTopY, botRightBottomX, botRightBottomY )
+
+        ::continue::
+    end
+end )
+
+callbacks.Register( "FireGameEvent", function(event)
+    if event:GetName() ~= "bullet_impact" then return end
+    if not SHOW:GetValue() then return end
+    if client.GetPlayerIndexByUserID( event:GetInt( 'userid' ) ) ~= client.GetLocalPlayerIndex() then return end
+    table.insert(bulletImpacts, {Vector3(event:GetFloat("x"), event:GetFloat("y"), event:GetFloat("z")), globals.CurTime() + 4})
+end )
+client.AllowListener( "bullet_impact" )
 
 -- show impacts 
-local function showimpacts()
-	if ShowImpactsCheckbox:GetValue() then
-		client.SetConVar("sv_showimpacts", 1, true)
-	else
-		client.SetConVar("sv_showimpacts", 0, true)
-	end
-end
-callbacks.Register("Draw", "showimpacts", showimpacts)
+callbacks.Register( "CreateMove", function()
+    if SHOW_CLIENT:GetValue() then
+        client.SetConVar( "sv_showimpacts", 2, true )
+    else
+        client.SetConVar( "sv_showimpacts", 0, true )
+    end
+end )
+
+callbacks.Register( "Unload", function()
+    client.SetConVar( "sv_showimpacts", 0, true )
+end )
 
 -- Bullet Penetration Impacts
 local function impact()

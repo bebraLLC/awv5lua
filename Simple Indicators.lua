@@ -1,18 +1,20 @@
 local y_offset = gui.Slider(gui.Reference("Visuals","Local","Helper"), "simple.indicators.y.ind.offset", "Simple Indicators Y Offset", -70, -450, 450)
-local screenX, screenY = getScreenSize()
+local screenX, screenY = draw.GetScreenSize()
 local half_screenY = screenY / 2
+local button_held = input.IsButtonDown
+local font = draw.CreateFont("Tahoma", 20, 700)
 
 
 callbacks.Register("Draw", function()
-	
-	if entities.GetLocalPlayer() then
-
 local hc = gui.GetValue("rbot.accuracy.weapon.asniper.hitchance")    
 local mindmg = gui.GetValue("rbot.accuracy.weapon.asniper.mindmg")   
-local fakewalkkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
-local button_held = input.IsButtonDown
-    
-		draw.SetFont(draw.CreateFont("Tahoma", 20, 700))
+local fakewalkkey = gui.GetValue("rbot.accuracy.movement.fakewalkkey")
+local fakeduckkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
+	
+	draw.SetFont(font)
+	
+	if entities.GetLocalPlayer() then
+	
 
     if (gui.GetValue("rbot.antiaim.advanced.autodir") == true) then
         draw.Color(0,128,0,255)
@@ -57,7 +59,7 @@ local button_held = input.IsButtonDown
 		draw.Color(0,0,128,255)
 		draw.TextShadow(16, half_screenY+95+y_offset:GetValue(), "No Toggleble Gun")
 	end
-
+if fakewalkkey:getValue() ~= true return end
 	if button_held(fakewalkkey) == true then
 		
 		draw.Color(0,128,0,255)
@@ -65,7 +67,17 @@ local button_held = input.IsButtonDown
 	else
 	    draw.Color(128,0,0,255)
 		draw.TextShadow(16, half_screenY+115+y_offset:GetValue(), "Fakewalking" )
-	end
+return end
+	if fakeduckkey:getValue() ~= true return end
+	if button_held(fakeduckkey) == true then
+		
+		draw.Color(0,128,0,255)
+		draw.TextShadow(16, half_screenY+135+y_offset:GetValue(), "Fakeduckin" )
+	else
+	    draw.Color(128,0,0,255)
+		draw.TextShadow(16, half_screenY+135+y_offset:GetValue(), "Fakeduckin" )
+	return
+end
 end
 
-end)
+end)

@@ -12,7 +12,6 @@ local function SmokeTimer()
 
    for i=1, #smoke_grenades do
        local smoke_grenade = smoke_grenades[i]
-
  if ("******") then
   local ticks = smoke_grenade:GetProp("m_nSmokeEffectTickBegin")
            local time_since_explosion = seconds_per_tick * (tick_current - ticks)

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------
-local NETWORK_GET_ADDR = "https://www.googleapis.com/auth/cloud-translation";
+local NETWORK_GET_ADDR = ;
 
 local MESSAGE_COOLDOWN = 30;
 local msc_menutoggle = 45
