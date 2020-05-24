@@ -1,6 +1,6 @@
-local ref = gui.Reference("Ragebot", "Accuracy", "Weapon")
-local enabled = gui.Checkbox(ref, "lua_damge_behind_wall_chkbox", "Enable Damage behind wall", 0)
-
+local ref2 = gui.Reference("Ragebot", "Accuracy", "Weapon")
+local enabled = gui.Checkbox(ref2, "lua_damge_behind_wall_chkbox", "Use Damage behind wall", 0)
+local ref = gui.Groupbox(gui.Reference("Ragebot", "Accuracy", "Weapon"), "AutoMinDamage due to Walls")
 local weapon_list = { "asniper", "sniper", "scout", "hpistol", "pistol", "rifle" }
 
 local rbot_autosniper_mindamage_2 = gui.Slider(ref, weapon_list[1] .. ".mindmg.2", "Damage Visible(auto)", 0, 0, 100);
@@ -87,7 +87,7 @@ local function set_vis(value)
     for k, v in pairs(vars_2) do
         if table_contains(v, value) then
             if k ~= false then
-                k:SetInvisible(false)
+              k:SetInvisible(false)
             end
         else
             if k ~= false then
@@ -177,3 +177,15 @@ local Player, LocalPlayer = entities_check()
         end
     end
 end)
+
+local function activationCheck()
+    if not enabled:GetValue() then
+            ref:SetInvisible(true);
+			ref:SetDisabled(true);
+        else
+            ref:SetInvisible(false);
+			ref:SetDisabled(false)
+    end
+end
+
+callbacks.Register( "Draw", "activationCheck", activationCheck );

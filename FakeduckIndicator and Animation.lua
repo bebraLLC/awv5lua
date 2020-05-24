@@ -43,7 +43,7 @@ callbacks.Register("DrawESP", "FD_Indicator", function(Builder)
             end
 
             if crouched_ticks[index] >= 5 then
-                Builder:Color(255, 255, 0, 255)
+                Builder:Color(255, 0, 0, 255)
                 Builder:AddTextRight("Fake Duck")
             end
         else

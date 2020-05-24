@@ -1,36 +1,59 @@
-local weaponIDs = {
-    --get the rest from https://tf2b.com/itemlist.php?gid=730
-[9] = "sniper",
-[40] = "scout",
-[38] = "asniper",
-[11] = "asniper",
-[1] = "hpistol",
-[2] = "pistol",
-[31] = "zeus"
-};
-
-local hc_ref = gui.Reference("RAGEBOT", "ACCURACY", "WEAPON");
-local hcslider = gui.Slider(hc_ref, "lua_hcslider", "New HC Slider", 0, 1, 100)
-local tgglkey = gui.Keybox(hc_ref, "ChangeHCKey", "Change HC key", nil);
-
-local lp = entities.GetLocalPlayer()
-
-callbacks.Register( 'Draw', function()
-    if (tgglkey:GetValue() == nil) then
-        return;
+local guiSet = gui.SetValue
+local guiGet = gui.GetValue
+local rage_ref_extra = gui.Reference("RAGEBOT", "ACCURACY", "WEAPON");
+local chengeDamageText = gui.Text(rage_ref_extra, "--- Changer Hitchance ---");
+local newHitchance = gui.Slider(rage_ref_extra, "newHitchance", "HitChance", 1, 0, 100);
+local changeKey = gui.Keybox(rage_ref_extra, "ChangeDmgKey", "Change HC key", 0);
+local auto = guiGet("rbot.accuracy.weapon.asniper.hitchance")
+local sniper = guiGet("rbot.accuracy.weapon.sniper.hitchance")
+local pistol = guiGet("rbot.accuracy.weapon.pistol.hitchance")
+local revolver = guiGet("rbot.accuracy.weapon.hpistol.hitchance")
+local smg = guiGet("rbot.accuracy.weapon.smg.hitchance")
+local rifle = guiGet("rbot.accuracy.weapon.rifle.hitchance")
+local shotgun = guiGet("rbot.accuracy.weapon.shotgun.hitchance")
+local scout = guiGet("rbot.accuracy.weapon.scout.hitchance")
+local lmg = guiGet("rbot.accuracy.weapon.lmg.hitchance")
+local toggle = 1;
+function changehcMain()
+    if(input.IsButtonPressed(changeKey:GetValue())) then
+            toggle = toggle + 1;
+    elseif(input.IsButtonDown) then
+    -- do nothing
     end
-	
-	local new_hc = hcslider:GetValue()
-	
-	if not enabled then
-	old_hc = gui.GetValue("rbot.accuracy.weapon." .. (weaponIDs[lp:GetWeaponID()]) .. ".hitchance")
-	end
-	
-	if input.IsButtonDown(tgglkey:GetValue()) then
-    gui.SetValue( "rbot.accuracy.weapon." .. (weaponIDs[lp:GetWeaponID()]) .. ".hitchance", new_hc)
-    enabled = true
-	else
-    gui.SetValue( "rbot.accuracy.weapon." .. (weaponIDs[lp:GetWeaponID()]) .. ".hitchance", old_hc)
-	enabled = false
+    if(input.IsButtonReleased(changeKey:GetValue())) then
+            if (toggle%2 == 0) then
+                    auto = guiGet("rbot.accuracy.weapon.asniper.hitchance")
+                    sniper = guiGet("rbot.accuracy.weapon.sniper.hitchance")
+                    pistol = guiGet("rbot.accuracy.weapon.pistol.hitchance")
+                    revolver = guiGet("rbot.accuracy.weapon.hpistol.hitchance")
+                    smg = guiGet("rbot.accuracy.weapon.smg.hitchance")
+                    rifle = guiGet("rbot.accuracy.weapon.rifle.hitchance")
+                    shotgun = guiGet("rbot.accuracy.weapon.shotgun.hitchance")
+                    scout = guiGet("rbot.accuracy.weapon.scout.hitchance")
+                    lmg = guiGet("rbot.accuracy.weapon.lmg.hitchance")
+
+                    guiSet("rbot.accuracy.weapon.asniper.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.sniper.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.pistol.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.hpistol.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.smg.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.rifle.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.shotgun.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.scout.hitchance", math.floor(newHitchance:GetValue()))
+                    guiSet("rbot.accuracy.weapon.lmg.hitchance", math.floor(newHitchance:GetValue()))
+                    toggle = 0;
+            elseif (toggle%2 == 1) then
+                guiSet("rbot.accuracy.weapon.asniper.hitchance", auto)
+                guiSet("rbot.accuracy.weapon.sniper.hitchance", sniper)
+                guiSet("rbot.accuracy.weapon.pistol.hitchance", pistol)
+                guiSet("rbot.accuracy.weapon.hpistol.hitchance", revolver)
+                guiSet("rbot.accuracy.weapon.smg.hitchance", smg)
+                guiSet("rbot.accuracy.weapon.rifle.hitchance", rifle)
+                guiSet("rbot.accuracy.weapon.shotgun.hitchance", shotgun)
+                guiSet("rbot.accuracy.weapon.scout.hitchance", scout)
+                guiSet("rbot.accuracy.weapon.lmg.hitchance", lmg)
+                toggle = 1;
+            end
+    end
 end
-end)
+callbacks.Register("Draw", "changehcMain", changehcMain);

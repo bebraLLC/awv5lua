@@ -94,9 +94,9 @@ end
 end
 
 if stopped and on_shot_quickstop_into_slowwalk:GetValue() then
-if input.IsButtonDown(65) then
+if input.IsButtonDown(65) then	--(a)
 gui.SetValue("rbot.accuracy.movement.slowkey", 65)
-elseif input.IsButtonDown(68) then
+elseif input.IsButtonDown(68) then	--(d)
 gui.SetValue("rbot.accuracy.movement.slowkey", 68)
 end
 else

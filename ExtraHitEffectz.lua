@@ -6,7 +6,7 @@ local ref3 = gui.Reference("Visuals", "World", "Extra", "Hit Effects", "Sound");
 local ref4 = gui.Reference("Visuals", "World", "Extra", "Hit Effects", "Marker");
 -- Gui Setup
 local multibox = gui.Multibox(ref1, "Hit Effects");
-local optionGroupBox = gui.Groupbox(gui.Reference("Visuals", "World"), "Settings", 328, 218, 296, 100);
+local optionGroupBox = gui.Groupbox(gui.Reference("Visuals", "World","Extra"), "Settings");
 local settingsTab = gui.Combobox(optionGroupBox, "currentsettings", "Hit Effect Settings", "General", "Hitmarker", "Font", "Debug");
 local soundEffect = gui.Checkbox(multibox, "hiteffects.sound", "Sound", false);
 local skeletonEffect = gui.Checkbox(multibox, "hiteffects.skeleton", "Skeleton", false);

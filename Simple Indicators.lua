@@ -6,17 +6,17 @@ local font = draw.CreateFont("Tahoma", 20, 700)
 
 
 callbacks.Register("Draw", function()
+	if not entities.GetLocalPlayer() then
+	return
+	else
+
 local hc = gui.GetValue("rbot.accuracy.weapon.asniper.hitchance")    
 local mindmg = gui.GetValue("rbot.accuracy.weapon.asniper.mindmg")   
-local fakewalkkey = gui.GetValue("rbot.accuracy.movement.fakewalkkey")
-local fakeduckkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
+local fakeduckkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")	
 	
 	draw.SetFont(font)
 	
-	if entities.GetLocalPlayer() then
-	
-
-    if (gui.GetValue("rbot.antiaim.advanced.autodir") == true) then
+	if (gui.GetValue("rbot.antiaim.advanced.autodir") == true) then
         draw.Color(0,128,0,255)
         draw.TextShadow(16, half_screenY+15+y_offset:GetValue(), "FreeStand")
 	else
@@ -59,25 +59,14 @@ local fakeduckkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
 		draw.Color(0,0,128,255)
 		draw.TextShadow(16, half_screenY+95+y_offset:GetValue(), "No Toggleble Gun")
 	end
-if fakewalkkey:getValue() ~= true return end
-	if button_held(fakewalkkey) == true then
-		
-		draw.Color(0,128,0,255)
-		draw.TextShadow(16, half_screenY+115+y_offset:GetValue(), "Fakewalking" )
-	else
-	    draw.Color(128,0,0,255)
-		draw.TextShadow(16, half_screenY+115+y_offset:GetValue(), "Fakewalking" )
-return end
-	if fakeduckkey:getValue() ~= true return end
-	if button_held(fakeduckkey) == true then
-		
-		draw.Color(0,128,0,255)
-		draw.TextShadow(16, half_screenY+135+y_offset:GetValue(), "Fakeduckin" )
-	else
-	    draw.Color(128,0,0,255)
-		draw.TextShadow(16, half_screenY+135+y_offset:GetValue(), "Fakeduckin" )
-	return
-end
-end
 
+	if button_held(fakeduckkey) == true then
+		draw.Color(0,128,0,255)
+		draw.TextShadow(16, half_screenY+115+y_offset:GetValue(), "Fakeduckin" )
+	else
+	    draw.Color(128,0,0,255)
+		draw.TextShadow(16, half_screenY+115+y_offset:GetValue(), "Fakeduckin" )
+	end 
+	end
 end)
+	

@@ -17,6 +17,9 @@ local scoutori = gui.Slider(scoutdmg, "scoutori", "Scout Original Min Damage", 1
 local autodmg = gui.Groupbox(tab,"Auto Damage Settings",310,190,280,300)
 local autoDamage = gui.Slider(autodmg, "autoDamage", "Auto Min Damage", 1, 0, 100)
 local autoori = gui.Slider(autodmg, "autoori", "Auto Original Min Damage", 1, 0, 100)
+local position = gui.Groupbox(tab,"Indicators position",16,350,280,300)
+local xpos = gui.Slider(position, "xpos", "X Position", 1, 0, 1980)
+local ypos = gui.Slider(position, "ypos", "Y Position", 1, 0, 1080)
 local Toggle =-1
 local pressed = false
 
@@ -59,88 +62,90 @@ Toggle = Toggle *-1
 end
 
 function Drawtext()
-    w, h = draw.GetScreenSize()
+    local w, h = draw.GetScreenSize()
+	w = xpos:GetValue()
+    h = ypos:GetValue()
 if (setDmg:GetValue()==1) then
     if Toggle == 1 then
-          draw.Color(0, 255, 0, 255);
-    draw.Text(w/2 +50, h - 500, "Min Damage Mode On (toggle)");
+        draw.Color(0, 255, 0, 255);
+        draw.Text(w, h-60, "Min Damage Mode On (toggle)");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 480, awpDamage:GetValue());
+        draw.Text(w+90, h-40, awpDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 480, "awp:");
+        draw.Text(w+30, h-40, "awp:");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 460, scoutDamage:GetValue());
+        draw.Text(w+90, h-20, scoutDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 460, "scout:");
+        draw.Text(w+30, h-20, "scout:");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 440, autoDamage:GetValue());
+        draw.Text(w+90, h, autoDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 440, "auto:");
+        draw.Text(w+30, h, "auto:");
     elseif Toggle == -1 then
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +50, h - 500, "Min Damage Mode Off");
+    draw.Text(w, h-60, "Min Damage Mode Off");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 460, scoutori:GetValue());
+    draw.Text(w+90, h-20, scoutori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 480, awpori:GetValue());
+    draw.Text(w+90, h-40, awpori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 440, autoori:GetValue());
+    draw.Text(w+90, h, autoori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 460, "scout:");
+    draw.Text(w+30, h-20, "scout:");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 480, "awp:");
+    draw.Text(w+30, h-40, "awp:");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 440, "auto:");
+    draw.Text(w+30, h, "auto:");
     end
 elseif (setDmg:GetValue()==2) then
     if input.IsButtonDown(togglekey:GetValue()) then
           draw.Color(0, 255, 0, 255);
-    draw.Text(w/2 +50, h - 500, "Min Damage Mode On (hold)");
+        draw.Text(w, h-60, "Min Damage Mode On (toggle)");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 480, awpDamage:GetValue());
+        draw.Text(w+90, h-40, awpDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 480, "awp:");
+        draw.Text(w+30, h-40, "awp:");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 460, scoutDamage:GetValue());
+        draw.Text(w+90, h-20, scoutDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 460, "scout:");
+        draw.Text(w+30, h-20, "scout:");
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +140, h - 440, autoDamage:GetValue());
+        draw.Text(w+90, h, autoDamage:GetValue());
         draw.Color(255, 255, 0, 255);
-        draw.Text(w/2 +80, h - 440, "auto:");
+        draw.Text(w+30, h, "auto:");
     else
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +50, h - 500, "Min Damage Mode Off");
+    draw.Text(w, h-60, "Min Damage Mode Off");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 460, scoutori:GetValue());
+    draw.Text(w+90, h-20, scoutori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 480, awpori:GetValue());
+    draw.Text(w+90, h-40, awpori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 440, autoori:GetValue());
+    draw.Text(w+90, h, autoori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 460, "scout:");
+    draw.Text(w+30, h-20, "scout:");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 480, "awp:");
+    draw.Text(w+30, h-40, "awp:");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 440, "auto:");
+    draw.Text(w+30, h, "auto:");
         
     
     end
 else
-draw.Color(255, 255, 255, 255);
-draw.Text(w/2 +50, h - 500, "Min Damage Mode Off");
-draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 460, scoutori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 480, awpori:GetValue());
+    draw.Text(w, h-60, "Min Damage Mode Off");
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +140, h - 440, autoori:GetValue());
+    draw.Text(w+90, h-20, scoutori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 460, "scout:");
+    draw.Text(w+90, h-40, awpori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 480, "awp:");
+    draw.Text(w+90, h, autoori:GetValue());
     draw.Color(255, 255, 255, 255);
-    draw.Text(w/2 +80, h - 440, "auto:");
+    draw.Text(w+30, h-20, "scout:");
+    draw.Color(255, 255, 255, 255);
+    draw.Text(w+30, h-40, "awp:");
+    draw.Color(255, 255, 255, 255);
+    draw.Text(w+30, h, "auto:");
 end
 end
 callbacks.Register("Draw", "Drawtext", Drawtext);

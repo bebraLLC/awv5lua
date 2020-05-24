@@ -1,5 +1,6 @@
 -- First person grenade helper by Scape#4313
 -- Request from laorent on fourms
+client.Command('sv_cheats', 1, true);
 local disableOnNade = gui.Checkbox(gui.Reference("Visuals", "Local", "Camera"), "thirdpersonnade", "Disable On Nade", false);
 disableOnNade:SetDescription("Disable thirdperson when holding a grenade");
 
@@ -8,7 +9,9 @@ local thirdpersonActive = true;
 client.Command("thirdperson", true);
 
 local function firstPersonGrenade() 
-    local localPlayer = entities.GetLocalPlayer();
+   
+if not thirdpersonKey then return error(NOthirdPersonkey) end;
+ local localPlayer = entities.GetLocalPlayer();
 
     if input.IsButtonPressed(thirdpersonKey) then
         thirdpersonActive = not thirdpersonActive;

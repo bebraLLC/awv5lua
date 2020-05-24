@@ -1,14 +1,24 @@
 local guiRef1 = gui.Reference( "Ragebot", "Accuracy", "Movement" )
-local Checkbox = gui.Checkbox( guiRef1, "fakewalk", "Fakewalk", false )
-Checkbox:SetDescription("Use Fakewalk instead of Slowwalk");
-local fakewalkkey = gui.Keybox(guiRef1, "fakewalkkey", "Fakewalkkey", 0)
-fakewalkkey:SetDescription("Start Fakewalking when holding down this Key");
+local enable = gui.Checkbox( guiRef1, "fakewalk", "Fakewalk", false )
+enable:SetDescription("Use Fakewalk instead of Slowwalk");
+local fakewalkgroupbox = gui.Groupbox(gui.Reference( "Ragebot", "Accuracy", "Movement" ), "Fakewalk Settings")
+local fakewalkkey = gui.Keybox(fakewalkgroupbox, "fakewalkkey", "Fakewalkkey", 0)
+fakewalkkey:SetDescription("Start Fakewalking when holding down this Key");
 
+local function activationCheck()
+    if not enable:GetValue() then
+            fakewalkgroupbox:SetInvisible(true);
+			fakewalkgroupbox:SetDisabled(true);
+        else
+            fakewalkgroupbox:SetInvisible(false);
+			fakewalkgroupbox:SetDisabled(false)
+    end
+end
 
 local function createMoveHook(cmd)
 
-    if gui.GetValue("rbot.accuracy.movement.fakewalk") then
-        if input.IsButtonDown( "a" ) and input.IsButtonDown( fakewalkkey:GetValue() ) and not input.IsButtonDown( "d" ) then
+	
+		if input.IsButtonDown( "a" ) and input.IsButtonDown( fakewalkkey:GetValue() ) and not input.IsButtonDown( "d" ) then
             cmd.sendpacket = false
             cmd.sidemove = -55
             cmd.sendpacket = false
@@ -76,7 +86,7 @@ local function createMoveHook(cmd)
             cmd.sendpacket = false
             cmd.forwardmove = 55
         end
-    end
-end
+	end
 
+callbacks.Register( "Draw", "activationCheck", activationCheck );
 callbacks.Register("CreateMove", createMoveHook)

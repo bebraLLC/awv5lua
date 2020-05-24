@@ -15,11 +15,16 @@ local manualRange = gui.Slider(ref, "testSlider", "Manual Range", 1, 1, 5);
 
 local targetIndex = nil;
 
-local function off()
+local function isOff()
+	
+	if method:GetValue() == 0 then
+	targetIndex = isOff()
+	--do nothing
+	end
+		
+	return targetIndex;
 
-return isoff;
-
-end
+	end
 
 -- Closest to player every frame
 local function distance(players, localPlayer)
@@ -144,7 +149,7 @@ local function hDraw()
     end
 
     if method:GetValue() == 0 then
-		targetIndex = off 
+		targetIndex = isOff()
 	elseif method:GetValue() == 1 then
         targetIndex = distance(players, localPlayer);
     elseif method:GetValue() == 2 then

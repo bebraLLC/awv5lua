@@ -234,15 +234,15 @@ local function IndicateDesyncBreak()
 
         draw.SetFont(desync_break_font);
         draw.Color(124, 176, 34)
-        draw.Text(10, screenH - 160, "RAINBOWSYNC")
-        draw.TextShadow(10, screenH - 160, "RAINBOWSYNC")
+        draw.Text(10, screenH - 73, "RAINBOWSYNC")
+        draw.TextShadow(10, screenH - 73, "RAINBOWSYNC")
         
     
     else
     draw.SetFont(desync_break_font);
         draw.Color(255, 25, 25)
-        draw.Text(10, screenH - 160, "RAINBOWSYNC")
-        draw.TextShadow(10, screenH - 160, "RAINBOWSYNC")
+        draw.Text(10, screenH - 73, "RAINBOWSYNC")
+        draw.TextShadow(10, screenH - 73, "RAINBOWSYNC")
     
     end
 end

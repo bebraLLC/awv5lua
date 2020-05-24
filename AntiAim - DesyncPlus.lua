@@ -128,7 +128,7 @@ local DESYNCPLUS_UPDATER_CHANGELOG_TEXT = gui.Text(DESYNCPLUS_UPDATER_CHANGELOG_
 local DESYNCPLUS_EXTRA_GBOX = gui.Groupbox(DESYNCPLUS_TAB, "Extra", 10, 170, 250, 0)
 local sW, sH = draw.GetScreenSize()
 local DESYNCPLUS_EXTRA_INDICATORX = gui.Slider(DESYNCPLUS_EXTRA_GBOX, "extra.indicatorx", "Indicator X Position", 10, 0, sW)
-local DESYNCPLUS_EXTRA_INDICATORY = gui.Slider(DESYNCPLUS_EXTRA_GBOX, "extra.indicatory", "Indicator Y Position", sH - 90, 0, sH)
+local DESYNCPLUS_EXTRA_INDICATORY = gui.Slider(DESYNCPLUS_EXTRA_GBOX, "extra.indicatory", "Indicator Y Position", sH-20 , 0, sH)
 
 local BASEDIRECTION_STATE = 0
 local ROTATION_STATE = 0

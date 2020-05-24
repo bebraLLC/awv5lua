@@ -67,5 +67,6 @@ if swastikkka_crosshair:GetValue() ~= true then return;
         degree = 0
     end
     end
-end end
+end 
+end
 callbacks.Register( "Draw", rainbowxhair)
