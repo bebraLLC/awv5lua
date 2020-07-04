@@ -1,30 +1,3 @@
-----    Base    code    for    auto    updating.
---
---local    cS    =    GetScriptName()
---local    cV    =    '1.0.0'
---local    gS    =    'PUT    LINK    TO    RAW    LUA    SCRIPT'
---local    gV    =    'PUT    LINK    TO    RAW    VERSION'
---
---local    function    AutoUpdate()
---	if    gui.GetValue('lua_allow_http')    and    gui.GetValue('lua_allow_cfg')    then
---		local    nV    =    http.Get(gV)
---		if    cV    ~=    nV    then
---			local    nF    =    http.Get(gS)
---			local    cF    =    file.Open(cS,    'w')
---			cF:Write(nF)
---			cF:Close()
---			print(cS,    'updated    from',    cV,    'to',    nV)
---		else
---			print(cS,    'is    up-to-date.')
---		end
---	end
---end		
---
---callbacks.Register('Draw',    'Auto    Update')
---callbacks.Unregister('Draw',    'Auto    Update')
-
-
-
 local WALK_SPEED = 100;
 local DRAW_MARKER_DISTANCE = 100;
 local WH_ACTION_COOLDOWN = 30;
@@ -445,7 +418,7 @@ function getThrowPositionw(pos_x, pos_y, pos_z, ax, ay, z_offset)
     return pos_x - DRAW_MARKER_DISTANCE * math.cos(math.rad(ay + 180)), pos_y - DRAW_MARKER_DISTANCE * math.sin(math.rad(ay + 180)), pos_z - DRAW_MARKER_DISTANCE * math.tan(math.rad(ax)) + z_offset;
 end
 
-function getWeaponNamew(me)
+function getWeaponName(me)
     local my_weapon = me:GetPropEntity("m_hActiveWeapon");
     if (my_weapon == nil) then
         return nil;

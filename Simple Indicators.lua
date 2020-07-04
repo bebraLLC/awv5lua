@@ -97,3 +97,76 @@ local fakeduckkey = gui.GetValue("rbot.antiaim.extra.fakecrouchkey")
 	end
 end)
 	
+-- lua created by soar#9999
+
+-- skeet font
+local light_font = draw.CreateFont("Tahoma", 27, 600);
+
+local function doubletap_indicator(pos)
+
+	draw.SetFont(light_font)
+
+	if gui.GetValue("rbot.accuracy.weapon.asniper.doublefire") > 0 then
+		draw.Color(130, 180, 0)
+	else
+		draw.Color(233, 4, 4)
+	end
+
+	draw.TextShadow(10, 985 + (pos * 25), "DT")
+end
+
+local function fake_indicator(pos)
+	
+	local pLocalPlayer = entities.GetLocalPlayer();
+
+ 	local vx = pLocalPlayer:GetPropFloat("localdata", "m_vecVelocity[0]")
+   	local vy = pLocalPlayer:GetPropFloat("localdata", "m_vecVelocity[1]")
+	
+	local velocity = math.floor(math.min(10000, math.sqrt(vx*vx + vy*vy) + 0.5))
+
+	draw.SetFont(light_font)
+
+	if velocity < 1 and not input.IsButtonDown(0x20) then
+		draw.Color(130, 180, 0)
+	else
+		draw.Color(141, 153, 0)
+	end
+
+	if input.IsButtonDown(0x20) then
+		draw.Color(233, 4, 4)
+	end
+
+	draw.TextShadow(10, 985 + (pos * 25), "FAKE")
+end
+
+
+callbacks.Register( "Draw", function()
+	
+	local pLocalPlayer = entities.GetLocalPlayer();
+
+	if pLocalPlayer == nil then
+	return;
+	end
+
+	if not pLocalPlayer:IsAlive() then
+	return;
+	end
+	
+	local flags = pLocalPlayer:GetPropInt("m_fFlags")
+ 	local onground = bit.band(flags, 1) ~= 0
+
+	local vx = pLocalPlayer:GetPropFloat("localdata", "m_vecVelocity[0]")
+   	local vy = pLocalPlayer:GetPropFloat("localdata", "m_vecVelocity[1]")
+	local velocity = math.floor(math.min(10000, math.sqrt(vx*vx + vy*vy) + 0.5))
+
+	if not input.IsButtonDown(0x20) or velocity < 220 then
+		doubletap_indicator(0);	
+		fake_indicator(1);
+	else
+		if velocity > 220 and input.IsButtonDown(0x20) then
+			doubletap_indicator(0);	
+			fake_indicator(1);	
+			lc_indicator(1);
+		end
+	end
+end)
