@@ -25,24 +25,30 @@
 
 
 
---[[
+
 -- FOVnViewFovModel changer incl Scopefix --
 
 local visuals_menu = gui.Reference("VISUALS")	-- ("VISUALS", "OTHER", "Effects")
 
 local TAB = gui.Tab(visuals_menu, "lua_fov_tab", "Fov Changer")
 
-local FOVBOX = gui.Groupbox(TAB, "FOV", 15, 15, 605, 500)
+local FOVBOX = gui.Groupbox(TAB, "FOV", 15, 15)
 local SLIDER = gui.Slider( FOVBOX, "lua_fov_slider", "Field of View", 90, 0, 180 )
-local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 40, 0, 180 )
-local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 15, 0, 180 )
-local FOVBETWEENCHECK = gui.Checkbox( FOVBOX, "lua_fov_between__shot_checkbox", "Reset FOV between scoped shots" , 0 )
+local SLIDER_ONE = gui.Slider( FOVBOX, "lua_fov_slider_one", "Field of View for 1st Zoom", 80, 0, 180 )
+local SLIDER_TWO = gui.Slider( FOVBOX, "lua_fov_slider_two", "Field of View for 2nd Zoom", 40, 0, 180 )
+local FOVBETWEENCHECK = gui.Checkbox( FOVBOX, "lua_fov_between__shot_checkbox", "Reset FOV between scoped shots" , 1 )
 
-local VIEWBOX = gui.Groupbox(TAB, "Viewmodel", 15, 260, 605, 500)
+local VIEWBOX = gui.Groupbox(TAB, "Viewmodel", 15, 260)
 local SLIDER_VIEW = gui.Slider( VIEWBOX, "lua_fov_slider_view", "Viewmodel Field of View", 60, 0, 180 )
 local SLIDER_VIEWX = gui.Slider( VIEWBOX, "lua_fov_slider_viewX", "Viewmodel Offset X", 1, -40, 40 )
 local SLIDER_VIEWY = gui.Slider( VIEWBOX, "lua_fov_slider_viewY", "Viewmodel Offset Y", 1, -40, 40 )
 local SLIDER_VIEWZ = gui.Slider( VIEWBOX, "lua_fov_slider_viewZ", "Viewmodel Offset Z", -1, -40, 40 )
+local ref1 = gui.Reference("Visuals", "Local", "Camera", "esp.local.fov");
+local ref2 = gui.Reference("Visuals", "Local", "Camera", "esp.local.viewmodelfov");
+ref1:SetDisabled(true);
+ref2:SetDisabled(true);
+ref1:SetInvisible(true);
+ref2:SetInvisible(true);
 
 local betweenshot
 
@@ -77,8 +83,8 @@ callbacks.Register( "Draw", function()
 end)	
 	
 -- End FOVnViewFovModel changer incl Scopefix --
---]]
 
+--[[
 --##--##--##--##- Viewmodel Changer + Zoom Changer + No Zoom -##--##--##--##--
 
 	
@@ -213,6 +219,8 @@ end
 end)
 
 --##--##--##--##- END Viewmodel Changer + Zoom Changer + No Zoom -##--##--##--##--
+--]]
+
 
 --##--##--##--##- noshadows -##--##--##--##--
 
@@ -228,8 +236,8 @@ local function noshadows()
 end
 
 
-local function event(e)
-    if e:GetName() == "round_start" then
+local function event(event)
+    if event:GetName() == "round_start" then
         noshadows()
     end       
 end
@@ -321,7 +329,7 @@ local REF = gui.Reference( "Visuals", "Fov Changer" ) -- ("Visual", "Local", "He
 
 --local TAB = gui.Tab(REF, "lua_transparent_on_scope_tab", "Transparent on scope")
 
-local BOX = gui.Groupbox(REF, "Transparent on scope lua by atk3001", 15, 690, 605, 500)
+local BOX = gui.Groupbox(REF, "Transparent on scope lua by atk3001", 15, 518)
 local SLIDER = gui.Slider(BOX, "lua_transparent_on_scope_slider", "Level of transparency", 5, 0, 255)
 local localchams = gui.Combobox(BOX, "lua_transparent_on_scope_set_localchams", "Select the local chams while scoped", "Use the already set one", "Flat", "Color", "Metallic", "Glow", "Textured", "invisible")
 local switchghost = gui.Checkbox(BOX, "lua_transparent_on_scope_switchghost", "Turn off ghost chams while scoped", false)
@@ -354,8 +362,6 @@ if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then re
 local player_local = entities.GetLocalPlayer();
 if entities.GetLocalPlayer() == NULL or entities.GetLocalPlayer() == nil then return end;
 local scoped = player_local:GetProp("m_bIsScoped")
-if scoped ~= 0 or scoped ~= 256 then
-draw.Text(10 , 10,"Scoped: " .. tostring(scoped))
 if scoped == 1 or scoped == 257 then
 
     if slidervalue ~= SLIDER:GetValue() then
@@ -488,7 +494,7 @@ else
 end
 end
 end
-end)
+)
 -- End TransparenzOnScope --
 
 
@@ -841,8 +847,8 @@ callbacks.Register("Draw", "engine_radar_draw", engine_radar_draw);
 
 
 -- No FOG  FPS Boost
-local function nofog(e)
-    if e:GetName() == "round_start" then
+local function nofog(event)
+    if event:GetName() == "round_start" then
         client.SetConVar( "fog_enable", 0, true );
         client.SetConVar( "fog_enableskybox", 0, true );
         client.SetConVar( "fog_enable_water_fog", 0, true );
@@ -871,8 +877,8 @@ else
 end
 end
 
-local function eventz(e)
-    if e:GetName() == "round_start" then
+local function eventz(event)
+    if event:GetName() == "round_start" then
         noshadows()
     end       
 end

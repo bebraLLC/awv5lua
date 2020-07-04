@@ -28,6 +28,7 @@
 local configdelete = gui.Reference("Settings", "Configurations", "Manage Configurations", "Delete")
 local configreset = gui.Reference("Settings", "Configurations", "Manage Configurations", "Reset")
 local luadelete = gui.Reference("Settings", "Lua Scripts", "Manage Scripts", "Delete")
+local luaautorun = gui.Reference("Settings", "Lua Scripts", "Manage Scripts", "Set As Autorun")
 local menu = gui.Reference("Menu")
 
 local configcheckbox = gui.Checkbox(gui.Reference("Settings", "Configurations", "Manage Configurations"), _, "", 0)
@@ -51,6 +52,7 @@ local toggled = false
 configdelete:SetDisabled(true)
 configreset:SetDisabled(true)
 luadelete:SetDisabled(true)
+luaautorun:SetDisabled(true)
 
 local function ondraw()
     if menu:IsActive() then
@@ -60,6 +62,7 @@ local function ondraw()
             configdelete:SetDisabled(false)
             configreset:SetDisabled(false)
             luadelete:SetDisabled(false)
+			luaautorun:SetDisabled(false)
             toggled = true
         end
         if (not configcheckbox:GetValue() or not luacheckbox:GetValue()) and toggled then
@@ -68,7 +71,8 @@ local function ondraw()
             configdelete:SetDisabled(true)
             configreset:SetDisabled(true)
             luadelete:SetDisabled(true)
-            toggled = false
+			luaautorun:SetDisabled(true)
+    		toggled = false
         end
     elseif toggled then
         configcheckbox:SetValue(false)
@@ -76,7 +80,8 @@ local function ondraw()
         configdelete:SetDisabled(true)
         configreset:SetDisabled(true)
         luadelete:SetDisabled(true)
-        toggled = false
+		luaautorun:SetDisabled(true)
+		toggled = false
     end
 end
 

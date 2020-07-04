@@ -1,713 +1,565 @@
-----    Base    code    for    auto    updating.
---
---local    cS    =    GetScriptName()
---local    cV    =    '1.0.0'
---local    gS    =    'PUT    LINK    TO    RAW    LUA    SCRIPT'
---local    gV    =    'PUT    LINK    TO    RAW    VERSION'
---
---local    function    AutoUpdate()
---	if    gui.GetValue('lua_allow_http')    and    gui.GetValue('lua_allow_cfg')    then
---		local    nV    =    http.Get(gV)
---		if    cV    ~=    nV    then
---			local    nF    =    http.Get(gS)
---			local    cF    =    file.Open(cS,    'w')
---			cF:Write(nF)
---			cF:Close()
---			print(cS,    'updated    from',    cV,    'to',    nV)
---		else
---			print(cS,    'is    up-to-date.')
---		end
---	end
---end		
---
---callbacks.Register('Draw',    'Auto    Update')
---callbacks.Unregister('Draw',    'Auto    Update')
+-- Add your own sound files and names here to use in lua the directory
+-- "C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\csgo\sound\hitsounds"
+-- Create a folder hitsounds to keep everything neat, you can change folder name but be sure to change folder name variable too so sounds play correctly.
+-- I Provided a few sample hit sounds that i feel alot of people will use but please add your own and share them with others too!
+local soundFolderName = "hitsounds";
+local soundFiles =  {"8bit1","8bit2","bameware_hitsound","bass","bf4","Bowhit","bruh","bubble","cod","Cookie","doublekill","fatality","Fuck u bitch motha fucka_Segment_0","gachi","godlike","Hardimpact","hattrick","Hitsound_new","Hitsound_retro","juggernaut","killingmachine","killingspree","kovaakded","kovaakhit","maniac","massacre","mchit","Mediumimpact","megakill","metro2033","mhit1","minecraft","multikill","Oooff","rampage","rifk","roblox","rust","Rust_hs","test","toy","uagay","vitas","voice_input","voice_input_1_sit_nn_dog","voice_input_iizi","voice_input-beamlaser","voice_input-camera","voice_input-carhorn","voice_input-dominating","voice_input-errorwin","voice_input-fart","voice_input-fatality","voice_input-kuack","voice_input-pew","voice_input-poing","voice_input-print","voice_input-punch","voice_input-sniper","voice_input-toy"};
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+----------DO NOT CAHNGE STUFF PAST HERE UNLESS YOU KNOW WHAT YOU'RE DOING---------
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+-- gui vars
+local guiTab = gui.Tab(gui.Reference("Visuals"), "hiteffects", "Hit Effects");
+local guiRef = gui.Reference("Visuals", "Hit Effects");
+-- Settings GroupBox
+local groupboxSettings = gui.Groupbox(guiRef, "Settings", 16, 16, 296, 0);
+local guiSettingsMultiBox = gui.Multibox(groupboxSettings, "Active Effects");
+local guiSettingsDrawMode = gui.Combobox(groupboxSettings, "settings.filter", "Draw Mode", "Off", "All", "Latest");
+local guiSettingsSolidTime = gui.Slider(groupboxSettings, "settings.solidtime", "Solid Time", 2, 0, 10, 0.1);
+local guiSettingsFadeTime = gui.Slider(groupboxSettings, "settings.fadetime", "Fade Time", 2, 0, 10, 0.1);
+local guiSettingsHPShotTime = gui.Slider(groupboxSettings, "settings.hpshottime", "Health Shot Duration", 2, 0, 10, 0.1);
+-- Effect MultiBox
+local guiEffectSkeleton = gui.Checkbox(guiSettingsMultiBox, "settings.effect.skeleton", "Skeleton", false);
+local guiEffectDammageNum = gui.Checkbox(guiSettingsMultiBox, "settings.effect.damage", "Damage", false);
+local guiEffectHitGroup = gui.Checkbox(guiSettingsMultiBox, "settings.effect.hitgroup", "Hit Group", false);
+local guiEffectMarker = gui.Checkbox(guiSettingsMultiBox, "settings.effect.marker", "Marker", false);
+local guiEffectHealthShot = gui.Checkbox(guiSettingsMultiBox, "settings.effect.hpshot", "Health Shot", false);
+-- HitMarker GroupBox
+local groupboxHitMarker = gui.Groupbox(guiRef, "Hitmarker", 16, 406, 296, 0);
+local guiHitMarkerStyle = gui.Combobox(groupboxHitMarker, "hitmarker.style", "Style", "Cube", "X-Cross");
+local guiHitMarkerSize = gui.Slider(groupboxHitMarker, "hitmakrer.size", "Size", 2 , 0.1, 10, 0.1);
+local guiHitMarkerColor = gui.ColorPicker(guiHitMarkerStyle, "hitmarker.color", "Color", 255, 255, 255, 255);
+-- Text groupBox
+local groupboxText = gui.Groupbox(guiRef, "Text", 328, 16, 296, 0);
+local guiTextFont = gui.Editbox(groupboxText, "text.font", "Font Name");
+local guiTextSize = gui.Slider(groupboxText, "text.size", "Font Size", 14, 14, 20);
+local guiTextFontWeight = gui.Slider(groupboxText, "text.weight", "Font Weight", 1, 0, 1);
+local guiTextExample = gui.Checkbox(groupboxText, "text.example", "Example text", true);
+local guiTextVelocity = gui.Slider(groupboxText, "text.velocity", "Velocity", 10, 0, 100);
+local guiTextColor = gui.ColorPicker(guiTextExample, "text.color", "", 255, 0, 0, 255);
+-- HitSound GroupBox
+local groupboxSound = gui.Groupbox(guiRef, "Hit Sounds", 328, 390, 296, 0);
+local guiSoundHit = gui.Combobox(groupboxSound, "sound.hit", "Hit", "Off", unpack(soundFiles));
+local guiSoundHead = gui.Combobox(groupboxSound, "sound.head", "HeadShot", "Off", unpack(soundFiles));
+local guiSoundKill = gui.Combobox(groupboxSound, "sound.kill", "Kill", "Off", unpack(soundFiles));
+local guiSoundLocalHit = gui.Combobox(groupboxSound, "sound.hityou", "Local Hit", "Off", unpack(soundFiles));
+local guiSoundResetButton = gui.Button(groupboxSound, "Reset Sound (Needs sv_cheats Bypass)", function() client.Command("snd_restart", true); end);
+-- Gui descriptions and tweaks
+guiSettingsMultiBox:SetDescription("Choose hit effects");
+guiSettingsDrawMode:SetDescription("Filter drawn hits");
+guiSettingsSolidTime:SetDescription("Time before fading");
+guiSettingsFadeTime:SetDescription("Time to fade completely");
+guiSettingsHPShotTime:SetDescription("Duration of Health Shot effect");
+guiHitMarkerStyle:SetDescription("Choose hitmarker style");
+guiHitMarkerSize:SetDescription("Customize hitmarker size");
+guiTextFontWeight:SetDescription("Customize font thickness");
+guiTextFont:SetDescription("Set the custom font for effects");
+guiTextSize:SetDescription("Customize text size");
+guiTextExample:SetDescription("Display an example of current text settings");
+guiTextVelocity:SetDescription("Customize the speed of damage text");
+guiSoundHit:SetValue(0);
+guiSoundHead:SetValue(0);
+guiSoundKill:SetValue(0);
+guiSoundLocalHit:SetValue(0);
+guiSoundResetButton:SetWidth(264);
+-- Important Static Globals
+local globalHitGroupDisplay = {"Generic", "Head", "Chest", "Stomach", "Left arm", "Right arm", "Left leg", "Right leg", "Neck"};
+local globalHitGroupNames = {"HITGROUP_GENERIC", "HITGROUP_HEAD", "HITGROUP_CHEST", "HITGROUP_STOMACH", "HITGROUP_LEFTARM", "HITGROUP_RIGHTARM", "HITGROUP_LEFTLEG", "HITGROUP_RIGHTLEG", "HITGROUP_GEAR"};
+local globalHitGroupToHitBox = {2, 0, 4, 2, 13, 14, 7, 8, 1};
+local globalCubeOutlineConnections = {{1, 2}, {1, 3}, {1, 5}, {8, 7}, {8, 6}, {8, 4}, {6, 3}, {4, 3}, {4, 2}, {2, 7}, {7, 5}, {6, 5}};
+local globalCubeFillConnections = {{1, 2, 3}, {1, 2 ,5}, {1, 3 ,5}, {8, 7, 6}, {8, 7, 4}, {8, 6, 4}, {3, 6, 5}, {3, 4, 6}, {2, 4, 7}, {2, 7, 5}, {3, 4, 2}, {6, 5, 7}};
+local globalHitBoxConnections = {{1, 2}, {2,7}, {7, 6}, {6, 5}, {5, 4}, {4, 3}, {3, 9}, {3, 8}, {9, 11}, {8, 10}, {11, 13}, {10, 12}, {7, 18}, {18, 19}, {19, 15}, {7, 16}, {16, 17}, {17, 14}};
+-- Very Important Tables That Hold Everything The Lua Does That Could Probably Be Structured Better But This Is Lua And Im Too Lazy
+local tablePlayerHistorys = {};
+local tableActiveHits = {};
+local tableImpacts = {};
+-- Less Important but still usefull stuff
+local localPlayer = entities.GetLocalPlayer();
+local lastSounds = {["hit"] = 0, ["head"] = 0, ["kill"] = 0, ["local"] = 0};
 
-
-
--- Extra hit effects by Scape#4313
--- Gui references
-local ref1 = gui.Reference("Visuals", "World", "Extra");
-local ref2 = gui.Reference("Visuals", "World", "Extra", "Hit Effects");
-local ref3 = gui.Reference("Visuals", "World", "Extra", "Hit Effects", "Sound");
-local ref4 = gui.Reference("Visuals", "World", "Extra", "Hit Effects", "Marker");
--- Gui Setup
-local multibox = gui.Multibox(ref1, "Hit Effects");
-local optionGroupBox = gui.Groupbox(gui.Reference("Visuals", "World","Extra"), "Settings");
-local settingsTab = gui.Combobox(optionGroupBox, "currentsettings", "Hit Effect Settings", "General", "Hitmarker", "Font", "Debug");
-local soundEffect = gui.Checkbox(multibox, "hiteffects.sound", "Sound", false);
-local skeletonEffect = gui.Checkbox(multibox, "hiteffects.skeleton", "Skeleton", false);
-local damageEffect = gui.Checkbox(multibox, "hiteffects.damage", "Damage", false);
-local hitgroupEffect = gui.Checkbox(multibox, "hiteffects.hitgroup", "Hit Group", false);
--- General options
-local solidTime = gui.Slider(optionGroupBox, "extrahiteffects.solidtime", "Duration", 0, 0, 10, .1);
-local fadeTime = gui.Slider(optionGroupBox, "extrahiteffects.fadetime", "Fade Duration", 2, 0, 10, .1);
-local skeletonColorLink = gui.Checkbox(optionGroupBox, "extrahiteffectss.skeletonlink", "Inherit Skeleton Color", true);
-local skeletonClr = gui.ColorPicker(optionGroupBox, "extrahiteffects.skeletonclr", "", 255, 255, 255, 255);
--- Hitmarker options
-local hitMarkerType = gui.Combobox(optionGroupBox, "hitmarkertype", "Hitmarker", "Off", "Cube", "Cross", "Dot");
-local cubeFilled = gui.Checkbox(optionGroupBox, "cube.fill", "Filled Cube", false);
-local cubeSize = gui.Slider(optionGroupBox, "cube.size", "Cube Size", 2, .1, 10, .1);
-local crossDynamic = gui.Checkbox(optionGroupBox, "cross.dynamic", "Dynamic Cross Size", false);
-local crossOutline = gui.Checkbox(optionGroupBox, "cross.outline", "Outline", true);
-local crossSize = gui.Slider(optionGroupBox, "cross.size", "Cross Size", 10, .1, 20, .1);
-local crossGapSize = gui.Slider(optionGroupBox, "cross.gapsize", "Cross Gap Size", 2, .1, 10, .1);
-local dotDynamic = gui.Checkbox(optionGroupBox, "dot.dynamic", "Dynamic Dot Size", false);
-local dotSize = gui.Slider(optionGroupBox, "dot.size", "Dot Size", 2, .1, 10, .1);
-local hitmarkerClr = gui.ColorPicker(optionGroupBox, "hitmarkerclr", "", 255, 255, 255, 255);
--- Text options
-local dammageClr = gui.ColorPicker(optionGroupBox, "damageclr", "Damage Color", 255, 255, 255, 255);
-local hitgroupClr = gui.ColorPicker(optionGroupBox, "hitgroupclr", "Hitgroup Color", 255, 255, 255, 255);
-local fontSize = gui.Slider(optionGroupBox, "fontsize", "Font Size", 16, 1, 30, 1);
-local fontName = gui.Editbox(optionGroupBox, "fontname", "Font Name"); 
-local fontCase = gui.Checkbox(optionGroupBox, "fontcase", "Upper Case", true);
--- Debug options
-local debugMultibox = gui.Multibox(optionGroupBox, "Log Hits");
-local predictedHitboxDebug = gui.Checkbox(debugMultibox, "debug.hitbox", "Hitbox", false);
-local predictedBacktrackDebug = gui.Checkbox(debugMultibox, "debug.backtrack", "Backtrack Index", false);
-local damageDebug = gui.Checkbox(debugMultibox, "debug.damage", "Damage", false);
--- Gui descriptions
-fontName:SetDescription("Enter font name");
-fontSize:SetDescription("Customize font size");
-debugMultibox:SetDescription("Log hit information in cheat console");
-dotDynamic:SetDescription("Render dot in world");
-dotSize:SetDescription("Customize dot size");
-cubeFilled:SetDescription("Colors faces of cube");
-cubeSize:SetDescription("Customize cube size");
-crossDynamic:SetDescription("Render cross in world");
-crossOutline:SetDescription("Draw outline around cross");
-crossSize:SetDescription("Customize cross size");
-crossGapSize:SetDescription("Customize gap size");
-skeletonColorLink:SetDescription("Use color from skeleton esp");
-multibox:SetDescription("Effects when hitting an enemy");
-hitMarkerType:SetDescription("Hitmarker style");
-solidTime:SetDescription("Seconds before fading");
-fadeTime:SetDescription("Seconds it takes to fade");
--- Gui finishing touches
-skeletonClr:SetPosY(182);
-hitmarkerClr:SetPosY(128);
-crossSize:SetWidth(130);
-crossSize:SetPosY(232);
-crossGapSize:SetWidth(130);
-crossGapSize:SetPosY(232);
-crossGapSize:SetPosX(140);
-fontName:SetValue("Tahoma");
-fontName:SetWidth(130);
-fontSize:SetWidth(130);
-fontSize:SetPosX(140);
-fontName:SetPosY(122);
-ref2:SetInvisible(true);
-ref4:SetValue(false);
-
--- Classes and global vars
-local hitGroupTextUpper = {"GENERIC", "HEAD", "CHEST", "STOMACH", "LEFT ARM", "RIGHT ARM", "LEFT LEG", "RIGHT LEG", "NECK"};
-local hitGroupTextlower = {"Generic", "Head", "Chest", "Stomach", "Left arm", "Right arm", "Left leg", "Right leg", "Neck"}
-local hitGroupStandards = {"HITGROUP_GENERIC", "HITGROUP_HEAD", "HITGROUP_CHEST", "HITGROUP_STOMACH", "HITGROUP_LEFTARM", "HITGROUP_RIGHTARM", "HITGROUP_LEFTLEG", "HITGROUP_RIGHTLEG", "HITGROUP_GEAR"};
-local playerBoneConnections = {{1, 2}, {2,7}, {7, 6}, {6, 5}, {5, 4}, {4, 3}, {3, 9}, {3, 8}, {9, 11}, {8, 10}, {11, 13}, {10, 12}, {7, 18}, {18, 19}, {19, 15}, {7, 16}, {16, 17}, {17, 14}};
-local conversion = {2, 0, 4, 2, 13, 14, 7, 8, 1};
-local savedPlayers = {};
-local impacts = {};
-local hits = {};
-local backtrackActive = false;
-
---- Hit class
+-- Hit Class
 local Hit = {
-    dammage = 0,
+    damage = 0,
     pos = {},
-    skeletonVecs = {},
-	created = 0;
+    skeletonvecs = {},
+    textpos = {},
+    textvel = {},
+    liferemaining = 0,
+    stacked = 1
 }
 
-function Hit:New(dmg, group, hitpos, skeleton)
+function Hit:Create(damage, hitGroup, hitPos, skeletonVecs, textVel)
     local newHit = {};
-    setmetatable(newHit, self)
-    self.__index = self;
-    newHit.dammage = dmg;
-    newHit.hitgroup = group;
-	newHit.pos = hitpos;
-	newHit.skeletonVecs = skeleton;
-	newHit.created = globals.CurTime();
+    setmetatable(newHit, {__index = Hit});
+    newHit.damage = damage;
+    newHit.hitgroup = hitGroup;
+	newHit.pos = hitPos;
+    newHit.skeletonvecs = skeletonVecs;
+    newHit.textpos = hitPos;
+    newHit.textvel = textVel;
+    newHit.liferemaining = guiSettingsSolidTime:GetValue() + guiSettingsFadeTime:GetValue();
+    newHit.stacked = 1;
     return newHit;
 end
--- Vector2 class
-local Vector2 = {
-    x = nil,
-    y = nil;
-}
 
-function Vector2:New(xcord, ycord)
-    local newVector2 = {};
-    setmetatable(newVector2, self)
-    self.__index = self;
-    newVector2.x = xcord;
-	newVector2.y = ycord;
-    return newVector2;
+-- Helpers that save me alot of hair pulling and desk slamming when refactoring
+local function Vector2(x , y)
+    return {x = x, y = y};
 end
--- Helper Funcs
+
+-- Generates a random vector + and - ang from up with a magnitude of len
+local function randomVector(ang)
+    local rand = math.rad(math.random(270 + ang/2, 270 - ang/2));
+    local vec = Vector2(math.cos(rand), math.sin(rand));
+    vec.x = vec.x;
+    vec.y = vec.y;
+    return vec;
+end
+
+-- This does all the fade stuff 
 local function map(src, srcMax, srcMin, retMax, retMin)
 	return (src - srcMin) / (srcMax - srcMin) * (retMax - retMin) + retMin;
 end
 
+-- Gets impact for player_hurt event
 local function getClosestImpact(vec3)
-	local bestIndex;
+	local bestImpact;
 	local bestDistance = math.huge;
 	
-	for index = 1, #impacts do 
-		local impact = impacts[index];
-		
-		if impact then
-			local delta = impact - vec3;
+	for i = 1, #tableImpacts do 
+		if tableImpacts[i] then
+			local delta = tableImpacts[i] - vec3;
 			local distance = delta:Length();
 			
 			if distance < bestDistance then
 				bestDistance = distance;
-				bestIndex = index;
+				bestImpact = tableImpacts[i];
 			end
 		end
 	end
 
-	return bestIndex;
+	return bestImpact;
 end
 
-local function getClosestBackTrack(point, playerIndex, hitbox)
-	local bestVecs;
-	local bestIndex;
+-- Gets backtracked player skeleton
+local function getClosestBackTrack(point, index, hitbox)
+	local bestIndex
 	local bestDistance = math.huge;
-	local player = entities.GetByIndex(playerIndex);
 	
-	for index = 1, #savedPlayers[playerIndex] do
-		if savedPlayers[playerIndex][index] then
-			local hitboxVecs = savedPlayers[playerIndex][index][1];
-			
-			local hitboxPos = hitboxVecs[hitbox+1];
-			if hitboxPos then
-				local delta = (hitboxPos - point);
-				local distance = delta:Length()
-					
-				if distance < bestDistance then
+    for i = 1, #tablePlayerHistorys[index] do
+        if tablePlayerHistorys[index][i] then
+			local vecs = tablePlayerHistorys[index][i].skeleton;
+            local pos = vecs[hitbox+1];
+            
+            if pos then 
+				local delta = pos - point;
+				local distance = delta:Length();
+                
+                if distance <= bestDistance then
+                    
 					bestDistance = distance;
-					bestIndex = index;
+					bestIndex = i;
 				end
 			end
 		end
-	end
-	bestVecs = savedPlayers[playerIndex][bestIndex][1];
+    end
 
-	return bestVecs, bestIndex;
+	return tablePlayerHistorys[index][bestIndex].skeleton;
 end
 
-local function drawCubeAtPoint(size, vec, alphaFill)
-	local lineConnections = {{1, 2}, {1, 3}, {1, 5}, {8, 7}, {8, 6}, {8, 4}, {6, 3}, {4, 3}, {4, 2}, {2, 7}, {7, 5}, {6, 5}};
-	local triangleConnections = {{1, 2, 3}, {1, 2 ,5}, {1, 3 ,5}, {8, 7, 6}, {8, 7, 4}, {8, 6, 4}, {3, 6, 5}, {3, 4, 6}, {2, 4, 7}, {2, 7, 5}, {3, 4, 2}, {6, 5, 7}};
+-- Fix for draw.TextShadow fading
+local function drawTextShadow(x, y, string, r, g, b, a)
+    draw.Color(0, 0, 0, a);
+    draw.Text(x+1, y+1, string); 
+    draw.Color(r, g, b, a);
+    draw.Text(x, y, string);
+end
+
+-- For cross marker outline, works pretty well feel free to use it for other crap
+local function drawOutlinedLine(x1, y1, x2, y2, r, g, b, alphaOutline, alphaLine)
+    draw.Color(0, 0, 0, alphaOutline);
+
+    -- Outline in black
+    draw.Line( x1, y1 + 1, x2, y2 + 1);
+    draw.Line( x1, y1 - 1, x2, y2 + 1);
+    draw.Line( x1 - 1, y1, x2 - 1, y2);
+    draw.Line( x1 + 1, y1, x2 + 1, y2);
+
+    -- Real line drawn ontop looks better
+    draw.Color(r, g, b, alphaLine);
+    draw.Line( x1, y1, x2, y2 );
+end
+
+-- The 8 points thing annoys me but there isnt another way
+local function drawCubeAtPoint(size, vec, r, g, b, alphaOutline, alphaFill)
 	local points = {};
 	
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x - size, vec.y - size, vec.z - size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x - size, vec.y + size, vec.z - size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x + size, vec.y - size, vec.z - size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x + size, vec.y + size, vec.z - size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x - size, vec.y - size, vec.z + size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x + size, vec.y - size, vec.z + size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x - size, vec.y + size, vec.z + size))));
-	table.insert(points, Vector2:New(client.WorldToScreen(Vector3(vec.x + size, vec.y + size, vec.z + size))));
-	
-	for i = 1, #lineConnections do
-		local p1 = points[lineConnections[i][1]];
-		local p2 = points[lineConnections[i][2]];
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x - size, vec.y - size, vec.z - size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x - size, vec.y + size, vec.z - size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x + size, vec.y - size, vec.z - size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x + size, vec.y + size, vec.z - size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x - size, vec.y - size, vec.z + size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x + size, vec.y - size, vec.z + size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x - size, vec.y + size, vec.z + size))));
+	table.insert(points, Vector2(client.WorldToScreen(Vector3(vec.x + size, vec.y + size, vec.z + size))));
+    
+	draw.Color(r, g, b, alphaOutline);
+	for i = 1, #globalCubeOutlineConnections do
+		local p1 = points[globalCubeOutlineConnections[i][1]];
+		local p2 = points[globalCubeOutlineConnections[i][2]];
 		
 		if p1.x and p1.y and p2.x and p2.y then
 			draw.Line(p1.x, p1.y, p2.x, p2.y);
 		end
 	end	
-	
-	if cubeFilled:GetValue() then
-		local r, g, b, a = hitmarkerClr:GetValue();
-		draw.Color(r, g, b, alphaFill);
-		for i = 1, #triangleConnections do
-			local p1 = points[triangleConnections[i][1]];
-			local p2 = points[triangleConnections[i][2]];
-			local p3 = points[triangleConnections[i][3]];
-			
-			if p1.x and p1.y and p2.x and p2.y and p3.x and p3.y then
-				draw.Triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
-			end
+    
+    -- No fill is just 0 alpha
+	draw.Color(r, g, b, alphaFill);
+	for i = 1, #globalCubeFillConnections do
+		local p1 = points[globalCubeFillConnections[i][1]];
+		local p2 = points[globalCubeFillConnections[i][2]];
+		local p3 = points[globalCubeFillConnections[i][3]];
+		
+		if p1.x and p1.y and p2.x and p2.y and p3.x and p3.y then
+			draw.Triangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 		end
+		
 	end
 end
 
-local function drawCrossAtPoint(size, vec3, gap, alphaOutline)
-	local x, y;
-	local newSize, newGap;
-	if crossDynamic:GetValue() then
-		local localPlayer = entities.GetLocalPlayer();
-		local localEye = localPlayer:GetAbsOrigin() + localPlayer:GetPropVector("localdata", "m_vecViewOffset[0]");
-		local targetAngles = (localEye - vec3):Angles();
-		local hitPoint = localEye + targetAngles:Forward() * -(vec3- localEye):Length();
-		local hitxy = Vector2:New(client.WorldToScreen(hitPoint));
-		
-		local rightOut = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * (size + gap))).x;
-		local leftOut = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * -(size + gap))).x;
-		local rightIn = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * gap)).x;
-		local leftIn = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * -gap)).x;
-		
-		
-		if leftOut and rightOut and leftIn and rightIn then
-			newSize = leftOut - rightOut;
-			newGap = leftIn - rightIn;
-		end
-		
-		x = hitxy.x;
-		y = hitxy.y;
-		
-	else
-		x, y = client.WorldToScreen(vec3)
-		newSize = size + gap;
-		newGap = gap;
-	end
-	
-	if x and y then -- This is real ugly not proud of this
-		draw.Line(x + newGap, y + newGap, x + newSize, y + newSize);
-		draw.Line(x - newGap, y - newGap, x - newSize, y - newSize);
-		draw.Line(x + newGap, y - newGap, x + newSize, y - newSize);
-		draw.Line(x - newGap, y + newGap, x - newSize, y + newSize);
-			
-		if crossOutline:GetValue() then
-			draw.Color(0,0,0, alphaOutline);
-			draw.Line(x + newGap - 1, y + newGap + 1, x + newSize - 1, y + newSize + 1);
-			draw.Line(x + newGap + 1, y + newGap - 1, x + newSize + 1, y + newSize - 1);
-			draw.Line(x - newSize - 1, y + newSize - 1, x - newSize + 1, y + newSize + 1);
-			draw.Line(x - newGap - 1, y - newGap + 1, x - newSize - 1, y - newSize + 1);
-			draw.Line(x - newGap + 1, y - newGap - 1, x - newSize + 1, y - newSize - 1);
-			draw.Line(x + newSize - 1, y - newSize - 1, x + newSize + 1, y - newSize + 1);
-			draw.Line(x + newGap - 1, y - newGap - 1, x + newSize - 1, y - newSize - 1);
-			draw.Line(x + newGap + 1, y - newGap + 1, x + newSize + 1, y - newSize + 1);
-			draw.Line(x - newSize - 1, y - newSize + 1, x - newSize + 1, y - newSize - 1);
-			draw.Line(x - newGap - 1, y + newGap - 1, x - newSize - 1, y + newSize - 1);
-			draw.Line(x - newGap + 1, y + newGap + 1, x - newSize + 1, y + newSize + 1);
-			draw.Line(x + newSize - 1, y + newSize + 1, x + newSize + 1, y + newSize - 1);
-			if newGap > .5 then
-				draw.Line(x - newGap + 1, y + newGap + 1, x - newGap - 1, y + newGap - 1);
-				draw.Line(x + newGap - 1, y - newGap - 1, x + newGap + 1, y - newGap + 1);
-				draw.Line(x - newGap - 1, y - newGap + 1, x - newGap + 1, y - newGap - 1);
-				draw.Line(x + newGap - 1, y + newGap + 1, x + newGap + 1, y + newGap - 1);
-			end
-		end
-	end
-	
+-- Cross hitmarker stuff
+local function drawCrossAtPoint(size, vec, r, g, b, alpha)
+    local gap = size * 0.75;
+    local x, y = client.WorldToScreen(vec);
+    
+    if x and y then
+        draw.Color(r, g, b, alphaLine);
+        drawOutlinedLine(x + gap, y + gap, x + (size + gap), y + (size + gap), r, g, b, alpha, alpha);
+        drawOutlinedLine(x - gap, y - gap, x - (size + gap), y - (size + gap), r, g, b, alpha, alpha);
+        drawOutlinedLine(x + gap, y - gap, x + (size + gap), y - (size + gap), r, g, b, alpha, alpha);
+        drawOutlinedLine(x - gap, y + gap, x - (size + gap), y + (size + gap), r, g, b, alpha, alpha);
+    end
+
 end
 
-local function drawDotAtPoint(size, vec3) 
-	local localPlayer = entities.GetLocalPlayer();
-	local localEye = localPlayer:GetAbsOrigin() + localPlayer:GetPropVector("localdata", "m_vecViewOffset[0]");
-	local targetAngles = (localEye - vec3):Angles();
-	
-	local hitPoint = localEye + targetAngles:Forward() * -(vec3- localEye):Length();
-	local hitxy = Vector2:New(client.WorldToScreen(hitPoint));
-	
-	local right = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * size)).x;
-	local left = Vector2:New(client.WorldToScreen(hitPoint + targetAngles:Right() * -size)).x;
-	
-	if left and right then
-		local radius
-		if dotDynamic:GetValue() then
-			radius = (right - left) / 2;
-		else
-			radius = size;
-		end
-		
-		draw.FilledCircle(hitxy.x, hitxy.y, radius);
-	end
-end
--- Main Body
--- gui stuffs
-local function guiDraw()
-	local settingSelection = settingsTab:GetValue();
-	
-	if soundEffect:GetValue() then
-		ref3:SetValue(true);
-	else
-		ref3:SetValue(false);
-	end
-	
-	if settingSelection == 0 then -- General
-		solidTime:SetInvisible(false);
-		fadeTime:SetInvisible(false);
-		skeletonColorLink:SetInvisible(false);
-		skeletonClr:SetInvisible(false);
-		hitMarkerType:SetInvisible(true);
-		hitmarkerClr:SetInvisible(true);
-		cubeFilled:SetInvisible(true);
-		cubeSize:SetInvisible(true);
-		crossDynamic:SetInvisible(true);
-		crossSize:SetInvisible(true);
-		crossGapSize:SetInvisible(true);
-		crossOutline:SetInvisible(true);
-		dotDynamic:SetInvisible(true);
-		dotSize:SetInvisible(true);
-		dammageClr:SetInvisible(true);
-		hitgroupClr:SetInvisible(true);
-		fontSize:SetInvisible(true);
-		fontName:SetInvisible(true);
-		fontCase:SetInvisible(true);
-		debugMultibox:SetInvisible(true);
-		predictedHitboxDebug:SetInvisible(true);
-		predictedBacktrackDebug:SetInvisible(true);
-		damageDebug:SetInvisible(true);
-	elseif settingSelection == 1 then -- Hitmarker
-		local hitmarkerSelection = hitMarkerType:GetValue();
-		if hitmarkerSelection == 0 then -- Off
-			solidTime:SetInvisible(true);
-			fadeTime:SetInvisible(true);
-			skeletonColorLink:SetInvisible(true);
-			skeletonClr:SetInvisible(true);
-			hitMarkerType:SetInvisible(false);
-			hitmarkerClr:SetInvisible(true);
-			cubeFilled:SetInvisible(true);
-			cubeSize:SetInvisible(true);
-			crossDynamic:SetInvisible(true);
-			crossSize:SetInvisible(true);
-			crossGapSize:SetInvisible(true);
-			crossOutline:SetInvisible(true);
-			dotDynamic:SetInvisible(true);
-			dotSize:SetInvisible(true);
-			dammageClr:SetInvisible(true);
-			hitgroupClr:SetInvisible(true);
-			fontSize:SetInvisible(true);
-			fontName:SetInvisible(true);
-			fontCase:SetInvisible(true);
-			debugMultibox:SetInvisible(true);
-		elseif hitmarkerSelection == 1 then -- Cube
-			solidTime:SetInvisible(true);
-			fadeTime:SetInvisible(true);
-			skeletonColorLink:SetInvisible(true);
-			skeletonClr:SetInvisible(true);
-			hitMarkerType:SetInvisible(false);
-			hitmarkerClr:SetInvisible(false);
-			cubeFilled:SetInvisible(false);
-			cubeSize:SetInvisible(false);
-			crossDynamic:SetInvisible(true);
-			crossSize:SetInvisible(true);
-			crossGapSize:SetInvisible(true);
-			crossOutline:SetInvisible(true);
-			dotDynamic:SetInvisible(true);
-			dotSize:SetInvisible(true);
-			dammageClr:SetInvisible(true);
-			hitgroupClr:SetInvisible(true);
-			fontSize:SetInvisible(true);
-			fontName:SetInvisible(true);
-			fontCase:SetInvisible(true);
-			debugMultibox:SetInvisible(true);
-		elseif hitmarkerSelection == 2 then -- Cross
-			solidTime:SetInvisible(true);
-			fadeTime:SetInvisible(true);
-			skeletonColorLink:SetInvisible(true);
-			skeletonClr:SetInvisible(true);
-			hitMarkerType:SetInvisible(false);
-			hitmarkerClr:SetInvisible(false);
-			cubeFilled:SetInvisible(true);
-			cubeSize:SetInvisible(true);
-			crossDynamic:SetInvisible(false);
-			crossSize:SetInvisible(false);
-			crossGapSize:SetInvisible(false);
-			crossOutline:SetInvisible(false);
-			dotDynamic:SetInvisible(true);
-			dotSize:SetInvisible(true);
-			dammageClr:SetInvisible(true);
-			hitgroupClr:SetInvisible(true);
-			fontSize:SetInvisible(true);
-			fontName:SetInvisible(true);
-			fontCase:SetInvisible(true);
-			debugMultibox:SetInvisible(true);
-		elseif hitmarkerSelection == 3 then -- Dot
-			solidTime:SetInvisible(true);
-			fadeTime:SetInvisible(true);
-			skeletonColorLink:SetInvisible(true);
-			skeletonClr:SetInvisible(true);
-			hitMarkerType:SetInvisible(false);
-			hitmarkerClr:SetInvisible(false);
-			cubeFilled:SetInvisible(true);
-			cubeSize:SetInvisible(true);
-			crossDynamic:SetInvisible(true);
-			crossSize:SetInvisible(true);
-			crossGapSize:SetInvisible(true);
-			crossOutline:SetInvisible(true);
-			dotDynamic:SetInvisible(false);
-			dotSize:SetInvisible(false);
-			dammageClr:SetInvisible(true);
-			hitgroupClr:SetInvisible(true);
-			fontSize:SetInvisible(true);
-			fontName:SetInvisible(true);
-			fontCase:SetInvisible(true);
-			debugMultibox:SetInvisible(true);
-		end
-	elseif settingSelection == 2 then -- Font
-		solidTime:SetInvisible(true);
-		fadeTime:SetInvisible(true);
-		skeletonColorLink:SetInvisible(true);
-		skeletonClr:SetInvisible(true);
-		hitMarkerType:SetInvisible(true);
-		hitmarkerClr:SetInvisible(true);
-		cubeFilled:SetInvisible(true);
-		cubeSize:SetInvisible(true);
-		crossDynamic:SetInvisible(true);
-		crossSize:SetInvisible(true);
-		crossGapSize:SetInvisible(true);
-		crossOutline:SetInvisible(true);
-		dotDynamic:SetInvisible(true);
-		dotSize:SetInvisible(true);
-		dammageClr:SetInvisible(false);
-		hitgroupClr:SetInvisible(false);
-		fontSize:SetInvisible(false);
-		fontName:SetInvisible(false);
-		fontCase:SetInvisible(false);
-		debugMultibox:SetInvisible(true);
-	elseif settingSelection == 3 then -- Debug
-		solidTime:SetInvisible(true);
-		fadeTime:SetInvisible(true);
-		skeletonColorLink:SetInvisible(true);
-		skeletonClr:SetInvisible(true);
-		hitMarkerType:SetInvisible(true);
-		hitmarkerClr:SetInvisible(true);
-		cubeFilled:SetInvisible(true);
-		cubeSize:SetInvisible(true);
-		crossDynamic:SetInvisible(true);
-		crossSize:SetInvisible(true);
-		crossGapSize:SetInvisible(true);
-		crossOutline:SetInvisible(true);
-		dotDynamic:SetInvisible(true);
-		dotSize:SetInvisible(true);
-		dammageClr:SetInvisible(true);
-		hitgroupClr:SetInvisible(true);
-		fontSize:SetInvisible(true);
-		fontName:SetInvisible(true);
-		fontCase:SetInvisible(true);
-		debugMultibox:SetInvisible(false);
-	end
-end
--- Event handler
-local function hFireGameEvent(event)
-	local localPlayer = entities.GetLocalPlayer();
+-- Main code stuff
+local function hDraw()
+    local drawFont = draw.CreateFont(guiTextFont:GetValue(), guiTextSize:GetValue(), guiTextFontWeight:GetValue() + 550);
+    draw.SetFont(drawFont);
 
-	if event:GetName() == "player_hurt" then
-		local attacker = entities.GetByUserID(event:GetInt("attacker"));
-		local victim = entities.GetByUserID(event:GetInt("userid"));
-		
-		if attacker:GetIndex() == localPlayer:GetIndex() and attacker:GetIndex() ~= victim:GetIndex() then
-			local hitGroupInt = event:GetInt("hitgroup") + 1;
-			local hitBoxVec = victim:GetHitboxPosition(hitGroupStandards[hitGroupInt]);
-			local impactIndex = getClosestImpact(hitBoxVec);
-			local hitPos;
+    -- Reduces function calls alot and besides a insignificant amount of time passes within a frame
+    local currentTime = globals.CurTime();
 
-			if hitGroupInt == 1 then
-				hitPos = hitBoxVec;
-			else
-				hitPos = impacts[impactIndex];
-			end
+    -- Nice quality of life feature to preview sounds, always find it annoying when i have to wait to hear sound.
+    if lastSounds["hit"] ~= guiSoundHit:GetValue() then
+        lastSounds["hit"] = guiSoundHit:GetValue();
+        client.Command("Play "..soundFolderName.."/"..soundFiles[guiSoundHit:GetValue()], true);
+    elseif lastSounds["head"] ~= guiSoundHead:GetValue() then
+        lastSounds["head"] = guiSoundHead:GetValue();
+        client.Command("Play "..soundFolderName.."/"..soundFiles[guiSoundHead:GetValue()], true);
+    elseif lastSounds["kill"] ~= guiSoundKill:GetValue() then
+        lastSounds["kill"] = guiSoundKill:GetValue();
+        client.Command("Play "..soundFolderName.."/"..soundFiles[guiSoundKill:GetValue()], true);
+    elseif lastSounds["local"] ~= guiSoundLocalHit:GetValue() then
+        lastSounds["local"] = guiSoundLocalHit:GetValue();
+        client.Command("Play "..soundFolderName.."/"..soundFiles[guiSoundLocalHit:GetValue()], true);
+    end
 
-			local hitBoxVecs = {};
-			local bestIndex = 0;
-			if backtrackActive and hitGroupInt ~= 0 then 
-				hitBoxVecs, bestindex = getClosestBackTrack(hitPos, victim:GetIndex(), conversion[hitGroupInt]);
-			else
-				for index = 0, 19, 1 do
-					local pos = victim:GetHitboxPosition(index);
-					table.insert(hitBoxVecs, pos);
-				end
-			end
-			
-			local newhit = Hit:New(event:GetInt("dmg_health"), hitGroupInt, hitPos, hitBoxVecs);
-			
-			table.insert(hits, newhit);
-			table.remove(impacts, impactIndex);
-			
-			if predictedBacktrackDebug:GetValue() or predictedHitboxDebug:GetValue() or damageDebug:GetValue() then
-				local message = "[Hit log] "
-				if damageDebug:GetValue() then
-					message = message..event:GetInt("dmg_health").." to "..victim:GetName().." in "..hitGroupStandards[hitGroupInt].. " ";
-				end
-				if predictedBacktrackDebug:GetValue() then
-					message = message..bestIndex.."/"..#savedPlayers[victim:GetIndex()].." ";
-				end
-				if predictedHitboxDebug:GetValue() then
-					message = message..conversion[hitGroupInt];
-				end
-				print(message);
-			end
-		end
-	elseif event:GetName() == "bullet_impact" then
-		local attacker = entities.GetByUserID(event:GetInt("userid"));
-		
-		if attacker:GetIndex() == localPlayer:GetIndex() then
-			local impactPos = Vector3(event:GetFloat("x"), event:GetFloat("y"), event:GetFloat("z"));
-			
-			table.insert(impacts, impactPos);
-		end
-	elseif event:GetName() == "round_start" or event:GetName() == "round_prestart" then
-		savedPlayers = {};
-	end
-end
--- Effect Draw Code
-local function hDraw()	
-	draw.SetFont(draw.CreateFont(fontName:GetValue(), fontSize:GetValue(), 700, {0x200}));
-	guiDraw();
-	
-	local alpha = 255;
-	for index = 1, #hits do
-		if hits[index] ~= nil then
-			local hit = hits[index];
-			local timeOnScreen = globals.CurTime() - hit.created;
-			
-			if timeOnScreen > solidTime:GetValue() + fadeTime:GetValue() then
-				table.remove(hits, index);
-				goto continue;
-			end
-			
-			if fadeTime:GetValue() ~= 0 then
-				alpha =  math.floor(map(math.max(timeOnScreen - solidTime:GetValue(), 0), fadeTime:GetValue(), 0, 0, 255));
-			end
-			
-			-- Player skeleton based off hitgroups
-			if skeletonEffect:GetValue() then
-				local r, g, b, a;
-				if skeletonColorLink:GetValue() then
-					r, g, b, a = gui.GetValue("esp.overlay.enemy.skeleton.clr");
-				else
-					r, g, b, a = skeletonClr:GetValue();
-				end
-				draw.Color(r, g, b, alpha);
-				
-				for index = 1, #playerBoneConnections do
-					local BoneConnection = playerBoneConnections[index];
+    -- Another quality of life feature to preview damage text.
+    if guiTextExample:GetValue() then
+        local r, g, b, a = guiTextColor:GetValue();
+        draw.Color(r, g, b, a);
+        draw.TextShadow(100, 25, "Example Text");
+    end
 
-					local x1, y1 = client.WorldToScreen(hit.skeletonVecs[BoneConnection[1]]);
-					local x2, y2 = client.WorldToScreen(hit.skeletonVecs[BoneConnection[2]]);
-						
-					if x1 and y1 and x2 and y2 then
-						draw.Line(x1, y1, x2, y2);
-					end
-				end
-			end
-			-- Hitmarker
-			if hitMarkerType:GetValue() ~= 0 then
-				local selection = hitMarkerType:GetValue();
-				local r, g, b, a = hitmarkerClr:GetValue();
-				draw.Color(r, g, b, alpha);
-					
-				if selection == 1 then -- Normal Cube
-					if fadeTime:GetValue() ~= 0 then
-						drawCubeAtPoint(cubeSize:GetValue(), hit.pos, math.floor(map(math.max(timeOnScreen - solidTime:GetValue(), 0), fadeTime:GetValue(), 0, 0, 100)));
-					else
-						drawCubeAtPoint(cubeSize:GetValue(), hit.pos, 100);
-					end
-					
-				elseif selection == 2 then -- Cross					
-					if fadeTime:GetValue() ~= 0 then
-						drawCrossAtPoint(crossSize:GetValue(), hit.pos, crossGapSize:GetValue(), math.floor(map(math.max(timeOnScreen - solidTime:GetValue(), 0), fadeTime:GetValue(), 0, 0, 100)));
-					else
-						drawCrossAtPoint(crossSize:GetValue(), hit.pos, crossGapSize:GetValue(), 100);
-					end
-				elseif selection == 3 then -- Dot
-					drawDotAtPoint(dotSize:GetValue(), hit.pos);
-				end
-			end
+    -- each frame we check the draw mode
+    local drawMode = 1;
+    if guiSettingsDrawMode:GetValue() == 2 then
+        drawMode = 2;
+    elseif guiSettingsDrawMode:GetValue() == 0 then
+        goto EndFrame;
+    end
 
-			local hitVec = Vector2:New(client.WorldToScreen(hit.pos));
-			if hitVec.x and hitVec.y then
-				-- Dammage number
-				if damageEffect:GetValue() then
-					local hitVec = Vector2:New(client.WorldToScreen(hit.pos));
-					local r, g, b, a = dammageClr:GetValue();
-					draw.Color(r, g, b, alpha);
-						
-					if alpha == 255 then
-						draw.TextShadow(hitVec.x + fontSize:GetValue(), hitVec.y - fontSize:GetValue()/2, hit.dammage);
-						else
-						draw.Text(hitVec.x + fontSize:GetValue(), hitVec.y - fontSize:GetValue()/2, hit.dammage);
-					end
-				end
-				
-				-- Hitgroup text
-				if hitgroupEffect:GetValue() then
-					local r, g, b, a = hitgroupClr:GetValue();
-					draw.Color(r, g, b, alpha);
-					local text = hitGroupTextUpper[hit.hitgroup];
-					
-					if not fontCase:GetValue() then 
-						text = hitGroupTextlower[hit.hitgroup];
-					end
-					
-					local w, h = draw.GetTextSize(text);
-					
-					if alpha == 255 then
-						draw.TextShadow(hitVec.x + fontSize:GetValue(), hitVec.y + h/2, text);
-					else
-						draw.Text(hitVec.x + fontSize:GetValue(), hitVec.y + h/2, text);
-					end
-				end
-			end
-		end
-		::continue::
-	end
-	impacts = {};
+    -- Main draw loop that does most of the work, could probably be refactored yet again but havent noticed a big fps drop ive done alot of refactoring to speed it up
+    -- Sadly because of 'latest' draw mode option i have to loop through players each frame which sucks
+    localPlayer = entities.GetLocalPlayer();
+    if localPlayer then
+
+        local players = entities.FindByClass("CCSPlayer");
+        for i = 1, #players do
+            -- I didnt want to draw the latest hit mutiple times per frame so i keep track of if i drew it already to save fps
+            local drawnlatestHit = false;
+            local player = players[i];
+            if tableActiveHits[player:GetIndex()] then
+
+                -- Updates and removes latest hit
+                if tableActiveHits[player:GetIndex()]["latest"] then
+                    local latest = tableActiveHits[player:GetIndex()]["latest"]
+                    latest.liferemaining = latest.liferemaining - globals.FrameTime();
+                    if latest.liferemaining <= 0.0 then
+                        latest.liferemaining = 0;
+                        tableActiveHits[player:GetIndex()]["latest"] = nil;
+                    end
+		        end
+                
+                -- Loops through each hit for each player
+                for j = 1, #tableActiveHits[player:GetIndex()] do
+                    if not drawnlatestHit then
+                        local currentHit = tableActiveHits[player:GetIndex()][j];
+
+                        -- Removes old hits and updates life remaining
+                        if currentHit then
+                            currentHit.liferemaining = currentHit.liferemaining - globals.FrameTime();
+                            if currentHit.liferemaining <= 0.0 then
+                                currentHit.liferemaining = 0;
+                                table.remove(tableActiveHits[player:GetIndex()], j);
+                            end
+		                else goto EndHit end
+
+                        -- All the draw mode logic that has to happen here
+                        if drawMode == 2 and tableActiveHits[player:GetIndex()]["latest"] then -- latest
+                            currentHit = tableActiveHits[player:GetIndex()]["latest"];
+                        elseif drawMode == 2 then goto EndHit end
+
+                        -- global alpha scale mapping
+                        local alpha = 255;
+                        local r, g, b, skeletonAlpha = gui.GetValue("esp.overlay.enemy.skeleton.clr");
+                        local r, g, b, hitMarkerAplha = guiHitMarkerColor:GetValue();
+                        if guiSettingsFadeTime:GetValue() ~= 0 and currentHit.liferemaining <= guiSettingsFadeTime:GetValue() then
+                            alpha = math.floor(map(currentHit.liferemaining, guiSettingsFadeTime:GetValue(), 0, 255, 0));
+                            skeletonAlpha = math.floor(map(currentHit.liferemaining, guiSettingsFadeTime:GetValue(), 0, skeletonAlpha, 0));
+                            hitMarkerAplha = math.floor(map(currentHit.liferemaining, guiSettingsFadeTime:GetValue(), 0, hitMarkerAplha, 0));
+                        end
+
+                        -- Hopefully debug overlay soon so i can draw hitboxes!!!!????
+                        if guiEffectSkeleton:GetValue() then 
+
+                            -- Uses color and alpha from esp skeleton color
+                            local r, g, b, a = gui.GetValue("esp.overlay.enemy.skeleton.clr");
+                            draw.Color(r, g, b, skeletonAlpha);
+                            
+                            for i = 1, #globalHitBoxConnections do
+                                -- Loops over connections of hitbox positions and draws a "skeleton" from 
+                                local hitBoxConnection = globalHitBoxConnections[i];
+
+                                local x1, y1 = client.WorldToScreen(currentHit.skeletonvecs[hitBoxConnection[1]]);
+                                local x2, y2 = client.WorldToScreen(currentHit.skeletonvecs[hitBoxConnection[2]]);
+                            
+                                if x1 and y1 and x2 and y2 then
+                                    draw.Line(x1, y1, x2, y2);
+                                end
+                            end
+                        end
+
+                        -- Floating Damage stuff, looks alot cooler in this version than last
+                        if guiEffectDammageNum:GetValue() or guiEffectHitGroup:GetValue() then
+
+                            -- Drawing the damamge and animating it
+                            local drawPos = Vector2(client.WorldToScreen(currentHit.textpos));
+                            if drawPos.x then
+                                local totalTime = guiSettingsSolidTime:GetValue() + guiSettingsFadeTime:GetValue();
+                                drawPos.x = drawPos.x + (currentHit.textvel.x * guiTextVelocity:GetValue()) * (totalTime - currentHit.liferemaining);
+                                drawPos.y = drawPos.y + (currentHit.textvel.y * guiTextVelocity:GetValue()) * (totalTime - currentHit.liferemaining);
+
+                                local text = " ";
+
+                                -- Damage number
+                                if guiEffectDammageNum:GetValue() then
+                                    text = "-"..math.abs(currentHit.damage).." ";
+                                end
+                                -- Hitgroup
+                                if guiEffectHitGroup:GetValue() then
+                                    text = text..globalHitGroupDisplay[currentHit.hitgroup];
+                                end
+                                -- Stacked amount dammage indicator
+                                if drawMode == 2 and currentHit.stacked > 1 then
+                                    text =  text.." x"..currentHit.stacked
+                                end
+
+                                local r, g, b, a = guiTextColor:GetValue();
+                                drawTextShadow(drawPos.x, drawPos.y, text, r, g, b, alpha);
+                            end
+                        end
+
+                        -- Hitmarker stuff, literally no one used dot so i cut it and simplified options cause it was needlesly complex
+                        if guiEffectMarker:GetValue() then
+
+                            local r, g, b, a = guiHitMarkerColor:GetValue();
+
+                            -- You can easily add more styles just make a function that takes a point and draws a marker, ez pz
+                            local hitMarkerSize = guiHitMarkerSize:GetValue()
+                            if guiHitMarkerStyle:GetValue() == 0 then
+                                drawCubeAtPoint(hitMarkerSize, currentHit.pos, r, g, b, alpha, hitMarkerAplha);
+                            elseif guiHitMarkerStyle:GetValue() == 1 then
+                                drawCrossAtPoint(hitMarkerSize, currentHit.pos, r, g, b, hitMarkerAplha);
+                            end
+                        end
+
+                        if drawMode == 2 then -- latest mode
+                            drawnlatestHit = true;
+                        else
+                            drawnlatestHit = false;
+                        end
+
+                        ::EndHit::
+                    end
+                end
+
+            end
+        end 
+        tableImpacts = {};   
+    end
+    ::EndFrame::
 end
 
-local function hCreateMove(cmd)
-	-- Backtrack fix
-	local localPlayer = entities.GetLocalPlayer();
+-- Hit logging magic happens here 
+local function hFireGameEvent(gameEvent)
+    local eventName = gameEvent:GetName();
+
+    if eventName == "player_hurt" then
+        local attacker = entities.GetByUserID(gameEvent:GetInt("attacker"));
+        local victim = entities.GetByUserID(gameEvent:GetInt("userid"));
+        local eventDamage = gameEvent:GetInt("dmg_health");
+        local eventHealth = gameEvent:GetInt("health");
+        local eventHitGroup = gameEvent:GetInt("hitgroup") + 1;
+
+        if attacker and victim and attacker:GetIndex() == localPlayer:GetIndex() and attacker:GetIndex() ~= victim:GetIndex() then
+            local attackerIndex = attacker:GetIndex();
+            local victimIndex = victim:GetIndex();
+            local eventHitBoxPos = victim:GetHitboxPosition(globalHitGroupToHitBox[eventHitGroup]);
+            local textVelocity = randomVector(30);
+            local eventImpactPos;
+
+            -- Fix for knife and nade damage
+            if eventHitGroup == 1 then
+                eventImpactPos = victim:GetHitboxPosition("Stomach");
+            else
+                eventImpactPos = getClosestImpact(eventHitBoxPos);
+            end
+
+            -- If backtracking then get backtracked position else get current
+            local skeleton = {};
+		    if eventHitGroup ~= 1  and (gui.GetValue("rbot.master") and gui.GetValue("rbot.accuracy.posadj.backtrack")) or (gui.GetValue("lbot.master") and gui.GetValue("lbot.extra.backtrack") ~= 0) then
+                skeleton = getClosestBackTrack(eventImpactPos, victimIndex, globalHitGroupToHitBox[eventHitGroup]);
+		    else
+			    skeleton = tablePlayerHistorys[victimIndex][#tablePlayerHistorys[victimIndex]].skeleton
+            end
+            
+            local eventHit = Hit:Create(eventDamage, eventHitGroup, eventImpactPos, skeleton, textVelocity);
+
+            -- Adding the new hit to the table and checking if there is a table made or not for the player
+            if not tableActiveHits[victimIndex] then
+                tableActiveHits[victimIndex] = {};
+            end
+            table.insert(tableActiveHits[victimIndex], eventHit);
+
+            -- Manipulating latest hit here saves alot of trouble later on in draw
+            if guiSettingsDrawMode:GetValue() == 2 then
+                -- Create a latest hit if we dont have one
+                if not tableActiveHits[victimIndex]["latest"] then
+                    tableActiveHits[victimIndex]["latest"] = eventHit;
+                -- if we already have one just add damage and stack counter and update it
+                else
+                    local latestStacked = tableActiveHits[victimIndex]["latest"].stacked + 1;
+
+                    tableActiveHits[victimIndex]["latest"] = Hit:Create(tableActiveHits[victimIndex]["latest"].damage + eventDamage, eventHitGroup, eventImpactPos, skeleton, textVelocity);
+                    tableActiveHits[victimIndex]["latest"].stacked = latestStacked;
+                end
+            end
+
+            -- Health Shot Effect
+            if guiEffectHealthShot:GetValue() then
+                localPlayer:SetProp('m_flHealthShotBoostExpirationTime', globals.CurTime() + guiSettingsHPShotTime:GetValue());
+            end
+
+            -- Hit Sounds stuff
+            local eventSound = "";
+             -- Hit that isnt fatal or no kill sound
+            if eventHealth > 0 or guiSoundKill:GetValue() == 0 then
+                if eventHitGroup == 2 then -- Headshot
+                    eventSound = guiSoundHead:GetValue();
+                else -- Normal hit
+                    eventSound = guiSoundHit:GetValue();
+                end
+            -- Fatal hit
+            else
+                eventSound = guiSoundKill:GetValue();
+            end
+
+            -- Play the sound if there is one
+            if eventSound ~= 0 then client.Command("Play "..soundFolderName.."/"..soundFiles[eventSound], true) end
+
+        end
+
+        -- Local attack victim
+        if attacker and victim and victim:GetIndex() == localPlayer:GetIndex() then
+            -- local hitsound
+            if guiSoundLocalHit:GetValue() ~= 0 then
+                client.Command("Play "..soundFolderName.."/"..soundFiles[guiSoundLocalHit:GetValue()], true);
+            end
+        end
+    -- This keeps track of all impacts from localPlayer, its used to determine where player was hit because player_hurt doesnt contain that info for some reason???
+    elseif eventName == "bullet_impact" then
+        local attacker = entities.GetByUserID(gameEvent:GetInt("userid"));
+        local impactPos = Vector3(gameEvent:GetFloat("x"), gameEvent:GetFloat("y"), gameEvent:GetFloat("z"));
+        
+        if attacker and attacker:GetIndex() == localPlayer:GetIndex() then
+			table.insert(tableImpacts, impactPos);
+        end
+        
+    elseif eventName == "round_prestart" then
+        -- Keeps everything running smoothly
+        tablePlayerHistorys = {};
+        tableActiveHits = {};
+        tableImpacts = {};
+    end
+end
+
+-- This hunk of junk is supposed to fix backtracking but is really bad and is a guess at best
+local function hCreateMove(pCmd)
+    local localPlayer = entities.GetLocalPlayer();
 	local players = entities.FindByClass("CBasePlayer");
-	local fakeLatency = 0;
-	local backtrackFactor = 0;
-	
-	if gui.GetValue("rbot.master") and gui.GetValue("rbot.accuracy.posadj.backtrack") then
-		backtrackFactor = 0.4;
-		backtrackActive = true;
-	elseif gui.GetValue("lbot.master") and gui.GetValue("lbot.posadj.backtrack") then
-		backtrackFactor = gui.GetValue("lbot.extra.backtrack") / 1000;
-		backtrackActive = true;
-	end
-	
-	if gui.GetValue("misc.master") and gui.GetValue("misc.fakelatency.enable") then
-		fakeLatency = gui.GetValue("misc.fakelatency.amount");
-	end
-	
-	for i = 1, #players do
-		local player = players[i];
-		local playerIndex = player:GetIndex();
-		
-		if player:GetTeamNumber() ~= localPlayer:GetTeamNumber() and player:IsAlive() then
-			
-			local playerHitBoxVecs = {};
-			for index = 0, 19, 1 do
-				local pos = player:GetHitboxPosition(index);
-				table.insert(playerHitBoxVecs, pos);
-			end
-			
-			if not savedPlayers[playerIndex] then
-				savedPlayers[playerIndex] = {};
-			end
-			
-			table.insert(savedPlayers[playerIndex], {playerHitBoxVecs, globals.CurTime()});
-			
-			for index = 1, #savedPlayers[playerIndex] do
-				if savedPlayers[playerIndex][index] then
-					local savedData = savedPlayers[playerIndex][index][2];
-					
-					if savedData + backtrackFactor + fakeLatency < globals.CurTime() then
-						table.remove(savedPlayers[playerIndex], index);
-					end
-				end
-			end
-		end
-	end
+    
+    for i = 1, #players do
+        local player = players[i];
+        local playerIndex = player:GetIndex();
+            
+        if player:GetTeamNumber() ~= localPlayer:GetTeamNumber() and player:IsAlive() then
+                
+            -- Save skeleton points
+            local hitBoxes = {};
+            for index = 0, 19 do
+                local vec = player:GetHitboxPosition(index);
+                table.insert(hitBoxes, vec);
+            end
+                    
+            -- Create a table if there isnt an existing one
+            if not tablePlayerHistorys[playerIndex] then
+                tablePlayerHistorys[playerIndex] = {};
+            end
+                    
+            -- insert new ticks
+            table.insert(tablePlayerHistorys[playerIndex], {skeleton = hitBoxes, expires = globals.CurTime() + 0.3});
+                    
+            -- Remove invaild ticks
+            for index = 1, #tablePlayerHistorys[playerIndex] do
+                if tablePlayerHistorys[playerIndex][index] then
+                    local expires = tablePlayerHistorys[playerIndex][index].expires;
+                        
+                    if expires <= globals.CurTime() then
+                        table.remove(tablePlayerHistorys[playerIndex], index);
+                    end
+                end
+            end
+        end
+    end
 end
 
-client.AllowListener("bullet_impact");
 client.AllowListener("player_hurt");
+client.AllowListener("bullet_impact");
 client.AllowListener("round_prestart");
-client.AllowListener("round_start");
 
 callbacks.Register("CreateMove", hCreateMove);
 callbacks.Register("FireGameEvent", hFireGameEvent);
 callbacks.Register("Draw", hDraw);
-callbacks.Register("Unload", function()
-	ref2:SetInvisible(false);	
-end);

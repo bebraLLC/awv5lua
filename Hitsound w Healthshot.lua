@@ -45,7 +45,7 @@ hssounds:SetDescription("Overrides the hitsound on HS")
 local hitssounds = gui.Combobox(msc_ref, 'lua_hitsound_combobox', 'Hitsound', "Off", "Bass", "Battlefield 4", "Bowhit", "Bruh", "You a gay", "Kovaak", "Cookie", "Windows XP error", "Roblox", "Vitas", "Minecraft hit", "Gachimuchi", "Metro 2033", "Minecraft oh", "Rust HS", "Toy", "Impact")
 
 local Healthshot = gui.Combobox(msc_ref, 'lua_healthshot_hitmarker_combobox', 'Healthshot hitmarker', 'Off', 'On hit', 'On kill')
-local slider = gui.Slider(msc_ref, 'lua_healthshot_hitmarker_slider', 'Healthshot duration (sec)', 1, 0, 10)
+local slider = gui.Slider(msc_ref, 'lua_healthshot_hitmarker_slider', 'Healthshot duration (sec)', 1, 0, 10, 0.1)
 
 listen('player_hurt')
 listen('player_death')
