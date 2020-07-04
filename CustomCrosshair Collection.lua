@@ -96,4 +96,5 @@ if swastikkka_crosshair:GetValue() ~= true then return;
     end
 end 
 end
-callbacks.Register( "Draw", rainbowxhair)
+callbacks.Register( "Draw", rainbowxhair) 
+

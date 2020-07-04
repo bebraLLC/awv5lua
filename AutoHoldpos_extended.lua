@@ -29,7 +29,7 @@
 
 local timer = timer or {}
 local timers = {}
-local mode = 1 -- 1: holdpos, 2: followpos
+local mode =  1 -- 1: holdpos, 2: followpos
 
 --AW Gui--
 local Ref_BotCmd = gui.Reference("MISC", "General", "Extra");
@@ -68,20 +68,22 @@ local function trim(s)
 end
 
 client.AllowListener("round_freeze_end")
+
 callbacks.Register('FireGameEvent', function(event)
     
 if(engine.GetServerIP() == "loopback") then 
 	return 
 	end
-	if not Checkbox_BotCmd:GetValue() then
-    if (event:GetName() == "round_freeze_end") then
+	if Checkbox_BotCmd:GetValue() then return 
+else
+     if (event:GetName( ) == "round_freeze_end") then
         if (are_there_any_bots()) then
             timer.Create("holdpos_delay", 1.0, 1, function()
                 if (mode == 1) then 
                     client.Command("holdpos", true)
                 elseif (mode == 2) then
                     client.Command("followme", true)
-                end
+              end
             end)
         end
 		end

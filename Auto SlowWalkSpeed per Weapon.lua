@@ -24,18 +24,30 @@
 --callbacks.Unregister('Draw',    'Auto    Update')
 
 
+local refff = gui.Reference("RAGEBOT", "ACCURACY", "Movement")
+local enable = gui.Checkbox(refff, "lua.rbot.accuracy.movement.slowspeed.chkbox", "Activate SlowWalkSpeed per Weapon", 0)
+local ref = gui.Groupbox(refff, "AutoSlowWalkSpeed per Weapon")
 
-local ref = gui.Reference("RAGEBOT", "ACCURACY", "Movement")
-local pistol = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.pistol", "Pistol Auto Stop Speed", 30, 0, 30)
-local heavypistol = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.heavypistol", "Heavy Pistol Auto Stop Speed", 30, 0, 30)
-local submachine = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.submachineGun", "Submachine Gun Auto Stop Speed", 30, 0, 30)
-local rifle = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.rifle", "Rifle Auto Stop Speed", 30, 0, 30)
-local shotgun = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.shotgun", "Shotgun Auto Stop Speed", 30, 0, 30)
-local scout = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.scout", "Scout Auto Stop Speed", 30, 0, 30)
-local autosniper = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.autosniper", "Autosniper Auto Stop Speed", 30, 0, 30)
-local awp = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.awp", "AWP Auto Stop Speed", 30, 0, 30)
-local light = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.light", "Light Machine Gun Auto Stop Speed", 30, 0, 30)
-local zeus = gui.Slider(ref, "rbot.accuracy.movement.slowspeed.zeus", "Zeus Auto Stop Speed", 30, 0, 30)
+local pistol = gui.Slider(ref, "slowspeed.pistol", "Pistol Auto Stop Speed", 30, 0, 30)
+local heavypistol = gui.Slider(ref, "slowspeed.heavypistol", "Heavy Pistol Auto Stop Speed", 30, 0, 30)
+local submachine = gui.Slider(ref, "slowspeed.submachineGun", "Submachine Gun Auto Stop Speed", 30, 0, 30)
+local rifle = gui.Slider(ref, "slowspeed.rifle", "Rifle Auto Stop Speed", 30, 0, 30)
+local shotgun = gui.Slider(ref, "slowspeed.shotgun", "Shotgun Auto Stop Speed", 30, 0, 30)
+local scout = gui.Slider(ref, "slowspeed.scout", "Scout Auto Stop Speed", 30, 0, 30)
+local autosniper = gui.Slider(ref, "slowspeed.autosniper", "Autosniper Auto Stop Speed", 30, 0, 30)
+local awp = gui.Slider(ref, "slowspeed.awp", "AWP Auto Stop Speed", 30, 0, 30)
+local light = gui.Slider(ref, "slowspeed.light", "Light Machine Gun Auto Stop Speed", 30, 0, 30)
+local zeus = gui.Slider(ref, "slowspeed.zeus", "Zeus Auto Stop Speed", 30, 0, 30)
+
+local function activationCheck()
+    if not enable:GetValue() then
+            ref:SetInvisible(true);
+			ref:SetDisabled(true);
+        else
+            ref:SetInvisible(false);
+			ref:SetDisabled(false)
+    end
+end
 
 local value
 local set = 0
@@ -91,4 +103,7 @@ if(entities.GetLocalPlayer() ~= nil and engine.GetServerIP() ~= nil and engine.G
     end
 end
 end
+
 callbacks.Register("Draw", slowspeed)
+callbacks.Register("Draw", activationCheck );
+

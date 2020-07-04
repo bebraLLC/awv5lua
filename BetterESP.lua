@@ -1,30 +1,3 @@
-----    Base    code    for    auto    updating.
---
---local    cS    =    GetScriptName()
---local    cV    =    '1.0.0'
---local    gS    =    'PUT    LINK    TO    RAW    LUA    SCRIPT'
---local    gV    =    'PUT    LINK    TO    RAW    VERSION'
---
---local    function    AutoUpdate()
---	if    gui.GetValue('lua_allow_http')    and    gui.GetValue('lua_allow_cfg')    then
---		local    nV    =    http.Get(gV)
---		if    cV    ~=    nV    then
---			local    nF    =    http.Get(gS)
---			local    cF    =    file.Open(cS,    'w')
---			cF:Write(nF)
---			cF:Close()
---			print(cS,    'updated    from',    cV,    'to',    nV)
---		else
---			print(cS,    'is    up-to-date.')
---		end
---	end
---end		
---
---callbacks.Register('Draw',    'Auto    Update')
---callbacks.Unregister('Draw',    'Auto    Update')
-
-
-
 --- Some References I will need.
 local ref = gui.Reference("VISUALS", "Overlay")
 local ref1 = gui.Reference("VISUALS", "Overlay", "Friendly")
@@ -107,7 +80,7 @@ local BetterESP = {
 
     metadata = {
         scriptName = GetScriptName();
-        version = "2.0 Beta 4";
+        version = "2.0 Beta 5";
         fileLink = "https://raw.githubusercontent.com/superyor/BetterESP/master/BetterESP.lua";
         versionLink = "https://raw.githubusercontent.com/superyor/BetterESP/master/version.txt";
         changelogLink = "https://raw.githubusercontent.com/superyor/BetterESP/master/changelog.txt";
@@ -569,18 +542,15 @@ function BetterESP:hkLoad() -- ok not really callback function but idc
     ref1:SetInvisible(true)
     ref2:SetInvisible(true)
 
-    --- The commented out ones are not working for whatever reason
     for i=1, 2 do
         p = i==1 and "friendly" or "enemy"
         setVal("esp.overlay." .. p .. ".box", 0)
         setVal("esp.overlay." .. p .. ".precision", 0)
         setVal("esp.overlay." .. p .. ".name", 0)
         setVal("esp.overlay." .. p .. ".skeleton", 0)
-        setVal("esp.overlay." .. p .. ".glow", 0)
         setVal("esp.overlay." .. p .. ".health.healthbar", 0)
         setVal("esp.overlay." .. p .. ".health.healthnum", 0)
-        setVal("esp.overlay." .. p .. ".armorbar", 0)
-        setVal("esp.overlay." .. p .. ".armornum", 0)
+        setVal("esp.overlay." .. p .. ".armor", 0)
         setVal("esp.overlay." .. p .. ".weapon", 0)
         setVal("esp.overlay." .. p .. ".defusing", 0)
         setVal("esp.overlay." .. p .. ".planting", 0)

@@ -31,7 +31,7 @@ local primaryWeapons = {
     { "Scout", "ssg08" };
     { "AWP", "awp" };
     { "AUG | SG553", "aug" };
-    { "AK-47 | M4A1", "ak47" };
+    { "AK  |  M4", "m4a1" };
 };
 local secondaryWeapons = {
     { "None", nil, nil };
@@ -66,7 +66,7 @@ local GRENADE_SLOT3 = gui.Combobox(GROUP, "autobuy.grenade3", "Grenade Slot #3",
 local GRENADE_SLOT4 = gui.Combobox(GROUP, "autobuy.grenade4", "Grenade Slot #4", granades[1][1], granades[2][1], granades[3][1], granades[4][1], granades[5][1], granades[6][1]);
 local TASER = gui.Checkbox(GROUP, "autobuy.taser", "Buy Taser", false);
 local DEFUSER = gui.Checkbox(GROUP, "autobuy.defuser", "Buy Defuse Kit", false);
-gui.Text(GROUP, "Auto Buy - Made By Rab(SamzSakerz#4758) ported by Clipper(superyu'#7167) Slight modifications by Tubify (Tubify#6969)");
+gui.Text(GROUP, "Auto Buy - Made By Myself");
 
 local function buy(wat)
     if (wat == nil) then return end;
@@ -104,8 +104,9 @@ callbacks.Register('FireGameEvent', function(e)
     if (localPlayer == nil or en ~= "player_spawn") then return end;
     local userIndex = client.GetPlayerIndexByUserID(e:GetInt('userid'));
     local localPlayerIndex = localPlayer:GetIndex();
-    if (userIndex ~= localPlayerIndex) then return end;
-    buyWeapon(PRIMARY_WEAPON, primaryWeapons);
+    if (userIndex ~= localPlayerIndex) then return end
+	if localPlayer ~= nil and (userIndex ~= localPlayerIndex) and en == "player_spawn" then return end
+	buyWeapon(PRIMARY_WEAPON, primaryWeapons);
     buyWeapon(SECONDARY_WEAPON, secondaryWeapons);
     local armorSelected = ARMOR:GetValue();
     local armorTable = armors[armorSelected + 1];
@@ -115,8 +116,7 @@ callbacks.Register('FireGameEvent', function(e)
     end
     if (TASER:GetValue()) then
         buy('taser');
-    end
-    buyGrenades({ GRENADE_SLOT1, GRENADE_SLOT2, GRENADE_SLOT3, GRENADE_SLOT4 });
-end);
-
+    buyGrenades({ GRENADE_SLOT1, GRENADE_SLOT2, GRENADE_SLOT3, GRENADE_SLOT4 })
+	end
+    end)
 client.AllowListener("player_spawn");

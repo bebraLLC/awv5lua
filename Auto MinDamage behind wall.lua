@@ -25,28 +25,38 @@
 
 
 
-local ref2 = gui.Reference("Ragebot", "Accuracy", "Weapon")
-local enabled = gui.Checkbox(ref2, "lua_damge_behind_wall_chkbox", "Use Damage behind wall", 0)
-local ref = gui.Groupbox(gui.Reference("Ragebot", "Accuracy", "Weapon"), "AutoMinDamage due to Walls")
+local ref = gui.Reference("Ragebot", "Accuracy", "Weapon")
+local enable = gui.Checkbox(ref, "lua_damge_behind_wall_chkbox", "Activate AutoMinDamage on in-/visible", 0)
+local ref2 = gui.Groupbox(ref, "AutoMinDamage due to Walls")
 local weapon_list = { "asniper", "sniper", "scout", "hpistol", "pistol", "rifle" }
 
-local rbot_autosniper_mindamage_2 = gui.Slider(ref, weapon_list[1] .. ".mindmg.2", "Damage Visible(auto)", 0, 0, 100);
-local rbot_autosniper_mindamage_1 = gui.Slider(ref, weapon_list[1] .. ".mindmg.1", "Damage behind Wall(auto)", 0, 0, 100);
+local rbot_autosniper_mindamage_2 = gui.Slider(ref2, weapon_list[1] .. ".mindmg.2", "Damage Visible(auto)", 0, 0, 100);
+local rbot_autosniper_mindamage_1 = gui.Slider(ref2, weapon_list[1] .. ".mindmg.1", "Damage behind Wall(auto)", 0, 0, 100);
 
-local rbot_sniper_mindamage_2 = gui.Slider(ref, weapon_list[2] .. ".mindmg.2", "Damage Visible(awp)", 0, 0, 100);
-local rbot_sniper_mindamage_1 = gui.Slider(ref, weapon_list[2] .. ".mindmg.1", "Damage behind Wall(awp)", 0, 0, 100);
+local rbot_sniper_mindamage_2 = gui.Slider(ref2, weapon_list[2] .. ".mindmg.2", "Damage Visible(awp)", 0, 0, 100);
+local rbot_sniper_mindamage_1 = gui.Slider(ref2, weapon_list[2] .. ".mindmg.1", "Damage behind Wall(awp)", 0, 0, 100);
 
-local rbot_scout_mindamage_2 = gui.Slider(ref, weapon_list[3] .. ".mindmg.2", "Damage Visible(scout)", 0, 0, 100);
-local rbot_scout_mindamage_1 = gui.Slider(ref, weapon_list[3] .. ".mindmg.1", "Damage behind Wall(scout)", 0, 0, 100);
+local rbot_scout_mindamage_2 = gui.Slider(ref2, weapon_list[3] .. ".mindmg.2", "Damage Visible(scout)", 0, 0, 100);
+local rbot_scout_mindamage_1 = gui.Slider(ref2, weapon_list[3] .. ".mindmg.1", "Damage behind Wall(scout)", 0, 0, 100);
 
-local rbot_revolver_mindamage_2 = gui.Slider(ref, weapon_list[4] .. ".mindmg.2", "Damage Visible(R8)", 0, 0, 100);
-local rbot_revolver_mindamage_1 = gui.Slider(ref, weapon_list[4] .. ".mindmg.1", "Damage behind Wall(R8)", 0, 0, 100);
+local rbot_revolver_mindamage_2 = gui.Slider(ref2, weapon_list[4] .. ".mindmg.2", "Damage Visible(R8)", 0, 0, 100);
+local rbot_revolver_mindamage_1 = gui.Slider(ref2, weapon_list[4] .. ".mindmg.1", "Damage behind Wall(R8)", 0, 0, 100);
 
-local rbot_pistol_mindamage_2 = gui.Slider(ref, weapon_list[5] .. ".mindmg.2", "Damage Visible(pistol)", 0, 0, 100);
-local rbot_pistol_mindamage_1 = gui.Slider(ref, weapon_list[5] .. ".mindmg.1", "Damage behind Wall(pistol)", 0, 0, 100);
+local rbot_pistol_mindamage_2 = gui.Slider(ref2, weapon_list[5] .. ".mindmg.2", "Damage Visible(pistol)", 0, 0, 100);
+local rbot_pistol_mindamage_1 = gui.Slider(ref2, weapon_list[5] .. ".mindmg.1", "Damage behind Wall(pistol)", 0, 0, 100);
 
-local rbot_rifle_mindamage_2 = gui.Slider(ref, weapon_list[6] .. ".mindmg.2", "Damage Visible(rifle)", 0, 0, 100);
-local rbot_rifle_mindamage_1 = gui.Slider(ref, weapon_list[6] .. ".mindmg.1", "Damage behind Wall(rifle)", 0, 0, 100);
+local rbot_rifle_mindamage_2 = gui.Slider(ref2, weapon_list[6] .. ".mindmg.2", "Damage Visible(rifle)", 0, 0, 100);
+local rbot_rifle_mindamage_1 = gui.Slider(ref2, weapon_list[6] .. ".mindmg.1", "Damage behind Wall(rifle)", 0, 0, 100);
+
+local function activationCheck()
+    if not enable:GetValue() then
+            ref2:SetInvisible(true);
+			ref2:SetDisabled(true);
+        else
+            ref2:SetInvisible(false);
+			ref2:SetDisabled(false)
+    end
+end
 
 local adaptive_weapons = {
     -- see line 219
@@ -180,7 +190,7 @@ end
 
 callbacks.Register("Draw", function()
     
-if (enabled:GetValue() == false) then
+if (enable:GetValue() == false) then
         return;
     end
 
@@ -205,14 +215,4 @@ local Player, LocalPlayer = entities_check()
     end
 end)
 
-local function activationCheck()
-    if not enabled:GetValue() then
-            ref:SetInvisible(true);
-			ref:SetDisabled(true);
-        else
-            ref:SetInvisible(false);
-			ref:SetDisabled(false)
-    end
-end
-
-callbacks.Register( "Draw", "activationCheck", activationCheck );
+callbacks.Register( "Draw", activationCheck );
