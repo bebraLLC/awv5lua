@@ -1,5 +1,5 @@
 -- DeadESP (This version only works with the default Chams provided by Aimware.net; not working with AdvancedChams or others atm)
-local w,h = 0,0
+local x,y = 0,0
 local visual_refs = gui.Reference("VISUALS");
 local deadesp_tab = gui.Tab(visual_refs, "deadesp.tab", "DeadESP")
 local deadesp_group = gui.Groupbox(deadesp_tab, "DeadESP")
@@ -10,6 +10,10 @@ deadesp_chams_on_tggl:SetDescription("Chams used for Wallhack on hold")
 local deadesp_chams_while_spec = gui.Combobox(deadesp_group, 'deadesp_chams_while_spec_combobox', 'DeadESP Chams while Spectating', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' ) -- Change Wallhack ChamsMode onthefly
 deadesp_chams_while_spec:SetDescription("Chams used for Wallhack when spectator")
 local wh_chams_indicators_clr = gui.ColorPicker(deadesp_group, "wh.chams.ind.color", "WH Chams Indicators Color", 180,0,0,255)
+local x_posi = gui.Slider(deadesp_group, "x", "X Position", x/2, 0, x)
+x_posi:SetDescription("Sets X Screenposition for the Indicator")
+local y_posi = gui.Slider(deadesp_group, "y", "Y Position", y/2, 0, y)
+y_posi:SetDescription("Sets Y Screenposition for the Indicator")
 gui.Text(deadesp_group, "Created by ticzz | aka KriZz87")
 gui.Text(deadesp_group, "https://github.com/ticzz/Aimware-v5-luas/blob/master/DeadESP.lua" )
 gui.Text(deadesp_group, "Inspired by zacks [https://aimware.net/forum/user-36169.html]" )
@@ -19,7 +23,7 @@ setFont = draw.SetFont
 color = draw.Color
 text = draw.TextShadow
 font = draw.CreateFont("Tahoma", 15, 700)
-w, h = draw.GetScreenSize()
+x, y = draw.GetScreenSize()
 
 
 local function DeadESP() 
@@ -32,7 +36,7 @@ if player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue
 
 gui.SetValue("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
 color(wh_chams_indicators_clr:GetValue())
-text(15, h/2, "Wallhack Chams OnKey")
+text(xposi:GetValue(),yposi:GetValue(), "WallhackChams onPress")
 
 
 elseif player:IsAlive() == true and not input.IsButtonDown(deadesp_wallhack_key:GetValue()) then -- Alive
