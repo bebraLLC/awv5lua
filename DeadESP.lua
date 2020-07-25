@@ -2,9 +2,7 @@
 
 local w,h = 0,0
 ScreenSize = draw.GetScreenSize()
-get = gui.GetValue()
-set = gui.SetValue()
-player = entities.GetLocalplayer()
+player = entities.GetLocalPlayer()
 color = draw.Color
 text = draw.TextShadow
 
@@ -27,62 +25,62 @@ w, h = ScreenSize
 	if not player then
 		return
 	end		
-
-	if player:IsAlive() == false then										-- Dead and spectating someone
-
-		set("esp.overlay.enemy.name", true)
-		set("esp.chams.enemy.occluded", deadesp_chams_while_spec:GetValue())
-		set("esp.chams.enemy.visible", "2")
-		set("esp.chams.enemy.overlay", "1")
-		set("esp.chams.enemyattachments.occluded", false)
-		set("esp.chams.enemyattachments.visible", false)
-		set("esp.chams.enemyattachments.overlay", false)
-		set("esp.chams.friendlyattachments.occluded", false)
-		set("esp.chams.friendlyattachments.visible", false)
-		set("esp.chams.friendlyattachments.overlay", false)
-		set("esp.overlay.enemy.scoped", false)
-		set("esp.overlay.enemy.reloading", false)
-		set("esp.overlay.enemy.health.healthnum", false)
-		set("esp.overlay.enemy.health.healthbar", true)
-		set("esp.overlay.enemy.weapon", "1")
-		set("esp.overlay.enemy.box", false)
-		set("esp.overlay.enemy.hasdefuser", true)
-		set("esp.overlay.enemy.hasc4", true)
-		set("esp.overlay.enemy.barrel", false)
-		set("esp.overlay.enemy.armor", "1")
-
-	elseif player:IsAlive() == true then								-- Alive
-            
-		set("esp.overlay.enemy.name", false)
-		set("esp.chams.enemy.occluded", false)
-		set("esp.chams.enemy.visible", "2")
-		set("esp.chams.enemy.overlay", false)
-		set("esp.chams.enemyattachments.occluded", false)
-		set("esp.chams.enemyattachments.visible", false)
-		set("esp.chams.enemyattachments.overlay", false)
-		set("esp.chams.friendlyattachments.occluded", false)
-		set("esp.chams.friendlyattachments.visible", false)
-		set("esp.chams.friendlyattachments.overlay", false)
-		set("esp.overlay.enemy.scoped", false)
-		set("esp.overlay.enemy.reloading", false)
-		set("esp.overlay.enemy.health.healthnum", false)
-		set("esp.overlay.enemy.health.healthbar", false)
-		set("esp.overlay.enemy.weapon", false)
-		set("esp.overlay.enemy.box", false)
-		set("esp.overlay.enemy.hasdefuser", false)
-		set("esp.overlay.enemy.hasc4", false)
-		set("esp.overlay.weapon.ammo", false)
-		set("esp.overlay.enemy.barrel", false)
-		set("esp.overlay.enemy.armor", false)
-	end
-	
+	
 	if (deadesp_wallhack_key:GetValue() ~= nil or false) then		
-	
-	if player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue()) then		-- Alive, holding down the wh-key
-		set("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
+		
+	if player:IsAlive() == true and not input.IsButtonDown(deadesp_wallhack_key:GetValue()) then								-- Alive
+            
+		gui.SetValue("esp.overlay.enemy.name", false)
+		gui.SetValue("esp.chams.enemy.occluded", false)
+		gui.SetValue("esp.chams.enemy.visible", "2")
+		gui.SetValue("esp.chams.enemy.overlay", false)
+		gui.SetValue("esp.chams.enemyattachments.occluded", false)
+		gui.SetValue("esp.chams.enemyattachments.visible", false)
+		gui.SetValue("esp.chams.enemyattachments.overlay", false)
+		gui.SetValue("esp.chams.friendlyattachments.occluded", false)
+		gui.SetValue("esp.chams.friendlyattachments.visible", false)
+		gui.SetValue("esp.chams.friendlyattachments.overlay", false)
+		gui.SetValue("esp.overlay.enemy.scoped", false)
+		gui.SetValue("esp.overlay.enemy.reloading", false)
+		gui.SetValue("esp.overlay.enemy.health.healthnum", false)
+		gui.SetValue("esp.overlay.enemy.health.healthbar", false)
+		gui.SetValue("esp.overlay.enemy.weapon", false)
+		gui.SetValue("esp.overlay.enemy.box", false)
+		gui.SetValue("esp.overlay.enemy.hasdefuser", false)
+		gui.SetValue("esp.overlay.enemy.hasc4", false)
+		gui.SetValue("esp.overlay.weapon.ammo", false)
+		gui.SetValue("esp.overlay.enemy.barrel", false)
+		gui.SetValue("esp.overlay.enemy.armor", false)
+
+	elseif player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue()) then		-- Alive, holding down the wh-key
+		gui.SetValue("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
 		color(wh_chams_indicators_clr:GetValue())
 		text(15, h/2, "Wallhack Chams OnKey")
-			
+
+	elseif player:IsAlive() == false then										-- Dead and spectating someone
+
+		gui.SetValue("esp.overlay.enemy.name", true)
+		gui.SetValue("esp.chams.enemy.occluded", deadesp_chams_while_spec:GetValue())
+		gui.SetValue("esp.chams.enemy.visible", "2")
+		gui.SetValue("esp.chams.enemy.overlay", "1")
+		gui.SetValue("esp.chams.enemyattachments.occluded", false)
+		gui.SetValue("esp.chams.enemyattachments.visible", false)
+		gui.SetValue("esp.chams.enemyattachments.overlay", false)
+		gui.SetValue("esp.chams.friendlyattachments.occluded", false)
+		gui.SetValue("esp.chams.friendlyattachments.visible", false)
+		gui.SetValue("esp.chams.friendlyattachments.overlay", false)
+		gui.SetValue("esp.overlay.enemy.scoped", false)
+		gui.SetValue("esp.overlay.enemy.reloading", false)
+		gui.SetValue("esp.overlay.enemy.health.healthnum", false)
+		gui.SetValue("esp.overlay.enemy.health.healthbar", true)
+		gui.SetValue("esp.overlay.enemy.weapon", "1")
+		gui.SetValue("esp.overlay.enemy.box", false)
+		gui.SetValue("esp.overlay.enemy.hasdefuser", true)
+		gui.SetValue("esp.overlay.enemy.hasc4", true)
+		gui.SetValue("esp.overlay.enemy.barrel", false)
+		gui.SetValue("esp.overlay.enemy.armor", "1")
+
+		
 		end			
 	end
 end
