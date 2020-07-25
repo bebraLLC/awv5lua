@@ -1,107 +1,91 @@
-----    Base    code    for    auto    updating.
---
---local    cS    =    GetScriptName()
---local    cV    =    '1.0.0'
---local    gS    =    'PUT    LINK    TO    RAW    LUA    SCRIPT'
---local    gV    =    'PUT    LINK    TO    RAW    VERSION'
---
---local    function    AutoUpdate()
---	if    gui.GetValue('lua_allow_http')    and    gui.GetValue('lua_allow_cfg')    then
---		local    nV    =    http.Get(gV)
---		if    cV    ~=    nV    then
---			local    nF    =    http.Get(gS)
---			local    cF    =    file.Open(cS,    'w')
---			cF:Write(nF)
---			cF:Close()
---			print(cS,    'updated    from',    cV,    'to',    nV)
---		else
---			print(cS,    'is    up-to-date.')
---		end
---	end
---end		
---
---callbacks.Register('Draw',    'Auto    Update')
---callbacks.Unregister('Draw',    'Auto    Update')
+-- DeadESP (This version only works with the default Chams provided by Aimware.net; not working with AdvancedChams or others atm)
 
-
-
--- DeadESP
 local w,h = 0,0
-local rage_ref_extra = gui.Reference("VISUALS");
-local deadesp_tab = gui.Tab(rage_ref_extra, "deadesp.tab", "DeadESP")
-local deadesp_group = gui.Groupbox(deadesp_tab, "Deadesp")
-local deadespwallhack = gui.Keybox(deadesp_group, "wallhackkey", "DeadESP Wallhackkey", false); 		-- Set wallhack-key and hold the key to enable enemy.occluded chams aka Wallhack
-local DeadESPchamstggl = gui.Combobox(deadesp_group, 'lua_deadesptgglchams_combobox', 'DeadESP Chams when toggle', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' )	-- Change Wallhack ChamsMode onthefly
-local DeadESPchams_while_spec = gui.Combobox(deadesp_group, 'lua_deadespchams_while_spec_combobox', 'DeadESP Chams while Spectating', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' )	-- Change Wallhack ChamsMode onthefly
+ScreenSize = draw.GetScreenSize()
+get = gui.GetValue()
+set = gui.SetValue()
+player = entities.GetLocalplayer()
+color = draw.Color
+text = draw.TextShadow
+
+local visual_refs = gui.Reference("VISUALS");
+local deadesp_tab = gui.Tab(visual_refs, "deadesp.tab", "DeadESP")
+local deadesp_group = gui.Groupbox(deadesp_tab, "DeadESP")
+local deadesp_wallhack_key = gui.Keybox(deadesp_group, "wallhackkey", "DeadESP Holdkey", false); 		-- Box to set a hold-key to enable enemy.occluded chams aka Wallhack
+deadesp_wallhack_key:SetDescription("Turn on Chams thru Wallz while alive");
+local deadesp_chams_on_tggl = gui.Combobox(deadesp_group, 'deadespontgglchams_combobox', 'DeadESP Chams on hold', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' )	-- Box to change WallhackChams Mode onthefly
+deadesp_chams_on_tggl:SetDescription("Chams used for Wallhack on hold")
+local deadesp_chams_while_spec = gui.Combobox(deadesp_group, 'deadesp_chams_while_spec_combobox', 'DeadESP Chams while Spectating', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' )	-- Change Wallhack ChamsMode onthefly
+deadesp_chams_while_spec:SetDescription("Chams used for Wallhack when spectator")
+local wh_chams_indicators_clr = gui.ColorPicker(deadesp_group, "wh.chams.ind.color", "WH Chams Indicators Color", 128,0,0,255)
+gui.Text(deadesp_group, "Hello kriZz ;D ..")
 
 
-local function ESP_Always_OnDead( ) 
+local function DeadESP( ) 
+w, h = ScreenSize
 
-w, h = draw.GetScreenSize()
-
-	if entities.GetLocalPlayer() == nil or NULL then
+	if not player then
 			return
-			
+	end		
 
-	else if (deadespwallhack:GetValue() ~= 0) then		
-		 if entities.GetLocalPlayer():IsAlive() == true and input.IsButtonDown(deadespwallhack:GetValue()) then
-				gui.SetValue("esp.chams.enemy.occluded", DeadESPchamstggl:GetValue())
-				draw.Color(128,0,0,255)
-				draw.Text(15, 560, "Visuals On")
-	
-	elseif entities.GetLocalPlayer():IsAlive() == true and not input.IsButtonDown(deadespwallhack:GetValue()) then
+	if player:IsAlive() == false then										-- Dead and spectating someone
+
+            set("esp.overlay.enemy.name", true)
+            set("esp.chams.enemy.occluded", deadesp_chams_while_spec:GetValue())
+			set("esp.chams.enemy.visible", "2")
+			set("esp.chams.enemy.overlay", "1")
+			set("esp.chams.enemyattachments.occluded", false)
+			set("esp.chams.enemyattachments.visible", false)
+			set("esp.chams.enemyattachments.overlay", false)
+            set("esp.chams.friendlyattachments.occluded", false)
+			set("esp.chams.friendlyattachments.visible", false)
+			set("esp.chams.friendlyattachments.overlay", false)
+			set("esp.overlay.enemy.scoped", false)
+            set("esp.overlay.enemy.reloading", false)
+            set("esp.overlay.enemy.health.healthnum", false)
+            set("esp.overlay.enemy.health.healthbar", true)
+			set("esp.overlay.enemy.weapon", "1")
+            set("esp.overlay.enemy.box", false)
+            set("esp.overlay.enemy.hasdefuser", true)
+            set("esp.overlay.enemy.hasc4", true)
+            set("esp.overlay.enemy.barrel", false)
+			set("esp.overlay.enemy.armor", "1")
+
+	elseif player:IsAlive() == true then								-- Alive
             
-			gui.SetValue("esp.overlay.enemy.name", false)
-            gui.SetValue("esp.chams.enemy.occluded", false)
-			gui.SetValue("esp.chams.enemy.visible", "2")
-			gui.SetValue("esp.chams.enemy.overlay", false)
-			gui.SetValue("esp.chams.enemyattachments.occluded", false)
-			gui.SetValue("esp.chams.enemyattachments.visible", false)
-			gui.SetValue("esp.chams.enemyattachments.overlay", false)
-			gui.SetValue("esp.chams.friendlyattachments.occluded", false)
-			gui.SetValue("esp.chams.friendlyattachments.visible", false)
-			gui.SetValue("esp.chams.friendlyattachments.overlay", false)
-            gui.SetValue("esp.overlay.enemy.scoped", false)
-            gui.SetValue("esp.overlay.enemy.reloading", false)
-            gui.SetValue("esp.overlay.enemy.health.healthnum", false)
-            gui.SetValue("esp.overlay.enemy.health.healthbar", false)
-            gui.SetValue("esp.overlay.enemy.weapon", false)
-            gui.SetValue("esp.overlay.enemy.box", false)
-            gui.SetValue("esp.overlay.enemy.hasdefuser", false)
-            gui.SetValue("esp.overlay.enemy.hasc4", false)
-			gui.SetValue("esp.overlay.weapon.ammo", false)
-            gui.SetValue("esp.overlay.enemy.barrel", false)
-			gui.SetValue("esp.overlay.enemy.armor", false)
-			
+			set("esp.overlay.enemy.name", false)
+            set("esp.chams.enemy.occluded", false)
+			set("esp.chams.enemy.visible", "2")
+			set("esp.chams.enemy.overlay", false)
+			set("esp.chams.enemyattachments.occluded", false)
+			set("esp.chams.enemyattachments.visible", false)
+			set("esp.chams.enemyattachments.overlay", false)
+			set("esp.chams.friendlyattachments.occluded", false)
+			set("esp.chams.friendlyattachments.visible", false)
+			set("esp.chams.friendlyattachments.overlay", false)
+            set("esp.overlay.enemy.scoped", false)
+            set("esp.overlay.enemy.reloading", false)
+            set("esp.overlay.enemy.health.healthnum", false)
+            set("esp.overlay.enemy.health.healthbar", false)
+            set("esp.overlay.enemy.weapon", false)
+            set("esp.overlay.enemy.box", false)
+            set("esp.overlay.enemy.hasdefuser", false)
+            set("esp.overlay.enemy.hasc4", false)
+			set("esp.overlay.weapon.ammo", false)
+            set("esp.overlay.enemy.barrel", false)
+			set("esp.overlay.enemy.armor", false)
+	end
 	
-	elseif entities.GetLocalPlayer():IsAlive() == false then
+	if (deadesp_wallhack_key:GetValue() ~= nil or false) then		
+	
+	if player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue()) then		-- Alive, holding down the wh-key
+				set("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
 
-            gui.SetValue("esp.overlay.enemy.name", true)
-            gui.SetValue("esp.chams.enemy.occluded", DeadESPchams_while_spec:GetValue())
-			gui.SetValue("esp.chams.enemy.visible", "2")
-			gui.SetValue("esp.chams.enemy.overlay", "1")
-			gui.SetValue("esp.chams.enemyattachments.occluded", false)
-			gui.SetValue("esp.chams.enemyattachments.visible", false)
-			gui.SetValue("esp.chams.enemyattachments.overlay", false)
-            gui.SetValue("esp.chams.friendlyattachments.occluded", false)
-			gui.SetValue("esp.chams.friendlyattachments.visible", false)
-			gui.SetValue("esp.chams.friendlyattachments.overlay", false)
-			gui.SetValue("esp.overlay.enemy.scoped", false)
-            gui.SetValue("esp.overlay.enemy.reloading", false)
-            gui.SetValue("esp.overlay.enemy.health.healthnum", false)
-            gui.SetValue("esp.overlay.enemy.health.healthbar", true)
-			gui.SetValue("esp.overlay.enemy.weapon", "1")
-            gui.SetValue("esp.overlay.enemy.box", false)
-            gui.SetValue("esp.overlay.enemy.hasdefuser", true)
-            gui.SetValue("esp.overlay.enemy.hasc4", true)
-            gui.SetValue("esp.overlay.enemy.barrel", false)
-			gui.SetValue("esp.overlay.enemy.armor", "1")
-
-			end
+				color(wh_chams_indicators_clr:GetValue())
+				text(15, h/2, "Wallhack Chams On")
+			
 		end			
 	end
-end
+end
 
-callbacks.Register( "Draw", "espalwaysondead", ESP_Always_OnDead );
-
--- End DeadESP
+callbacks.Register( "Draw", DeadESP );
