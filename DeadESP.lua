@@ -17,8 +17,8 @@ local deadesp_chams_on_tggl = gui.Combobox(deadesp_group, 'deadespontgglchams_co
 deadesp_chams_on_tggl:SetDescription("Chams used for Wallhack on hold")
 local deadesp_chams_while_spec = gui.Combobox(deadesp_group, 'deadesp_chams_while_spec_combobox', 'DeadESP Chams while Spectating', 'Off', 'Flat', 'Color', 'Metallic', 'Glow' )	-- Change Wallhack ChamsMode onthefly
 deadesp_chams_while_spec:SetDescription("Chams used for Wallhack when spectator")
-local wh_chams_indicators_clr = gui.ColorPicker(deadesp_group, "wh.chams.ind.color", "WH Chams Indicators Color", 128,0,0,255)
-gui.Text(deadesp_group, "Created by ticzz [https://github.com/ticzz/Aimware-v5-luas/blob/master/DeadESP.lua]")
+local wh_chams_indicators_clr = gui.ColorPicker(deadesp_group, "wh.chams.ind.color", "WH Chams Indicators Color", 180,0,0,255)
+gui.Text(deadesp_group, "Created by ticzz [ https://github.com/ticzz/Aimware-v5-luas/blob/c7f6ed6a85533d14e3821d39274612cae2c7137f/DeadESP.lua ]")
 
 
 local function DeadESP( ) 
@@ -82,7 +82,7 @@ w, h = ScreenSize
 				set("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
 
 				color(wh_chams_indicators_clr:GetValue())
-				text(15, h/2, "Wallhack Chams On")
+				text(15, h/2, "Wallhack Chams OnKey")
 			
 		end			
 	end
