@@ -33,13 +33,11 @@ text = draw.TextShadow
 font = draw.CreateFont("Tahoma", 15, 700)
 
 
-
 local function DeadESP() 
 
 local x,y = draw.GetScreenSize()
 local player = entities.GetLocalPlayer()
 setFont(font)
-
 
 if player == nil or NULL then
 return
