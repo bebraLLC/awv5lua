@@ -1,3 +1,8 @@
+--Turns Visuals on when dead (to get infos for teammates (but Legit player shouldnt know too much ;P)
+--Turns Visuals off when alive (exept the Visual Chams of visible Enemys stay on)
+--If alive but need/want some extra infos for easier clutches just tap your wallhackkey as long as needed :D (onhold key)
+--Inspired by zacks [https://aimware.net/forum/user-36169.html] always esp on dead.lua [https://aimware.net/forum/thread/86414]
+
 -- DeadESP (This version only works with the default Chams provided by Aimware.net; not working with AdvancedChams or others atm)
 local x,y = 0,0
 local visual_refs = gui.Reference("VISUALS");
