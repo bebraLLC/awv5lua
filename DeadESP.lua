@@ -1,11 +1,5 @@
 -- DeadESP (This version only works with the default Chams provided by Aimware.net; not working with AdvancedChams or others atm)
-
 local w,h = 0,0
-ScreenSize = draw.GetScreenSize()
-player = entities.GetLocalPlayer()
-color = draw.Color
-text = draw.TextShadow
-
 local visual_refs = gui.Reference("VISUALS");
 local deadesp_tab = gui.Tab(visual_refs, "deadesp.tab", "DeadESP")
 local deadesp_group = gui.Groupbox(deadesp_tab, "DeadESP")
@@ -18,17 +12,30 @@ deadesp_chams_while_spec:SetDescription("Chams used for Wallhack when spectator"
 local wh_chams_indicators_clr = gui.ColorPicker(deadesp_group, "wh.chams.ind.color", "WH Chams Indicators Color", 180,0,0,255)
 gui.Text(deadesp_group, "Created by ticzz | aka KriZz87")
 gui.Text(deadesp_group, "https://github.com/ticzz/Aimware-v5-luas/blob/master/DeadESP.lua")
+gui.Text(deadesp_group, "Inspired by zacks [https://aimware.net/forum/user-36169.html] ")
+gui.Text(deadesp_group, "'always esp on dead.lua' [https://aimware.net/forum/thread/86414] ")
+player = entities.GetLocalPlayer()
+setFont = draw.SetFont
+color = draw.Color
+text = draw.TextShadow
+font = draw.CreateFont("Tahoma", 15, 700)
+w, h = draw.GetScreenSize()
 
-local function DeadESP( ) 
-w, h = ScreenSize
 
-	if not player then
+local function DeadESP() 
+
+	if player == nil or NULL then
 		return
-	end		
-	
-	if (deadesp_wallhack_key:GetValue() ~= nil or false) then		
+
+	else if (deadesp_wallhack_key:GetValue() ~= nil or 0) then
+	if player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue()) then		-- Alive, holding down the wh-key
 		
-	if player:IsAlive() == true and not input.IsButtonDown(deadesp_wallhack_key:GetValue()) then								-- Alive
+		gui.SetValue("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
+		color(wh_chams_indicators_clr:GetValue())
+		text(15, h/2, "Wallhack Chams OnKey")
+
+
+	elseif player:IsAlive() == true and not input.IsButtonDown(deadesp_wallhack_key:GetValue()) then								-- Alive
             
 		gui.SetValue("esp.overlay.enemy.name", false)
 		gui.SetValue("esp.chams.enemy.occluded", false)
@@ -52,10 +59,6 @@ w, h = ScreenSize
 		gui.SetValue("esp.overlay.enemy.barrel", false)
 		gui.SetValue("esp.overlay.enemy.armor", false)
 
-	elseif player:IsAlive() == true and input.IsButtonDown(deadesp_wallhack_key:GetValue()) then		-- Alive, holding down the wh-key
-		gui.SetValue("esp.chams.enemy.occluded", deadesp_chams_on_tggl:GetValue())
-		color(wh_chams_indicators_clr:GetValue())
-		text(15, h/2, "Wallhack Chams OnKey")
 
 	elseif player:IsAlive() == false then										-- Dead and spectating someone
 
@@ -81,8 +84,10 @@ w, h = ScreenSize
 		gui.SetValue("esp.overlay.enemy.armor", "1")
 
 		
-		end			
+				end			
+			end
+		end
 	end
-end
+
 
 callbacks.Register( "Draw", DeadESP );
