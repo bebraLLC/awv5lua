@@ -1,13 +1,17 @@
+print(GetScriptName() .. " succesfully loaded")
+
+--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#
+
 local vis_tab_radar = gui.Reference('VISUALS')
 local vis_main_tab = gui.Tab(vis_tab_radar, "lua_tab_radar", "EngineRadar")
-local EngineRadarchk = gui.Checkbox ( vis_main_tab, "lua_engine_radar", "Enable EngineRadar", 0 );
+local EngineRadarchk = gui.Checkbox ( vis_main_tab, "lua_engine_radar", "Enable EngineRadar", false );
 
 
 local function engine_radar_draw()
 
 if EngineRadarchk:GetValue() then        
 
-    for index, Player in pairs(entities.FindByClass("CCSPlayer")) do
+for index, Player in pairs(entities.FindByClass("CCSPlayer")) do
 
 Player:SetProp("m_bSpotted", 1);
 

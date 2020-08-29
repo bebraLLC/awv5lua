@@ -1,3 +1,7 @@
+print(GetScriptName() .. " succesfully loaded")
+
+--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#--#
+
 local nisc = gui.Reference('VISUALS')
 local vis_main_tab = gui.Tab(nisc, "vis_tab_radar", "EngineRadar & FPSboost")
 local EngineRadarchk = gui.Checkbox ( vis_main_tab, "lua_engine_radar", "Enable EngineRadar", 0 );
