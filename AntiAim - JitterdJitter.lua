@@ -8,10 +8,12 @@ local remslid = gui.Slider( ref, "remove","Remove/Add", 0, -58, 58, 1 )
 local eremslid = gui.Slider( ref, "eremove","Edge Remove", 0, 0, 58, 1 )
 local inv = 0
 local GetLocalPlayer = entities.GetLocalPlayer
-local lp = GetLocalPlayer()
+
+local lp = GetLocalPlayer()
 --local weapon = lp:GetPropEntity('m_hActiveWeapon')
 --local weaponID = weapon:GetWeaponID()
-local weapon = weapon ~= nil and weapon:GetClass() ~= nil 
+
+local weapon = weapon ~= nil and weapon:GetClass() ~= nil 
 
 local function autozues()
 	
@@ -62,6 +64,7 @@ local function jitterdjitter()
     if not edgey:GetValue() then gui.SetValue( "rbot.antiaim.left", 165) end
     if not edgey:GetValue() then gui.SetValue( "rbot.antiaim.right", -165) end
 end
+
 
 callbacks.Register( "Draw", jitterdjitter)
 callbacks.Register("Draw", autozues)
