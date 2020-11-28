@@ -15,7 +15,7 @@ local lp = GetLocalPlayer()
 
 local weapon = weapon ~= nil and weapon:GetClass() ~= nil 
 
-local function autozues()
+local function autozeus()
 	
 
    local lp = entities.GetLocalPlayer();
@@ -67,4 +67,4 @@ end
 
 
 callbacks.Register( "Draw", jitterdjitter)
-callbacks.Register("Draw", autozues)
+callbacks.Register("Draw", autozeus)
