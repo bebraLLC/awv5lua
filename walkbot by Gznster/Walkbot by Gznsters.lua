@@ -873,8 +873,9 @@ callbacks.Register("CreateMove", "walkbot_move", moveEventHandler);
 callbacks.Register("AimbotTarget", "walkbot_aimbot_target", aimbotTargetHandler);
 
 
-
 --***********************************************--
 
-print(GetScriptName() .. " succesfully loaded")
+print(GetScriptName() .. "  loaded without Errors ♥♥♥")
+--***********************************************--
 
+print("♥♥♥ " .. GetScriptName() .. " loaded without Errors ♥♥♥")
