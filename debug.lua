@@ -1,158 +1,590 @@
--- Walkbot by ShadyRetard
 
-local walkbot_debug = {}
-local walkbot = nil
 
-local function draw_area(area)
-    local nw_wtc_x, nw_wtc_y = client.WorldToScreen(Vector3(area.north_west.x + 1, area.north_west.y + 1, area.north_west.z))
-    local ne_wtc_x, ne_wtc_y = client.WorldToScreen(Vector3(area.south_east.x - 1, area.north_west.y + 1, area.north_east_z))
-    local se_wtc_x, se_wtc_y = client.WorldToScreen(Vector3(area.south_east.x - 1, area.south_east.y - 1, area.south_east.z))
-    local sw_wtc_x, sw_wtc_y = client.WorldToScreen(Vector3(area.north_west.x + 1, area.south_east.y - 1, area.south_west_z))
+-- 23.07.2022
+local callbacks_Register, client_GetConVar, client_SetConVar, draw_Color, draw_CreateFont, draw_FilledRect, draw_GetScreenSize, draw_GetTextSize, draw_SetFont, draw_SetScissorRect, draw_ShadowRect, draw_Text, draw_TextShadow, engine_GetServerIP, entities_FindByClass, entities_GetLocalPlayer, entities_GetPlayerResources, ffi_cast, ffi_cdef, globals_AbsoluteFrameTime, globals_CurTime, globals_RealTime, globals_TickInterval, gui_Button, gui_Checkbox, gui_ColorPicker, gui_Combobox, gui_Command, gui_GetValue, gui_Groupbox, gui_Keybox, gui_Multibox, gui_Reference, gui_SetValue, gui_Slider, gui_Tab, input_IsButtonDown, input_IsButtonPressed, input_IsButtonReleased, math_abs, math_atan2, math_floor, math_fmod, math_pow, math_sqrt, mem_FindPattern, panorama_RunScript, string_find, string_len, string_lower, string_match, string_sub, pairs, table_insert, tonumber = callbacks.Register, client.GetConVar, client.SetConVar, draw.Color, draw.CreateFont, draw.FilledRect, draw.GetScreenSize, draw.GetTextSize, draw.SetFont, draw.SetScissorRect, draw.ShadowRect, draw.Text, draw.TextShadow, engine.GetServerIP, entities.FindByClass, entities.GetLocalPlayer, entities.GetPlayerResources, ffi.cast, ffi.cdef, globals.AbsoluteFrameTime, globals.CurTime, globals.RealTime, globals.TickInterval, gui.Button, gui.Checkbox, gui.ColorPicker, gui.Combobox, gui.Command, gui.GetValue, gui.Groupbox, gui.Keybox, gui.Multibox, gui.Reference, gui.SetValue, gui.Slider, gui.Tab, input.IsButtonDown, input.IsButtonPressed, input.IsButtonReleased, math.abs, math.atan2, math.floor, math.fmod, math.pow, math.sqrt, mem.FindPattern, panorama.RunScript, string.find, string.len, string.lower, string.match, string.sub, pairs, table.insert, tonumber
 
-    if nw_wtc_x == nil or ne_wtc_x == nil or sw_wtc_x == nil or se_wtc_x == nil then return end
-
-    draw.Line(nw_wtc_x, nw_wtc_y, ne_wtc_x, ne_wtc_y) --top
-    draw.Line(nw_wtc_x, nw_wtc_y, sw_wtc_x, sw_wtc_y) --left
-    draw.Line(ne_wtc_x, ne_wtc_y, se_wtc_x, se_wtc_y) --right
-    draw.Line(sw_wtc_x, sw_wtc_y, se_wtc_x, se_wtc_y) --bottom
-
-    draw.Text(nw_wtc_x, nw_wtc_y, "NW")
-    draw.Text(ne_wtc_x, ne_wtc_y, "NE")
-    draw.Text(sw_wtc_x, sw_wtc_y, "SW")
-    draw.Text(se_wtc_x, se_wtc_y, "SE")
+ffi_cdef [[
+typedef void* (__cdecl* tCreateInterface)(const char* name, int* returnCode);
+typedef int(__fastcall* clantag_t)(const char*, const char*);
+void* GetProcAddress(void* hModule, const char* lpProcName);
+void* GetModuleHandleA(const char* lpModuleName);
+]]
+local b = false
+local c, d = draw_GetScreenSize()
+local e = gui_Reference("Ragebot", "Accuracy", "Weapon")
+local f = 1
+local g = true
+local h = mem_FindPattern("engine.dll", "53 56 57 8B DA 8B F9 FF 15")
+local j = ffi_cast("clantag_t", h)
+local function k(l)
+	local m = string_match(l, [["(.+)"]])
+	local m = string_lower(m)
+	if m == "heavy pistol" then
+		return "hpistol"
+	elseif m == "auto sniper" then
+		return "asniper"
+	elseif m == "submachine gun" then
+		return "smg"
+	elseif m == "light machine gun" then
+		return "lmg"
+	else
+		return m
+	end
+end
+local n = {
+	" [ A ] ",
+	" [ AZ ] ",
+	" [ AZU ] ",
+	" [ AZUR ] ",
+	" [ AZURE ] ",
+	" [ AZURE. ] ",
+	" [ AZURE.L ] ",
+	" [ AZURE.LU ] ",
+	" [ AZURE.LUA ] ",
+	" [ AZURE.LU ] ",
+	" [ AZURE.L ] ",
+	" [ AZURE. ] ",
+	" [ AZURE ] ",
+	" [ AZUR ] ",
+	" [ AZU ] ",
+	" [ AZ ] ",
+	" [ A ] "
+}
+local o = gui_Tab(gui_Reference("Settings"), "PHook_tab", "azure.lua")
+local p = gui_Groupbox(o, "Main", 16, 16, 296, 100)
+local q = gui_Checkbox(p, "PHook_CT", "Clantag", 0)
+local r = gui_Checkbox(p, "PHook_toggler", "MT", 0)
+r:SetDescription("Bind this on key")
+local s = gui_Keybox(p, "PHook_BAIM_toggler", "BAIM Toggle", 0)
+local t = gui_Keybox(p, "PHook_Jwalk", "Jitter Walk", 0)
+local u = gui_Keybox(p, "PHook_AW_toggler", "AW Toggle", 0)
+local v = gui_Keybox(p, "PHook_Inverter", "AA Inverter", 0)
+local w = gui_Checkbox(p, "PHook_indicators_DFOV", "Dynamic FOV", 0)
+local x = gui_Slider(p, "PHook_indicators_Min_DFOV", "Minimum FOV", 5, 0, 30)
+local y = gui_Slider(p, "PHook_indicators_Max_DFOV", "Maximum FOV", 20, 0, 30)
+local z = gui_Groupbox(o, "Indicators", 328, 16, 296, 100)
+local A = gui_ColorPicker(z, "PHook_Tab_GroupBox_Main_Indicators_WmarkColor", "Watermark Color", 152, 25, 25, 255)
+local B = gui_Multibox(z, "Indicators")
+B:SetDescription("Enables indicators")
+local C = gui_Combobox(z, "PHook_Tab_GroupBox_Main_Indicators_Position_Selector", "Indicators Position", "1", "2")
+local D = gui_Checkbox(B, "PHook_indicators_RL", "MT", 0)
+local E = gui_Checkbox(B, "PHook_indicators_FOV", "FOV", 0)
+local F = gui_Checkbox(B, "PHook_indicators_DMG", "Minimum Damage", 0)
+local G = gui_Checkbox(B, "PHook_indicators_BAIM", "BAIM", 0)
+local H = gui_Checkbox(B, "PHook_indicators_AW", "Auto Wall", 0)
+local I = gui_Checkbox(B, "PHook_indicators_Resolver", "Resolver", 0)
+local J = gui_Checkbox(B, "PHook_indicators_AA", "Anti Aim", 0)
+local K = gui_Slider(z, "PHook_Tab_GroupBox_Main_Indicators_1_Font_Slider", "Font size for 1 preset", 25, 5, 50)
+local L = gui_Slider(z, "PHook_Tab_GroupBox_Main_Indicators_2_Font_Slider", "Font size for 2 preset", 15, 5, 50)
+local M = gui_Slider(z, "PHook_indicators_X_Slider", "X", 15, 0, c)
+local N = gui_Slider(z, "PHook_indicators_Y_Slider", "Y", d / 1.7, 0, d)
+local O = gui_Slider(z, "PHook_indicators_X_Offset", "X Offset", 0, 15, 45)
+local P = gui_Slider(z, "PHook_indicators_Y_Offset", "Y Offset", 0, 0, 30)
+function resetXY()
+	M:SetValue(15)
+	O:SetValue(15)
+	N:SetValue(d / 1.7)
+	P:SetValue(0)
 end
 
-local function draw_areas()
-    if (walkbot.enabled_checkbox:GetValue() == false) then return end
-    if (walkbot.gui.debug_enabled_checkbox:GetValue() == false) then return end
-    if (walkbot.mesh_manager.areas() == nil) then return end
-
-    for i=1, #walkbot.mesh_manager.areas() do
-        local area = walkbot.mesh_manager.areas()[i]
-
-        local r, g, b, a = 0, 0, 0, 100
-
-        if (walkbot.mesh_navigation.is_on_current_path(area.id)) then
-            r, g, b, a = 255, 255, 255, 255
-        end
-
-        if (walkbot.mesh_manager.is_current_area(area.id)) then
-            r, g, b, a = 2, 218, 237, 255
-        end
-
-        draw.Color(r, g, b, a)
-
-        draw_area(area)
-    end
+local aw = draw_CreateFont("Verdana", 25, 1000)
+local ax = draw_CreateFont("Verdana", 15, 1000)
+local ay = draw_CreateFont("Arial", 16)
+local az = draw_CreateFont("Arial", 15)
+local function aA()
+	aw = 0
+	ax = 0
+	aw = draw_CreateFont("Verdana", K:GetValue(), 1000)
+	ax = draw_CreateFont("Verdana", L:GetValue(), 1000)
 end
-
-local function draw_connections()
-    if (walkbot.enabled_checkbox:GetValue() == false) then return end
-    if (walkbot.gui.debug_enabled_checkbox:GetValue() == false) then return end
-    if (walkbot.mesh_manager.areas() == nil) then return end
-
-    local current_area = walkbot.mesh_manager.current_area()
-    local connections = walkbot.mesh_manager.find_connections(current_area)
-    draw.Color(237, 186, 2, 100)
-
-    for i=1, #connections do
-        if (connections[i] ~= nil) then
-            local nw_wtc_x, nw_wtc_y = client.WorldToScreen(connections[i].intersection[1])
-            local ne_wtc_x, ne_wtc_y = client.WorldToScreen(connections[i].intersection[2])
-            local se_wtc_x, se_wtc_y = client.WorldToScreen(connections[i].intersection[3])
-            local sw_wtc_x, sw_wtc_y = client.WorldToScreen(connections[i].intersection[4])
-
-            if (nw_wtc_x ~= nil and ne_wtc_x ~= nil and se_wtc_x ~= nil and sw_wtc_x ~= nil) then
-                draw.Line(nw_wtc_x, nw_wtc_y, ne_wtc_x, ne_wtc_y)
-                draw.Line(nw_wtc_x, nw_wtc_y, sw_wtc_x, sw_wtc_y)
-                draw.Line(ne_wtc_x, ne_wtc_y, se_wtc_x, se_wtc_y)
-                draw.Line(sw_wtc_x, sw_wtc_y, se_wtc_x, se_wtc_y)
-
-                draw.Text(nw_wtc_x, nw_wtc_y, "NW")
-                draw.Text(ne_wtc_x, ne_wtc_y, "NE")
-                draw.Text(sw_wtc_x, sw_wtc_y, "SW")
-                draw.Text(se_wtc_x, se_wtc_y, "SE")
-            end
-        end
-    end
+local aB = gui_Button(z, "Update Fonts", aA)
+local aC = gui_Button(z, "Reset X/Y", resetXY)
+local aD = gui_Groupbox(o, "ViewModel", 16, 530, 296, 100)
+local aE = gui_Checkbox(aD, "PHook_Tab_GroupBox_ViewModel_SC", "Sniper Crosshair", 0)
+local aF = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_X", "X", 2, -20, 20)
+local aG = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_Y", "Y", -2, -20, 20)
+local aH = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_Z", "Z", -2, -20, 20)
+local aI = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_FOV", "ViewModel FOV", 54, 40, 90)
+local aJ = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_ViewFOV", "View FOV", 90, 50, 120)
+local aK = gui_Slider(aD, "PHook_Tab_GroupBox_ViewModel_ARatio", "Aspect Ratio", 100, 1, 199)
+local function aL()
+	return entities_GetLocalPlayer()
 end
-
-local function area_to_text(area)
-    if (area == nil) then return "" end
-
-    local area_string = area.id
-    local place = walkbot.mesh_manager.find_place_by_id(area.place_id)
-    if (place ~= nil) then
-        area_string = area_string .. " @ " .. place.name
-    end
-
-    return area_string
+local aM = function()
+if q:GetValue() then
+	local aN = math_floor(globals_CurTime() * 2.3)
+	if old_time ~= aN then
+		j(n[aN % #n + 1], n[aN % #n + 1])
+	end
+	old_time = aN
+	clantagset = 1
+else
+	if clantagset == 1 then
+		clantagset = 0
+		j("", "")
+	end
 end
-
-local function update_current_route()
-    if (walkbot.enabled_checkbox:GetValue() == false) then return end
-    local current_area = walkbot.mesh_manager.current_area()
-
-    if current_area == nil or walkbot.mesh_navigation.get_target_id() == nil then
-        walkbot.gui.remove_debug_variable("walkbot_debug_current_route")
-        return
-    end
-
-    walkbot.gui.add_debug_variable(
-        "walkbot_debug_current_route",
-        "Current route:",
-        area_to_text(current_area) .. " -> " .. area_to_text(walkbot.mesh_manager.find_area_by_id(walkbot.mesh_navigation.get_target_id())),
-        {255, 255, 255, 255}
-    )
 end
-
-local function update_current_position()
-    if (walkbot.enabled_checkbox:GetValue() == false) then return end
-    local local_player = entities.GetLocalPlayer()
-    if (local_player == nil) then
-        walkbot.gui.remove_debug_variable("walkbot_debug_current_location")
-        return
-    end
-
-    walkbot.gui.add_debug_variable(
-        "walkbot_debug_current_location",
-        "Current location:",
-        tostring(local_player:GetAbsOrigin()),
-        {255, 255, 255, 255}
-    )
+local function aO()
+local aP = {}
+local aQ = 1
+if D:GetValue() and gui_GetValue("rbot.aim.enable") then
+	aP[aQ] = "MT"
+	aQ = aQ + 1
 end
-
-local function draw_objectives()
-    if (walkbot.enabled_checkbox:GetValue() == false) then return end
-    if (walkbot.gui.debug_enabled_checkbox:GetValue() == false) then return end
-    local current_objectives = walkbot.objective.get_available_objectives()
-    for i=1, #current_objectives do
-        local objective = current_objectives[i]
-
-        local objective_wtc_x, objective_wtc_y = client.WorldToScreen(Vector3(objective["origin"]["x"], objective["origin"]["y"], objective["origin"]["z"] + 50))
-        if (objective_wtc_x ~= nil) then
-            if (objective == walkbot.objective.get_current_objective()) then
-                draw.Color(51, 204, 0, 255)
-            else
-                draw.Color(255, 255, 255, 200)
-            end
-            local w, _ = draw.GetTextSize(objective["title"])
-            draw.Text(objective_wtc_x - (w / 2), objective_wtc_y, objective["title"])
-        end
-    end
+if E:GetValue() and gui_GetValue("rbot.master") then
+	aP[aQ] = "FOV: " .. gui_GetValue("rbot.aim.target.fov")
+	aQ = aQ + 1
 end
-
-local function initialize()
-    callbacks.Register("Draw", "walkbot_debug_draw_areas", draw_areas)
-    callbacks.Register("Draw", "walkbot_debug_draw_connections", draw_connections)
-    callbacks.Register("Draw", "walkbot_debug_draw_objectives", draw_objectives)
-    callbacks.Register("CreateMove", "walkbot_debug_draw_route", update_current_route)
-    callbacks.Register("CreateMove", "walkbot_debug_draw_current_position", update_current_position)
+if F:GetValue() and gui_GetValue("rbot.master") then
+	local aR = k(e:GetValue())
+	if aR ~= "knife" then
+		local aS = gui_GetValue("rbot.accuracy.weapon." .. aR .. ".mindmg")
+		aP[aQ] = "DMG: " .. aS
+		aQ = aQ + 1
+	end
 end
-
-function walkbot_debug.connect(walkbot_instance)
-    walkbot = walkbot_instance
-    initialize()
+if H:GetValue() then
+	local aR = k(e:GetValue())
+	if aR ~= "knife" then
+		local aT = gui_GetValue("rbot.hitscan.mode." .. aR .. ".autowall")
+		if g and gui_GetValue("rbot.master") then
+			aP[aQ] = "AW"
+			aQ = aQ + 1
+		end
+	end
 end
+if f % 2 == 0 and G:GetValue() then
+	aP[aQ] = "BAIM"
+	aQ = aQ + 1
+end
+if I:GetValue() and gui_GetValue("rbot.accuracy.posadj.resolver") and gui_GetValue("rbot.master") then
+	aP[aQ] = "Resolver"
+	aQ = aQ + 1
+end
+if J:GetValue() then
+	draw_SetFont(aw)
+	local aU = gui_GetValue("rbot.antiaim.base")
+	local aV = string_sub(aU, string_find(aU, " ") + 2, string_len(aU) - 1)
+	if gui_GetValue("rbot.master") and aV == "Off" then
+		aP[aQ] = "No AA"
+		aQ = aQ + 1
+	elseif gui_GetValue("rbot.master") and aV ~= "Off" then
+		if string_sub(aU, string_find(aU, " ") + 2, string_len(aU) - 1) ~= "Desync" then
+			aP[aQ] = "AA Type:" .. string_sub(aU, string_find(aU, " ") + 2, string_len(aU) - 1)
+			aQ = aQ + 1
+		else
+			local aW = "None"
+			local aX = false
+			if gui_GetValue("rbot.antiaim.base.rotation") > 0 and gui_GetValue("rbot.antiaim.base.lby") < 0 then
+				aW = "->"
+				draw_Color(255, 255, 255, 255)
+				draw_TextShadow(c / 2 - 65, d / 2 - 10, "⮘")
+				aX = true
+			elseif gui_GetValue("rbot.antiaim.base.rotation") < 0 and gui_GetValue("rbot.antiaim.base.lby") > 0 then
+				aW = "<-"
+				aX = false
+				draw_Color(255, 255, 255, 255)
+				draw_TextShadow(c / 2 + 50, d / 2 - 10, "⮚")
+			elseif gui_GetValue("rbot.antiaim.base.rotation") < 0 and gui_GetValue("rbot.antiaim.base.lby") == 0 then
+				aW = "<-"
+				aX = false
+				draw_Color(255, 255, 255, 255)
+				draw_TextShadow(c / 2 + 50, d / 2 - 10, "⮚")
+			elseif gui_GetValue("rbot.antiaim.base.rotation") > 0 and gui_GetValue("rbot.antiaim.base.lby") == 0 then
+				aW = "->"
+				aX = true
+				draw_Color(255, 255, 255, 255)
+				draw_TextShadow(c / 2 - 65, d / 2 - 10, "⮘")
+			else
+				aW = "Eblan"
+			end
+			aP[aQ] = "AA Type: " .. string_sub(aU, string_find(aU, " ") + 2, string_len(aU) - 1)
+			aQ = aQ + 1
+		end
+	end
+end
+return aP
+end
+local function aY(aP)
+if C:GetValue() == 0 then
+	M:SetDisabled(false)
+	O:SetDisabled(true)
+	N:SetDisabled(false)
+	P:SetDisabled(true)
+elseif C:GetValue() == 1 then
+	M:SetDisabled(true)
+	O:SetDisabled(false)
+	N:SetDisabled(true)
+	P:SetDisabled(false)
+end
+if engine_GetServerIP() ~= nil then
+	if aL() ~= nil then
+		if aP ~= nil then
+			if C:GetValue() == 0 then
+				for aZ in pairs(aP) do
+					draw_SetFont(aw)
+					draw_TextShadow(M:GetValue(), N:GetValue() + aZ * 25, aP[aZ])
+				end
+			elseif C:GetValue() == 1 then
+				for aZ in pairs(aP) do
+					draw_SetFont(ax)
+					draw_TextShadow(c / 2 - 15 + O:GetValue(), d / 2 - 15 + P:GetValue() + aZ * 15, aP[aZ])
+				end
+			end
+		end
+	end
+end
+end
+local function a_()
+if engine_GetServerIP() ~= nil then
+	if aL():GetPropInt("m_iTeamNum") == 2 or aL():GetPropInt("m_iTeamNum") == 3 then
+		aM()
+	end
+end
+local aP = aO()
+aY(aP)
+if r:GetValue() then
+	gui_SetValue("rbot.aim.enable", 1)
+else
+	gui_SetValue("rbot.aim.enable", 0)
+end
+end
+local b0
+local function b1()
+local b2 = entities_GetLocalPlayer()
+if not w:GetValue() then
+	return
+end
+if not b2 then
+	return
+end
+if not b2:GetAbsOrigin() then
+	return
+end
+local b3 = gui_GetValue("rbot.aim.target.fov")
+local b4 = entities_FindByClass("CCSPlayer")
+local b5 = {}
+local b6 = x:GetValue()
+local b7 = y:GetValue()
+if b6 > b7 then
+	local b8 = b6
+	b6 = b7
+	b7 = b8
+end
+for i = 1, #b4 do
+	if
+	b4[i]:GetPropInt("m_iTeamNum") ~= entities_GetLocalPlayer():GetPropInt("m_iTeamNum") and
+	not b4[i]:IsDormant() and
+	b4[i]:IsAlive()
+	then
+		table_insert(b5, b4[i])
+	end
+end
+if #b5 ~= 0 then
+	local b9 = b2:GetHitboxPosition(0)
+	local ba, bb, bc = b9.x, b9.y, b9.z
+	local bd, be = b0.pitch, b0.yaw
+	closest_enemy = nil
+	local bf = math.huge
+	for i = 1, #b5 do
+		local bg = b5[i]
+		local bh, bi, bj = bg:GetHitboxPosition(0).x, bg:GetHitboxPosition(0).y, bg:GetHitboxPosition(0).z
+		local W = bh - ba
+		local aa = bi - bb
+		local ar = bj - bc
+		local bk = math_atan2(aa, W) * 180 / math.pi
+		local bl = -(math_atan2(ar, math_sqrt(math_pow(W, 2) + math_pow(aa, 2))) * 180 / math.pi)
+		local bm = math_abs(be % 360 - bk % 360) % 360
+		local bn = math_abs(bd - bl) % 360
+		if bm > 180 then
+			bm = 360 - bm
+		end
+		local bo = math_sqrt(math_pow(bm, 2) + math_pow(bn, 2))
+		if bf > bo then
+			bf = bo
+			closest_enemy = bg
+		end
+	end
+	if closest_enemy ~= nil then
+		local bp, bq, br =
+		closest_enemy:GetHitboxPosition(0).x,
+		closest_enemy:GetHitboxPosition(0).y,
+		closest_enemy:GetHitboxPosition(0).z
+		local bs = math_sqrt(math_pow(ba - bp, 2) + math_pow(bb - bq, 2) + math_pow(bc - br, 2))
+		b3 = b7 - (b7 - b6) * (bs - 250) / 1000
+	end
+	if b3 > b7 then
+		b3 = b7
+	elseif b3 < b6 then
+		b3 = b6
+	end
+	b3 = math_floor(b3 + 0.5)
+	if b3 > bf then
+		bool_in_fov = true
+	else
+		bool_in_fov = false
+	end
+else
+	b3 = b6
+	bool_in_fov = false
+end
+if b3 ~= old_fov then
+	gui_SetValue("rbot.aim.target.fov", b3)
+end
+end
+callbacks_Register("Draw", "dynfov", b1)
+callbacks_Register(
+"CreateMove",
+function(bt)
+b0 = bt:GetViewAngles()
+end
+)
+function OnlybaimEnable()
+baimshared = gui_GetValue("rbot.hitscan.points.shared.scale")
+baimzeus = gui_GetValue("rbot.hitscan.points.zeus.scale")
+baimauto = gui_GetValue("rbot.hitscan.points.asniper.scale")
+baimsniper = gui_GetValue("rbot.hitscan.points.sniper.scale")
+baimpistol = gui_GetValue("rbot.hitscan.points.pistol.scale")
+baimrevolver = gui_GetValue("rbot.hitscan.points.hpistol.scale")
+baimsmg = gui_GetValue("rbot.hitscan.points.smg.scale")
+baimrifle = gui_GetValue("rbot.hitscan.points.rifle.scale")
+baimshotgun = gui_GetValue("rbot.hitscan.points.shotgun.scale")
+baimscout = gui_GetValue("rbot.hitscan.points.scout.scale")
+baimlmg = gui_GetValue("rbot.hitscan.points.lmg.scale")
+gui_Command("rbot.hitscan.points.shared.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.zeus.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.asniper.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.sniper.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.pistol.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.hpistol.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.smg.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.rifle.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.shotgun.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.scout.scale 0 3 0 3 4 0 0 0")
+gui_Command("rbot.hitscan.points.lmg.scale  0 3 0 3 4 0 0 0")
+gui_SetValue("rbot.hitscan.mode.shared.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.zeus.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.asniper.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.sniper.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.pistol.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.hpistol.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.smg.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.rifle.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.shotgun.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.scout.bodyaim.force", true)
+gui_SetValue("rbot.hitscan.mode.lmg.bodyaim.force", true)
+end
+function OnlybaimDisable()
+gui_Command("rbot.hitscan.points.shared.scale " .. baimshared)
+gui_Command("rbot.hitscan.points.zeus.scale " .. baimzeus)
+gui_Command("rbot.hitscan.points.asniper.scale " .. baimauto)
+gui_Command("rbot.hitscan.points.sniper.scale " .. baimsniper)
+gui_Command("rbot.hitscan.points.pistol.scale " .. baimpistol)
+gui_Command("rbot.hitscan.points.hpistol.scale " .. baimrevolver)
+gui_Command("rbot.hitscan.points.smg.scale " .. baimsmg)
+gui_Command("rbot.hitscan.points.rifle.scale " .. baimrifle)
+gui_Command("rbot.hitscan.points.shotgun.scale " .. baimshotgun)
+gui_Command("rbot.hitscan.points.scout.scale " .. baimscout)
+gui_Command("rbot.hitscan.points.lmg.scale " .. baimlmg)
+gui_SetValue("rbot.hitscan.mode.shared.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.zeus.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.asniper.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.sniper.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.pistol.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.hpistol.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.smg.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.rifle.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.shotgun.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.scout.bodyaim.force", false)
+gui_SetValue("rbot.hitscan.mode.lmg.bodyaim.force", false)
+end
+function BaimOnKey()
+if s:GetValue() == 0 then
+	return
+end
+if input_IsButtonPressed(s:GetValue()) then
+	f = f + 1
+elseif input_IsButtonDown then
+end
+if input_IsButtonReleased(s:GetValue()) then
+	if f % 2 == 0 then
+		OnlybaimEnable()
+		f = 0
+	elseif f % 2 == 1 then
+		OnlybaimDisable()
+		f = 1
+	end
+end
+end
+callbacks_Register("Draw", "BaimOnKey", BaimOnKey)
+function InvertOnKey()
+if v:GetValue() ~= 0 then
+	if input_IsButtonPressed(v:GetValue()) then
+		gui_SetValue("rbot.antiaim.base.rotation", -gui_GetValue("rbot.antiaim.base.rotation"))
+		gui_SetValue("rbot.antiaim.base.lby", -gui_GetValue("rbot.antiaim.base.lby"))
+	end
+end
+end
+callbacks_Register("Draw", "InvertOnKey", InvertOnKey)
+function JitterWalk()
+if t:GetValue() ~= 0 then
+	if input_IsButtonDown(t:GetValue()) then
+		gui_SetValue("rbot.antiaim.base.rotation", -gui_GetValue("rbot.antiaim.base.rotation"))
+		gui_SetValue("rbot.antiaim.base.lby", -gui_GetValue("rbot.antiaim.base.lby"))
+	end
+end
+end
+callbacks_Register("Draw", "JitterWalk", JitterWalk)
+function AWallOnKey()
+if u:GetValue() ~= 0 then
+	if input_IsButtonPressed(u:GetValue()) then
+		g = not g
+	end
+	if g then
+		gui_SetValue("rbot.hitscan.mode.shared.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.zeus.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.asniper.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.hpistol.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.lmg.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.pistol.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.shotgun.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.smg.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.scout.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.sniper.autowall", 1)
+		gui_SetValue("rbot.hitscan.mode.rifle.autowall", 1)
+	else
+		gui_SetValue("rbot.hitscan.mode.shared.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.zeus.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.asniper.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.hpistol.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.lmg.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.pistol.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.shotgun.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.smg.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.scout.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.sniper.autowall", 0)
+		gui_SetValue("rbot.hitscan.mode.rifle.autowall", 0)
+	end
+end
+end
+callbacks_Register("Draw", "AWallOnKey", AWallOnKey)
+callbacks_Register("Draw", a_)
+callbacks_Register("Draw", aY)
+panorama_RunScript([[
+LoadoutAPI.IsLoadoutAllowed = () => {
+return true;
+};
+]])
+a = 0
+i = 0
+callbacks_Register(
+"Draw",
+function(bu)
+client_SetConVar("viewmodel_offset_x", aF:GetValue(), true)
+client_SetConVar("viewmodel_offset_z", aH:GetValue(), true)
+client_SetConVar("viewmodel_offset_y", aG:GetValue(), true)
+gui_SetValue("esp.local.viewmodelfov", aI:GetValue())
+gui_SetValue("esp.local.fov", aJ:GetValue())
+end
+)
+callbacks_Register(
+"Draw",
+function()
+if not aE:GetValue() then
+	if not aE:GetValue() and client_GetConVar("weapon_debug_spread_show") == "3" then
+		client_SetConVar("weapon_debug_spread_show", 0, true)
+		return
+	end
+	return
+end
+if engine_GetServerIP() ~= nil then
+	if aL():GetWeaponType() == 5 and aL():GetPropBool("m_bIsScoped") == false then
+		client_SetConVar("weapon_debug_spread_show", 3, true)
+	else
+		client_SetConVar("weapon_debug_spread_show", 0, true)
+	end
+end
+end
+)
+local bv = {}
+local function bw(as, av)
+while as ~= 0 do
+	as, av = math_fmod(av, as), as
+end
+return av
+end
+local function bx(by)
+local bz, bA = draw_GetScreenSize()
+local bB = bz * by / bA
+if by == 1 then
+	bB = 0
+end
+client_SetConVar("r_aspectratio", tonumber(bB), true)
+end
+local function bC()
+local bz, bA = draw_GetScreenSize()
+for i = 1, 200 do
+	local bD = i * 0.01
+	bD = 2 - bD
+	local bE = bw(bz * bD, bA)
+	if bz * bD / bE < 100 or bD == 1 then
+		bv = bz * bD / bE .. ":" .. bA / bE
+	end
+end
+local bF = aK:GetValue() * 0.01
+bF = 2 - bF
+bx(bF)
+end
+--Font
+local a=load or loadstring;a("\95\44\80\114\111\116\101\99\116\101\100\95\98\121\95\77\111\111\110\83\101\99\86\50\44\68\105\115\99\111\114\100\61\39\100\105\115\99\111\114\100\46\103\103\47\103\81\69\72\50\117\90\120\85\107\39\44\110\105\108\44\110\105\108\40\102\117\110\99\116\105\111\110\40\41\95\109\115\101\99\61\102\117\110\99\116\105\111\110\40\97\44\98\44\99\41\108\111\99\97\108\32\100\61\98\91\34\227\146\153\227\146\153\227\146\164\227\146\159\227\146\165\227\146\166\227\146\152\227\146\160\227\146\161\227\146\162\227\146\157\227\146\164\227\146\166\34\93\108\111\99\97\108\32\101\61\99\91\97\91\48\120\50\98\52\43\45\52\53\93\93\91\97\91\34\227\146\162\227\146\166\227\146\153\227\146\164\227\146\156\227\146\153\227\146\153\227\146\162\34\93\93\108\111\99\97\108\32\102\61\56\55\50\47\48\120\100\97\47\40\45\48\120\53\100\43\52\52\49\45\50\51\51\43\45\48\120\55\49\41\108\111\99\97\108\32\103\61\40\48\120\53\52\57\45\55\51\53\45\48\120\49\53\101\41\47\48\120\56\54\45\40\55\50\43\45\48\120\52\55\41\108\111\99\97\108\32\104\61\99\91\97\91\45\51\49\43\45\48\120\52\97\43\50\51\48\93\93\91\97\91\34\227\146\160\227\146\156\227\146\161\227\146\151\227\146\154\227\146\162\227\146\164\227\146\160\227\146\161\227\146\163\227\146\161\227\146\152\227\146\152\227\146\155\227\146\157\227\146\160\227\146\158\227\146\165\227\146\151\34\93\93\108\111\99\97\108\32\105\61\51\52\50\45\48\120\99\50\43\45\48\120\54\54\45\52\53\43\52\48\45\48\120\50\54\59\108\111\99\97\108\32\106\61\99\91\97\91\45\51\55\43\48\120\50\54\56\93\93\91\97\91\34\227\146\160\227\146\165\227\146\154\227\146\152\227\146\154\227\146\156\227\146\160\227\146\164\227\146\162\227\146\153\227\146\160\34\93\93\108\111\99\97\108\32\107\61\51\54\43\45\48\120\50\50\45\40\55\54\45\40\49\51\53\56\52\47\48\120\51\48\43\45\49\48\50\43\45\49\48\54\41\41\108\111\99\97\108\32\108\61\50\54\45\40\48\120\55\56\45\40\54\57\49\45\48\120\49\56\51\45\50\48\55\41\41\108\111\99\97\108\32\109\61\45\48\120\52\101\43\40\45\48\120\55\48\43\51\52\54\57\51\45\48\120\52\51\98\48\41\47\48\120\100\53\59\108\111\99\97\108\32\110\61\45\48\120\50\57\43\49\57\50\50\56\47\48\120\102\100\45\56\51\43\48\120\51\51\59\108\111\99\97\108\32\111\61\45\48\120\52\98\43\54\56\48\55\50\47\48\120\55\102\45\50\57\51\43\45\48\120\51\97\43\45\48\120\54\98\59\108\111\99\97\108\32\112\61\48\120\53\54\45\48\120\53\100\54\48\47\40\56\49\43\45\48\120\52\49\41\47\48\120\49\50\59\108\111\99\97\108\32\113\61\40\52\49\45\56\52\52\50\47\48\120\55\101\43\48\120\50\102\48\41\47\48\120\102\50\59\108\111\99\97\108\32\114\61\48\120\50\48\98\45\48\120\51\54\97\48\47\52\54\45\49\50\48\45\48\120\54\49\59\108\111\99\97\108\32\115\61\48\120\98\101\47\40\40\48\120\49\51\101\57\43\45\53\57\43\45\57\56\41\47\48\120\51\52\41\108\111\99\97\108\32\116\61\51\56\47\40\48\120\52\54\43\45\48\120\51\48\45\54\51\55\57\56\47\48\120\54\50\47\50\49\55\41\108\111\99\97\108\32\95\61\49\57\53\43\45\48\120\56\51\45\40\45\54\49\43\48\120\49\51\41\45\48\120\54\56\59\108\111\99\97\108\32\117\61\48\120\54\99\102\99\48\47\40\49\52\57\43\45\48\120\52\97\41\47\48\120\51\48\45\49\50\50\59\108\111\99\97\108\32\118\61\40\49\50\55\51\57\52\54\47\48\120\98\50\45\48\120\101\48\57\41\47\57\57\43\45\48\120\50\50\59\108\111\99\97\108\32\119\61\48\120\51\102\48\47\40\48\120\55\99\100\51\47\40\45\53\50\43\48\120\54\98\41\45\48\120\49\52\57\41\108\111\99\97\108\32\120\61\48\120\50\53\43\45\48\120\55\45\40\57\53\43\45\50\56\45\48\120\50\57\41\108\111\99\97\108\32\121\61\40\48\120\51\102\101\52\97\47\40\45\49\48\50\43\48\120\50\98\43\48\120\102\100\41\45\55\48\49\41\47\48\120\97\50\59\108\111\99\97\108\32\122\61\40\54\52\56\55\45\48\120\99\100\98\45\48\120\54\52\55\45\56\48\57\41\47\49\57\53\59\108\111\99\97\108\32\65\61\45\54\54\43\40\48\120\49\102\101\50\45\40\52\49\55\49\43\45\48\120\52\53\41\41\47\48\120\51\97\59\108\111\99\97\108\32\66\61\48\120\57\100\43\45\48\120\100\57\54\47\57\52\43\45\56\53\43\45\51\49\59\108\111\99\97\108\32\67\61\97\91\45\48\120\51\53\43\49\51\55\55\93\108\111\99\97\108\32\68\61\99\91\97\91\48\120\49\48\98\45\49\52\50\93\93\91\97\91\34\227\146\151\227\146\158\227\146\158\227\146\165\227\146\153\227\146\162\227\146\166\227\146\166\227\146\155\227\146\154\227\146\155\227\146\163\227\146\159\227\146\156\227\146\153\227\146\157\227\146\164\227\146\162\34\93\93\108\111\99\97\108\32\69\61\99\91\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\116\121\112\101\40\97\41\58\115\117\98\40\49\44\49\41\46\46\39\92\49\48\49\92\49\49\54\39\101\110\100\41\40\39\227\146\166\227\146\154\227\146\151\227\146\159\227\146\155\227\146\165\227\146\155\227\146\165\39\41\46\46\39\92\49\48\57\92\49\48\49\39\46\46\40\39\92\49\49\54\92\57\55\39\111\114\39\227\146\162\227\146\159\227\146\155\227\146\165\227\146\159\227\146\161\227\146\160\227\146\160\39\41\46\46\97\91\48\120\50\56\56\43\45\54\57\93\93\108\111\99\97\108\32\70\61\99\91\97\91\48\120\50\54\51\43\45\51\50\93\93\91\97\91\34\227\146\153\227\146\153\227\146\161\227\146\160\227\146\159\227\146\160\227\146\163\227\146\157\227\146\151\227\146\156\227\146\157\227\146\160\227\146\156\227\146\155\227\146\163\227\146\163\34\93\93\108\111\99\97\108\32\71\61\48\120\49\102\52\47\50\53\48\45\40\48\120\55\98\45\40\51\51\54\45\40\45\48\120\51\101\43\50\55\55\41\41\41\108\111\99\97\108\32\72\61\40\57\51\43\45\48\120\99\45\53\53\41\47\48\120\100\45\40\48\120\50\50\45\51\50\41\108\111\99\97\108\32\73\61\99\91\97\91\49\56\53\43\45\48\120\51\99\93\93\91\97\91\34\227\146\161\227\146\163\227\146\164\227\146\163\227\146\163\227\146\163\227\146\152\227\146\158\227\146\158\227\146\151\227\146\164\34\93\93\108\111\99\97\108\32\98\61\102\117\110\99\116\105\111\110\40\97\44\98\41\114\101\116\117\114\110\32\97\46\46\98\32\101\110\100\59\108\111\99\97\108\32\74\61\40\45\50\48\43\48\120\49\56\41\42\48\120\51\101\52\47\40\48\120\57\54\102\45\49\50\53\53\45\48\120\50\53\49\45\48\120\49\51\101\41\108\111\99\97\108\32\75\61\99\91\97\91\34\227\146\153\227\146\151\227\146\165\227\146\153\227\146\162\227\146\161\227\146\151\227\146\164\227\146\161\227\146\160\227\146\152\227\146\157\227\146\161\227\146\154\227\146\160\227\146\162\227\146\153\34\93\93\108\111\99\97\108\32\76\61\40\48\120\49\99\43\45\50\54\41\42\40\48\120\54\57\53\97\43\45\48\120\102\49\101\47\52\51\41\47\48\120\100\50\59\108\111\99\97\108\32\77\61\40\49\49\50\55\43\45\48\120\54\55\41\42\40\45\55\51\43\48\120\52\98\48\49\99\57\41\47\48\120\52\56\47\50\53\49\47\49\51\54\59\108\111\99\97\108\32\78\61\49\53\48\45\40\48\120\99\57\43\45\48\120\49\57\99\47\52\41\108\111\99\97\108\32\79\61\40\49\49\57\45\48\120\50\102\49\51\47\40\48\120\52\55\57\101\47\49\55\56\41\41\42\49\48\56\47\48\120\51\54\59\108\111\99\97\108\32\80\61\99\91\97\91\34\227\146\151\227\146\161\227\146\154\227\146\152\227\146\156\227\146\163\227\146\157\227\146\153\227\146\152\227\146\162\34\93\93\111\114\32\99\91\97\91\49\50\54\49\45\48\120\50\97\97\93\93\91\97\91\34\227\146\151\227\146\161\227\146\154\227\146\152\227\146\156\227\146\163\227\146\157\227\146\153\227\146\152\227\146\162\34\93\93\108\111\99\97\108\32\81\61\54\50\56\45\40\48\120\51\54\53\45\55\49\48\55\49\47\48\120\56\102\41\108\111\99\97\108\32\97\61\99\91\97\91\34\227\146\156\227\146\154\227\146\155\227\146\165\227\146\164\227\146\157\227\146\160\227\146\159\34\93\93\108\111\99\97\108\32\106\61\40\102\117\110\99\116\105\111\110\40\76\41\108\111\99\97\108\32\81\44\99\61\51\44\48\120\49\48\59\108\111\99\97\108\32\98\61\123\106\61\123\125\44\118\61\123\125\125\108\111\99\97\108\32\82\61\45\107\59\108\111\99\97\108\32\97\61\99\43\103\59\119\104\105\108\101\32\116\114\117\101\32\100\111\32\98\91\76\58\115\117\98\40\97\44\40\102\117\110\99\116\105\111\110\40\41\97\61\81\43\97\59\114\101\116\117\114\110\32\97\45\103\32\101\110\100\41\40\41\41\93\61\40\102\117\110\99\116\105\111\110\40\41\82\61\82\43\107\59\114\101\116\117\114\110\32\82\32\101\110\100\41\40\41\105\102\32\82\61\61\74\45\107\32\116\104\101\110\32\82\61\34\34\99\61\71\59\98\114\101\97\107\32\101\110\100\32\101\110\100\59\108\111\99\97\108\32\82\61\35\76\59\119\104\105\108\101\32\97\60\82\43\103\32\100\111\32\98\46\118\91\99\93\61\76\58\115\117\98\40\97\44\40\102\117\110\99\116\105\111\110\40\41\97\61\81\43\97\59\114\101\116\117\114\110\32\97\45\103\32\101\110\100\41\40\41\41\99\61\99\43\107\59\105\102\32\99\37\102\61\61\71\32\116\104\101\110\32\99\61\72\59\70\40\98\46\106\44\73\40\98\91\98\46\118\91\72\93\93\42\74\43\98\91\98\46\118\91\107\93\93\41\41\101\110\100\32\101\110\100\59\114\101\116\117\114\110\32\106\40\98\46\106\41\101\110\100\41\40\34\46\46\58\58\58\77\111\111\110\83\101\99\58\58\46\46\227\146\151\227\146\152\227\146\153\227\146\154\227\146\155\227\146\156\227\146\157\227\146\158\227\146\159\227\146\160\227\146\161\227\146\162\227\146\163\227\146\164\227\146\165\227\146\166\227\146\163\227\146\157\227\146\162\227\146\161\227\146\162\227\146\151\227\146\161\227\146\157\227\146\160\227\146\164\227\146\160\227\146\153\227\146\159\227\146\159\227\146\158\227\146\165\227\146\158\227\146\155\227\146\157\227\146\161\227\146\157\227\146\151\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\154\227\146\159\227\146\153\227\146\165\227\146\153\227\146\162\227\146\152\227\146\161\227\146\152\227\146\151\227\146\151\227\146\157\227\146\166\227\146\163\227\146\153\227\146\165\227\146\165\227\146\159\227\146\164\227\146\165\227\146\164\227\146\155\227\146\163\227\146\162\227\146\163\227\146\151\227\146\162\227\146\157\227\146\161\227\146\163\227\146\161\227\146\153\227\146\160\227\146\159\227\146\159\227\146\165\227\146\159\227\146\155\227\146\158\227\146\161\227\146\158\227\146\151\227\146\157\227\146\157\227\146\156\227\146\163\227\146\156\227\146\153\227\146\155\227\146\159\227\146\154\227\146\165\227\146\154\227\146\155\227\146\153\227\146\161\227\146\153\227\146\151\227\146\152\227\146\157\227\146\151\227\146\163\227\146\151\227\146\153\227\146\166\227\146\159\227\146\165\227\146\165\227\146\165\227\146\155\227\146\164\227\146\161\227\146\164\227\146\151\227\146\163\227\146\157\227\146\162\227\146\166\227\146\162\227\146\153\227\146\161\227\146\159\227\146\160\227\146\165\227\146\160\227\146\155\227\146\159\227\146\161\227\146\159\227\146\151\227\146\158\227\146\157\227\146\157\227\146\163\227\146\157\227\146\153\227\146\156\227\146\159\227\146\155\227\146\165\227\146\155\227\146\155\227\146\154\227\146\161\227\146\154\227\146\151\227\146\153\227\146\157\227\146\152\227\146\163\227\146\152\227\146\153\227\146\151\227\146\161\227\146\166\227\146\165\227\146\166\227\146\155\227\146\165\227\146\161\227\146\165\227\146\151\227\146\164\227\146\157\227\146\163\227\146\163\227\146\163\227\146\153\227\146\162\227\146\159\227\146\161\227\146\166\227\146\161\227\146\155\227\146\160\227\146\161\227\146\160\227\146\151\227\146\159\227\146\157\227\146\158\227\146\165\227\146\158\227\146\153\227\146\157\227\146\159\227\146\156\227\146\165\227\146\165\227\146\152\227\146\155\227\146\161\227\146\155\227\146\151\227\146\154\227\146\157\227\146\153\227\146\163\227\146\153\227\146\153\227\146\152\227\146\159\227\146\151\227\146\165\227\146\151\227\146\155\227\146\165\227\146\155\227\146\166\227\146\156\227\146\165\227\146\157\227\146\164\227\146\163\227\146\164\227\146\153\227\146\165\227\146\151\227\146\158\227\146\153\227\146\151\227\146\166\227\146\162\227\146\160\227\146\156\227\146\159\227\146\162\227\146\156\227\146\159\227\146\163\227\146\159\227\146\153\227\146\158\227\146\159\227\146\159\227\146\151\227\146\158\227\146\161\227\146\156\227\146\161\227\146\156\227\146\153\227\146\155\227\146\157\227\146\154\227\146\164\227\146\154\227\146\153\227\146\153\227\146\159\227\146\152\227\146\165\227\146\153\227\146\157\227\146\153\227\146\151\227\146\151\227\146\151\227\146\166\227\146\160\227\146\165\227\146\163\227\146\165\227\146\154\227\146\164\227\146\159\227\146\163\227\146\165\227\146\163\227\146\155\227\146\163\227\146\163\227\146\163\227\146\166\227\146\161\227\146\157\227\146\161\227\146\151\227\146\160\227\146\153\227\146\159\227\146\161\227\146\158\227\146\165\227\146\158\227\146\155\227\146\157\227\146\161\227\146\157\227\146\157\227\146\158\227\146\164\227\146\155\227\146\163\227\146\155\227\146\158\227\146\154\227\146\159\227\146\153\227\146\165\227\146\153\227\146\155\227\146\152\227\146\162\227\146\152\227\146\151\227\146\151\227\146\161\227\146\166\227\146\163\227\146\166\227\146\153\227\146\152\227\146\162\227\146\164\227\146\165\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\153\227\146\162\227\146\157\227\146\161\227\146\163\227\146\161\227\146\153\227\146\160\227\146\159\227\146\163\227\146\152\227\146\159\227\146\155\227\146\158\227\146\161\227\146\158\227\146\151\227\146\157\227\146\157\227\146\156\227\146\163\227\146\156\227\146\153\227\146\155\227\146\159\227\146\154\227\146\165\227\146\157\227\146\158\227\146\153\227\146\161\227\146\153\227\146\151\227\146\152\227\146\157\227\146\151\227\146\166\227\146\151\227\146\153\227\146\166\227\146\159\227\146\165\227\146\165\227\146\165\227\146\155\227\146\151\227\146\164\227\146\164\227\146\151\227\146\163\227\146\157\227\146\162\227\146\163\227\146\162\227\146\154\227\146\161\227\146\159\227\146\160\227\146\165\227\146\160\227\146\155\227\146\159\227\146\161\227\146\162\227\146\155\227\146\158\227\146\157\227\146\158\227\146\151\227\146\157\227\146\153\227\146\156\227\146\161\227\146\155\227\146\165\227\146\155\227\146\156\227\146\154\227\146\161\227\146\154\227\146\157\227\146\156\227\146\152\227\146\152\227\146\163\227\146\152\227\146\153\227\146\151\227\146\159\227\146\152\227\146\160\227\146\166\227\146\155\227\146\165\227\146\162\227\146\165\227\146\151\227\146\164\227\146\158\227\146\163\227\146\163\227\146\163\227\146\157\227\146\163\227\146\153\227\146\161\227\146\165\227\146\161\227\146\155\227\146\160\227\146\161\227\146\161\227\146\162\227\146\159\227\146\157\227\146\158\227\146\164\227\146\158\227\146\153\227\146\157\227\146\165\227\146\158\227\146\162\227\146\156\227\146\155\227\146\155\227\146\161\227\146\155\227\146\151\227\146\155\227\146\155\227\146\153\227\146\163\227\146\153\227\146\154\227\146\152\227\146\159\227\146\151\227\146\166\227\146\151\227\146\155\227\146\166\227\146\165\227\146\166\227\146\161\227\146\165\227\146\157\227\146\164\227\146\163\227\146\164\227\146\153\227\146\164\227\146\157\227\146\162\227\146\165\227\146\162\227\146\156\227\146\161\227\146\161\227\146\161\227\146\155\227\146\161\227\146\151\227\146\159\227\146\163\227\146\159\227\146\153\227\146\158\227\146\159\227\146\159\227\146\160\227\146\157\227\146\155\227\146\156\227\146\162\227\146\156\227\146\151\227\146\155\227\146\163\227\146\156\227\146\160\227\146\154\227\146\153\227\146\153\227\146\160\227\146\152\227\146\165\227\146\153\227\146\156\227\146\151\227\146\161\227\146\151\227\146\152\227\146\166\227\146\157\227\146\165\227\146\163\227\146\165\227\146\153\227\146\164\227\146\163\227\146\164\227\146\159\227\146\163\227\146\155\227\146\162\227\146\161\227\146\162\227\146\151\227\146\162\227\146\158\227\146\160\227\146\163\227\146\160\227\146\154\227\146\159\227\146\159\227\146\159\227\146\153\227\146\158\227\146\165\227\146\157\227\146\161\227\146\157\227\146\151\227\146\156\227\146\157\227\146\157\227\146\158\227\146\155\227\146\153\227\146\154\227\146\160\227\146\153\227\146\165\227\146\153\227\146\155\227\146\152\227\146\161\227\146\152\227\146\151\227\146\151\227\146\161\227\146\166\227\146\163\227\146\166\227\146\155\227\146\165\227\146\159\227\146\165\227\146\152\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\151\227\146\162\227\146\157\227\146\162\227\146\152\227\146\161\227\146\153\227\146\160\227\146\162\227\146\159\227\146\165\227\146\159\227\146\157\227\146\158\227\146\161\227\146\158\227\146\157\227\146\159\227\146\154\227\146\156\227\146\163\227\146\156\227\146\157\227\146\155\227\146\159\227\146\156\227\146\155\227\146\154\227\146\155\227\146\153\227\146\162\227\146\153\227\146\151\227\146\152\227\146\162\227\146\151\227\146\163\227\146\151\227\146\157\227\146\151\227\146\153\227\146\165\227\146\165\227\146\165\227\146\155\227\146\164\227\146\161\227\146\165\227\146\157\227\146\163\227\146\157\227\146\162\227\146\164\227\146\162\227\146\153\227\146\161\227\146\163\227\146\161\227\146\159\227\146\160\227\146\155\227\146\159\227\146\161\227\146\159\227\146\151\227\146\160\227\146\152\227\146\157\227\146\163\227\146\157\227\146\154\227\146\156\227\146\159\227\146\155\227\146\165\227\146\155\227\146\155\227\146\154\227\146\161\227\146\154\227\146\155\227\146\153\227\146\157\227\146\152\227\146\165\227\146\152\227\146\153\227\146\151\227\146\162\227\146\166\227\146\165\227\146\166\227\146\155\227\146\165\227\146\161\227\146\165\227\146\151\227\146\164\227\146\162\227\146\163\227\146\163\227\146\163\227\146\156\227\146\162\227\146\159\227\146\162\227\146\151\227\146\161\227\146\155\227\146\161\227\146\151\227\146\162\227\146\162\227\146\159\227\146\157\227\146\159\227\146\151\227\146\158\227\146\153\227\146\159\227\146\154\227\146\156\227\146\165\227\146\156\227\146\156\227\146\155\227\146\161\227\146\155\227\146\156\227\146\154\227\146\157\227\146\154\227\146\151\227\146\153\227\146\163\227\146\152\227\146\159\227\146\151\227\146\165\227\146\151\227\146\155\227\146\152\227\146\156\227\146\166\227\146\151\227\146\165\227\146\158\227\146\164\227\146\163\227\146\164\227\146\157\227\146\164\227\146\153\227\146\162\227\146\165\227\146\162\227\146\155\227\146\161\227\146\161\227\146\162\227\146\163\227\146\160\227\146\157\227\146\159\227\146\164\227\146\159\227\146\153\227\146\158\227\146\159\227\146\160\227\146\157\227\146\157\227\146\155\227\146\156\227\146\165\227\146\156\227\146\151\227\146\155\227\146\157\227\146\154\227\146\163\227\146\154\227\146\153\227\146\153\227\146\159\227\146\152\227\146\165\227\146\155\227\146\156\227\146\151\227\146\161\227\146\151\227\146\155\227\146\166\227\146\157\227\146\165\227\146\164\227\146\165\227\146\153\227\146\164\227\146\159\227\146\163\227\146\165\227\146\163\227\146\155\227\146\164\227\146\156\227\146\162\227\146\151\227\146\161\227\146\161\227\146\160\227\146\163\227\146\160\227\146\155\227\146\159\227\146\159\227\146\158\227\146\165\227\146\158\227\146\155\227\146\157\227\146\161\227\146\158\227\146\156\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\154\227\146\160\227\146\153\227\146\165\227\146\153\227\146\155\227\146\152\227\146\161\227\146\152\227\146\153\227\146\151\227\146\157\227\146\166\227\146\163\227\146\166\227\146\153\227\146\165\227\146\159\227\146\165\227\146\157\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\151\227\146\165\227\146\159\227\146\162\227\146\151\227\146\161\227\146\153\227\146\160\227\146\159\227\146\159\227\146\165\227\146\159\227\146\165\227\146\155\227\146\155\227\146\164\227\146\165\227\146\157\227\146\165\227\146\155\227\146\156\227\146\156\227\146\153\227\146\155\227\146\159\227\146\154\227\146\165\227\146\154\227\146\155\227\146\153\227\146\161\227\146\153\227\146\151\227\146\159\227\146\157\227\146\155\227\146\163\227\146\165\227\146\163\227\146\166\227\146\165\227\146\165\227\146\165\227\146\165\227\146\155\227\146\164\227\146\161\227\146\165\227\146\162\227\146\159\227\146\162\227\146\153\227\146\159\227\146\162\227\146\165\227\146\157\227\146\153\227\146\166\227\146\161\227\146\166\227\146\155\227\146\160\227\146\157\227\146\159\227\146\151\227\146\158\227\146\157\227\146\157\227\146\163\227\146\155\227\146\165\227\146\151\227\146\163\227\146\162\227\146\151\227\146\153\227\146\160\227\146\163\227\146\163\227\146\159\227\146\157\227\146\153\227\146\159\227\146\161\227\146\166\227\146\156\227\146\155\227\146\152\227\146\160\227\146\161\227\146\159\227\146\153\227\146\153\227\146\164\227\146\155\227\146\165\227\146\155\227\146\164\227\146\157\227\146\163\227\146\163\227\146\163\227\146\153\227\146\163\227\146\154\227\146\157\227\146\158\227\146\166\227\146\166\227\146\161\227\146\166\227\146\152\227\146\162\227\146\159\227\146\157\227\146\158\227\146\163\227\146\158\227\146\153\227\146\157\227\146\159\227\146\159\227\146\166\227\146\156\227\146\155\227\146\155\227\146\161\227\146\155\227\146\151\227\146\154\227\146\157\227\146\153\227\146\163\227\146\153\227\146\153\227\146\151\227\146\159\227\146\155\227\146\164\227\146\163\227\146\151\227\146\166\227\146\164\227\146\166\227\146\151\227\146\165\227\146\157\227\146\164\227\146\163\227\146\165\227\146\164\227\146\159\227\146\165\227\146\152\227\146\161\227\146\164\227\146\157\227\146\161\227\146\161\227\146\161\227\146\151\227\146\160\227\146\157\227\146\160\227\146\165\227\146\161\227\146\152\227\146\158\227\146\159\227\146\158\227\146\152\227\146\157\227\146\155\227\146\156\227\146\165\227\146\156\227\146\151\227\146\155\227\146\157\227\146\154\227\146\163\227\146\154\227\146\153\227\146\156\227\146\159\227\146\152\227\146\165\227\146\152\227\146\158\227\146\151\227\146\161\227\146\151\227\146\154\227\146\166\227\146\157\227\146\165\227\146\164\227\146\165\227\146\153\227\146\164\227\146\165\227\146\164\227\146\151\227\146\163\227\146\155\227\146\162\227\146\164\227\146\162\227\146\151\227\146\161\227\146\162\227\146\160\227\146\163\227\146\160\227\146\154\227\146\159\227\146\159\227\146\158\227\146\166\227\146\158\227\146\155\227\146\157\227\146\165\227\146\157\227\146\161\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\154\227\146\164\227\146\153\227\146\165\227\146\153\227\146\156\227\146\152\227\146\161\227\146\152\227\146\155\227\146\152\227\146\151\227\146\166\227\146\163\227\146\166\227\146\153\227\146\165\227\146\159\227\146\165\227\146\157\227\146\164\227\146\155\227\146\163\227\146\162\227\146\163\227\146\151\227\146\163\227\146\159\227\146\163\227\146\162\227\146\161\227\146\153\227\146\160\227\146\162\227\146\159\227\146\165\227\146\159\227\146\159\227\146\158\227\146\161\227\146\158\227\146\151\227\146\157\227\146\157\227\146\156\227\146\163\227\146\159\227\146\153\227\146\155\227\146\159\227\146\155\227\146\152\227\146\154\227\146\155\227\146\153\227\146\164\227\146\153\227\146\151\227\146\152\227\146\158\227\146\151\227\146\163\227\146\151\227\146\153\227\146\152\227\146\154\227\146\165\227\146\165\227\146\165\227\146\158\227\146\164\227\146\161\227\146\164\227\146\153\227\146\163\227\146\157\227\146\162\227\146\163\227\146\162\227\146\153\227\146\162\227\146\161\227\146\162\227\146\155\227\146\160\227\146\155\227\146\159\227\146\164\227\146\159\227\146\151\227\146\158\227\146\164\227\146\157\227\146\163\227\146\157\227\146\153\227\146\156\227\146\159\227\146\157\227\146\151\227\146\156\227\146\163\227\146\154\227\146\161\227\146\154\227\146\155\227\146\153\227\146\157\227\146\153\227\146\153\227\146\152\227\146\153\227\146\151\227\146\159\227\146\166\227\146\165\227\146\151\227\146\157\227\146\165\227\146\161\227\146\165\227\146\151\227\146\164\227\146\162\227\146\163\227\146\163\227\146\163\227\146\160\227\146\162\227\146\159\227\146\161\227\146\165\227\146\161\227\146\155\227\146\160\227\146\161\227\146\160\227\146\151\227\146\159\227\146\157\227\146\159\227\146\153\227\146\158\227\146\153\227\146\157\227\146\159\227\146\156\227\146\165\227\146\156\227\146\155\227\146\155\227\146\161\227\146\156\227\146\153\227\146\154\227\146\157\227\146\153\227\146\163\227\146\153\227\146\160\227\146\152\227\146\159\227\146\152\227\146\156\227\146\151\227\146\155\227\146\166\227\146\161\227\146\166\227\146\151\227\146\165\227\146\161\227\146\164\227\146\163\227\146\164\227\146\153\227\146\163\227\146\164\227\146\162\227\146\165\227\146\164\227\146\153\227\146\161\227\146\161\227\146\161\227\146\152\227\146\160\227\146\157\227\146\159\227\146\163\227\146\161\227\146\158\227\146\158\227\146\159\227\146\158\227\146\158\227\146\157\227\146\155\227\146\156\227\146\165\227\146\156\227\146\151\227\146\155\227\146\157\227\146\154\227\146\163\227\146\155\227\146\155\227\146\157\227\146\152\227\146\152\227\146\165\227\146\152\227\146\165\227\146\151\227\146\161\227\146\151\227\146\154\227\146\166\227\146\157\227\146\165\227\146\163\227\146\165\227\146\153\227\146\166\227\146\159\227\146\163\227\146\165\227\146\163\227\146\155\227\146\163\227\146\155\227\146\162\227\146\151\227\146\162\227\146\151\227\146\160\227\146\163\227\146\160\227\146\158\227\146\159\227\146\159\227\146\160\227\146\165\227\146\158\227\146\155\227\146\157\227\146\161\227\146\157\227\146\162\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\155\227\146\151\227\146\153\227\146\165\227\146\153\227\146\155\227\146\152\227\146\161\227\146\152\227\146\151\227\146\152\227\146\154\227\146\166\227\146\163\227\146\166\227\146\161\227\146\165\227\146\159\227\146\164\227\146\165\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\151\227\146\162\227\146\157\227\146\162\227\146\161\227\146\161\227\146\153\227\146\161\227\146\151\227\146\159\227\146\165\227\146\159\227\146\155\227\146\158\227\146\161\227\146\158\227\146\151\227\146\157\227\146\157\227\146\156\227\146\163\227\146\156\227\146\164\227\146\155\227\146\159\227\146\155\227\146\163\227\146\154\227\146\155\227\146\153\227\146\163\227\146\153\227\146\151\227\146\154\227\146\157\227\146\151\227\146\163\227\146\151\227\146\153\227\146\151\227\146\154\227\146\165\227\146\165\227\146\165\227\146\166\227\146\164\227\146\161\227\146\164\227\146\152\227\146\163\227\146\157\227\146\162\227\146\163\227\146\162\227\146\153\227\146\161\227\146\159\227\146\161\227\146\160\227\146\160\227\146\155\227\146\159\227\146\163\227\146\159\227\146\151\227\146\158\227\146\159\227\146\157\227\146\163\227\146\157\227\146\153\227\146\156\227\146\159\227\146\155\227\146\165\227\146\155\227\146\166\227\146\154\227\146\161\227\146\154\227\146\162\227\146\153\227\146\157\227\146\152\227\146\166\227\146\152\227\146\153\227\146\153\227\146\159\227\146\166\227\146\165\227\146\166\227\146\155\227\146\166\227\146\156\227\146\165\227\146\151\227\146\165\227\146\152\227\146\163\227\146\163\227\146\163\227\146\155\227\146\162\227\146\159\227\146\161\227\146\165\227\146\161\227\146\155\227\146\160\227\146\161\227\146\160\227\146\161\227\146\159\227\146\157\227\146\158\227\146\165\227\146\158\227\146\153\227\146\157\227\146\161\227\146\156\227\146\165\227\146\156\227\146\155\227\146\155\227\146\161\227\146\155\227\146\151\227\146\154\227\146\161\227\146\153\227\146\163\227\146\153\227\146\162\227\146\152\227\146\159\227\146\152\227\146\159\227\146\151\227\146\155\227\146\166\227\146\161\227\146\166\227\146\151\227\146\165\227\146\157\227\146\165\227\146\156\227\146\164\227\146\153\227\146\163\227\146\162\227\146\162\227\146\165\227\146\162\227\146\157\227\146\161\227\146\161\227\146\163\227\146\151\227\146\160\227\146\157\227\146\159\227\146\163\227\146\159\227\146\156\227\146\158\227\146\159\227\146\158\227\146\158\227\146\157\227\146\155\227\146\156\227\146\163\227\146\156\227\146\151\227\146\155\227\146\161\227\146\157\227\146\151\227\146\154\227\146\153\227\146\153\227\146\164\227\146\152\227\146\165\227\146\153\227\146\153\227\146\151\227\146\161\227\146\151\227\146\152\227\146\166\227\146\157\227\146\166\227\146\165\227\146\151\227\146\152\227\146\164\227\146\159\227\146\164\227\146\154\227\146\163\227\146\155\227\146\162\227\146\165\227\146\162\227\146\151\227\146\161\227\146\157\227\146\160\227\146\163\227\146\160\227\146\153\227\146\160\227\146\160\227\146\158\227\146\165\227\146\158\227\146\160\227\146\157\227\146\161\227\146\157\227\146\152\227\146\156\227\146\157\227\146\156\227\146\151\227\146\155\227\146\153\227\146\154\227\146\159\227\146\155\227\146\160\227\146\153\227\146\155\227\146\152\227\146\165\227\146\152\227\146\151\227\146\151\227\146\159\227\146\166\227\146\163\227\146\166\227\146\153\227\146\165\227\146\159\227\146\164\227\146\165\227\146\165\227\146\160\227\146\163\227\146\161\227\146\163\227\146\151\227\146\162\227\146\157\227\146\161\227\146\164\227\146\161\227\146\153\227\146\160\227\146\159\227\146\159\227\146\165\227\146\159\227\146\158\227\146\159\227\146\166\227\146\158\227\146\151\227\146\157\227\146\157\227\146\156\227\146\163\227\146\154\227\146\163\227\146\155\227\146\166\227\146\154\227\146\165\227\146\154\227\146\155\227\146\153\227\146\161\227\146\151\227\146\162\227\146\164\227\146\157\227\146\158\227\146\154\227\146\152\227\146\153\227\146\161\227\146\156\227\146\156\227\146\152\227\146\165\227\146\157\227\146\151\227\146\160\227\146\164\227\146\156\227\146\163\227\146\158\227\146\162\227\146\163\227\146\162\227\146\153\227\146\152\227\146\158\227\146\165\227\146\163\227\146\163\227\146\161\227\146\159\227\146\165\227\146\158\227\146\152\227\146\155\227\146\159\227\146\152\227\146\154\227\146\165\227\146\157\227\146\163\227\146\154\227\146\160\227\146\160\227\146\153\227\146\154\227\146\151\227\146\157\227\146\152\227\146\153\227\146\166\227\146\155\227\146\163\227\146\159\227\146\160\227\146\165\227\146\157\227\146\159\227\146\155\227\146\162\227\146\152\227\146\158\227\146\161\227\146\160\227\146\159\227\146\152\227\146\156\227\146\162\227\146\153\227\146\162\227\146\156\227\146\163\227\146\164\227\146\158\227\146\162\227\146\156\227\146\162\227\146\152\227\146\160\227\146\165\227\146\159\227\146\157\227\146\152\227\146\153\227\146\151\227\146\161\227\146\166\227\146\154\227\146\164\227\146\152\227\146\161\227\146\153\227\146\158\227\146\157\227\146\156\227\146\164\227\146\164\227\146\166\227\146\165\227\146\154\227\146\164\227\146\151\227\146\162\227\146\156\227\146\155\227\146\156\227\146\155\227\146\155\227\146\153\227\146\159\227\146\166\227\146\162\227\146\162\227\146\153\227\146\162\227\146\152\227\146\159\227\146\155\227\146\156\227\146\157\227\146\154\227\146\156\227\146\152\227\146\152\227\146\160\227\146\163\227\146\158\227\146\158\227\146\157\227\146\154\227\146\157\227\146\155\227\146\155\227\146\153\227\146\151\227\146\166\227\146\165\227\146\154\227\146\162\227\146\163\227\146\159\227\146\155\227\146\156\227\146\164\227\146\152\227\146\156\227\146\151\227\146\165\227\146\165\227\146\158\227\146\162\227\146\157\227\146\155\227\146\166\227\146\153\227\146\155\227\146\154\227\146\162\227\146\152\227\146\164\227\146\166\227\146\154\227\146\163\227\146\156\227\146\160\227\146\165\227\146\154\227\146\162\227\146\151\227\146\157\227\146\164\227\146\163\227\146\165\227\146\157\227\146\162\227\146\164\227\146\160\227\146\164\227\146\154\227\146\154\227\146\154\227\146\166\227\146\152\227\146\161\227\146\166\227\146\161\227\146\163\227\146\151\227\146\161\227\146\153\227\146\158\227\146\162\227\146\155\227\146\154\227\146\152\227\146\157\227\146\166\227\146\162\227\146\164\227\146\152\227\146\157\227\146\156\227\146\158\227\146\151\227\146\156\227\146\153\227\146\153\227\146\157\227\146\162\227\146\165\227\146\163\227\146\157\227\146\161\227\146\166\227\146\159\227\146\156\227\146\155\227\146\159\227\146\153\227\146\151\227\146\166\227\146\162\227\146\164\227\146\157\227\146\161\227\146\155\227\146\159\227\146\154\227\146\156\227\146\166\227\146\154\227\146\155\227\146\163\227\146\157\227\146\161\227\146\156\227\146\158\227\146\158\227\146\155\227\146\160\227\146\153\227\146\153\227\146\166\227\146\156\227\146\164\227\146\151\227\146\161\227\146\154\227\146\159\227\146\151\227\146\156\227\146\154\227\146\153\227\146\155\227\146\151\227\146\152\227\146\164\227\146\155\227\146\161\227\146\158\227\146\158\227\146\164\227\146\156\227\146\161\227\146\153\227\146\161\227\146\166\227\146\166\227\146\164\227\146\157\227\146\161\227\146\159\227\146\159\227\146\159\227\146\156\227\146\165\227\146\154\227\146\153\227\146\151\227\146\161\227\146\164\227\146\165\227\146\161\227\146\164\227\146\159\227\146\163\227\146\156\227\146\166\227\146\154\227\146\154\227\146\151\227\146\163\227\146\164\227\146\163\227\146\162\227\146\157\227\146\159\227\146\162\227\146\156\227\146\165\227\146\154\227\146\161\227\146\151\227\146\166\227\146\165\227\146\156\227\146\162\227\146\156\227\146\159\227\146\161\227\146\158\227\146\165\227\146\158\227\146\158\227\146\153\227\146\151\227\146\153\227\146\151\227\146\165\227\146\164\227\146\162\227\146\152\227\146\161\227\146\161\227\146\158\227\146\160\227\146\151\227\146\166\227\146\152\227\146\163\227\146\151\227\146\156\227\146\163\227\146\159\227\146\157\227\146\151\227\146\154\227\146\162\227\146\151\227\146\156\227\146\165\227\146\153\227\146\162\227\146\157\227\146\164\227\146\161\227\146\162\227\146\157\227\146\159\227\146\157\227\146\156\227\146\164\227\146\153\227\146\155\227\146\151\227\146\153\227\146\163\227\146\166\227\146\162\227\146\154\227\146\159\227\146\151\227\146\157\227\146\154\227\146\153\227\146\159\227\146\162\227\146\165\227\146\160\227\146\165\227\146\160\227\146\161\227\146\159\227\146\165\227\146\156\227\146\157\227\146\154\227\146\160\227\146\152\227\146\151\227\146\161\227\146\153\227\146\157\227\146\165\227\146\160\227\146\155\227\146\157\227\146\159\227\146\154\227\146\151\227\146\152\227\146\154\227\146\165\227\146\156\227\146\161\227\146\165\227\146\160\227\146\151\227\146\156\227\146\165\227\146\166\227\146\155\227\146\164\227\146\155\227\146\162\227\146\163\227\146\163\227\146\152\227\146\160\227\146\158\227\146\155\227\146\152\227\146\154\227\146\155\227\146\152\227\146\164\227\146\165\227\146\151\227\146\159\227\146\155\227\146\158\227\146\164\227\146\158\227\146\151\227\146\154\227\146\159\227\146\152\227\146\161\227\146\165\227\146\163\227\146\163\227\146\158\227\146\160\227\146\157\227\146\154\227\146\155\227\146\153\227\146\159\227\146\152\227\146\161\227\146\165\227\146\161\227\146\163\227\146\166\227\146\161\227\146\153\227\146\158\227\146\163\227\146\155\227\146\165\227\146\152\227\146\162\227\146\166\227\146\166\227\146\160\227\146\151\227\146\159\227\146\165\227\146\158\227\146\157\227\146\156\227\146\152\227\146\152\227\146\164\227\146\166\227\146\165\227\146\164\227\146\163\227\146\161\227\146\165\227\146\155\227\146\151\227\146\154\227\146\161\227\146\154\227\146\152\227\146\166\227\146\155\227\146\164\227\146\162\227\146\162\227\146\154\227\146\154\227\146\156\227\146\154\227\146\159\227\146\153\227\146\157\227\146\151\227\146\156\227\146\165\227\146\153\227\146\158\227\146\153\227\146\157\227\146\160\227\146\157\227\146\152\227\146\154\227\146\155\227\146\151\227\146\153\227\146\165\227\146\154\227\146\161\227\146\159\227\146\159\227\146\161\227\146\157\227\146\157\227\146\166\227\146\159\227\146\165\227\146\163\227\146\165\227\146\156\227\146\159\227\146\165\227\146\159\227\146\165\227\146\156\227\146\162\227\146\152\227\146\166\227\146\152\227\146\159\227\146\165\227\146\158\227\146\158\227\146\164\227\146\159\227\146\161\227\146\158\227\146\154\227\146\154\227\146\157\227\146\163\227\146\165\227\146\161\227\146\157\227\146\158\227\146\154\227\146\161\227\146\157\227\146\153\227\146\152\227\146\161\227\146\159\227\146\158\227\146\154\227\146\157\227\146\153\227\146\156\227\146\159\227\146\155\227\146\165\227\146\156\227\146\152\227\146\151\227\146\154\227\146\159\227\146\166\227\146\153\227\146\163\227\146\164\227\146\164\227\146\158\227\146\162\227\146\151\227\146\162\227\146\156\227\146\165\227\146\166\227\146\161\227\146\165\227\146\161\227\146\165\227\146\151\227\146\164\227\146\157\227\146\155\227\146\161\227\146\166\227\146\161\227\146\155\227\146\153\227\146\155\227\146\158\227\146\164\227\146\156\227\146\162\227\146\160\227\146\152\227\146\162\227\146\160\227\146\151\227\146\158\227\146\163\227\146\158\227\146\153\227\146\157\227\146\159\227\146\163\227\146\156\227\146\157\227\146\166\227\146\153\227\146\154\227\146\163\227\146\157\227\146\159\227\146\151\227\146\153\227\146\158\227\146\163\227\146\166\227\146\158\227\146\160\227\146\154\227\146\161\227\146\165\227\146\151\227\146\156\227\146\161\227\146\166\227\146\161\227\146\165\227\146\157\227\146\164\227\146\163\227\146\164\227\146\153\227\146\163\227\146\166\227\146\157\227\146\165\227\146\153\227\146\152\227\146\162\227\146\153\227\146\155\227\146\166\227\146\151\227\146\151\227\146\160\227\146\163\227\146\153\227\146\165\227\146\163\227\146\164\227\146\158\227\146\159\227\146\152\227\146\164\227\146\159\227\146\158\227\146\156\227\146\151\227\146\155\227\146\157\227\146\154\227\146\163\227\146\160\227\146\153\227\146\156\227\146\162\227\146\152\227\146\157\227\146\163\227\146\163\227\146\160\227\146\163\227\146\151\227\146\158\227\146\151\227\146\164\227\146\163\227\146\159\227\146\159\227\146\164\227\146\155\227\146\152\227\146\151\227\146\163\227\146\163\227\146\155\227\146\158\227\146\164\227\146\154\227\146\159\227\146\151\227\146\161\227\146\163\227\146\152\227\146\154\227\146\152\227\146\154\227\146\163\227\146\165\227\146\165\227\146\162\227\146\166\227\146\157\227\146\159\227\146\154\227\146\161\227\146\165\227\146\161\227\146\162\227\146\158\227\146\158\227\146\158\227\146\153\227\146\159\227\146\165\227\146\152\227\146\161\227\146\151\227\146\157\227\146\159\227\146\153\227\146\155\227\146\165\227\146\155\227\146\160\227\146\158\227\146\156\227\146\157\227\146\163\227\146\166\227\146\160\227\146\165\227\146\157\227\146\155\227\146\152\227\146\162\227\146\164\227\146\158\227\146\159\227\146\156\227\146\156\227\146\155\227\146\152\227\146\152\227\146\164\227\146\158\227\146\159\227\146\164\227\146\154\227\146\162\227\146\151\227\146\160\227\146\166\227\146\164\227\146\157\227\146\157\227\146\156\227\146\163\227\146\156\227\146\153\227\146\155\227\146\159\227\146\154\227\146\165\227\146\154\227\146\155\227\146\158\227\146\157\227\146\157\227\146\151\227\146\164\227\146\153\227\146\152\227\146\153\227\146\151\227\146\153\227\146\166\227\146\159\227\146\165\227\146\165\227\146\153\227\146\163\227\146\151\227\146\152\227\146\156\227\146\160\227\146\160\227\146\156\227\146\152\227\146\166\227\146\157\227\146\159\227\146\151\227\146\159\227\146\161\227\146\155\227\146\160\227\146\155\227\146\159\227\146\161\227\146\159\227\146\151\227\146\159\227\146\152\227\146\153\227\146\160\227\146\163\227\146\156\227\146\157\227\146\151\227\146\151\227\146\159\227\146\161\227\146\164\227\146\154\227\146\162\227\146\154\227\146\152\227\146\153\227\146\157\227\146\152\227\146\163\227\146\152\227\146\153\227\146\157\227\146\158\227\146\151\227\146\152\227\146\166\227\146\155\227\146\165\227\146\161\227\146\165\227\146\151\227\146\164\227\146\157\227\146\163\227\146\163\227\146\151\227\146\153\227\146\151\227\146\161\227\146\165\227\146\165\227\146\151\227\146\154\227\146\160\227\146\161\227\146\160\227\146\151\227\146\159\227\146\157\227\146\158\227\146\163\227\146\158\227\146\153\227\146\157\227\146\159\227\146\160\227\146\165\227\146\160\227\146\155\227\146\161\227\146\161\227\146\156\227\146\156\227\146\154\227\146\157\227\146\153\227\146\163\227\146\153\227\146\153\227\146\153\227\146\155\227\146\163\227\146\159\227\146\158\227\146\152\227\146\151\227\146\151\227\146\161\227\146\162\227\146\155\227\146\164\227\146\164\227\146\165\227\146\155\227\146\158\227\146\152\227\146\166\227\146\162\227\146\165\227\146\153\227\146\156\227\146\166\227\146\163\227\146\159\227\146\156\227\146\152\227\146\159\227\146\162\227\146\161\227\146\155\227\146\154\227\146\153\227\146\156\227\146\161\227\146\160\227\146\157\227\146\157\227\146\165\227\146\153\227\146\160\227\146\158\227\146\158\227\146\159\227\146\155\227\146\159\227\146\154\227\146\153\227\146\153\227\146\159\227\146\152\227\146\165\227\146\151\227\146\151\227\146\162\227\146\165\227\146\157\227\146\153\227\146\164\227\146\162\227\146\158\227\146\165\227\146\154\227\146\159\227\146\164\227\146\161\227\146\157\227\146\152\227\146\151\227\146\157\227\146\163\227\146\162\227\146\156\227\146\161\227\146\164\227\146\155\227\146\159\227\146\154\227\146\154\227\146\163\227\146\159\227\146\159\227\146\158\227\146\165\227\146\158\227\146\155\227\146\164\227\146\163\227\146\160\227\146\152\227\146\154\227\146\153\227\146\166\227\146\158\227\146\161\227\146\164\227\146\151\227\146\164\227\146\151\227\146\160\227\146\163\227\146\160\227\146\158\227\146\164\227\146\153\227\146\164\227\146\165\227\146\155\227\146\156\227\146\166\227\146\151\227\146\159\227\146\162\227\146\163\227\146\161\227\146\153\227\146\156\227\146\165\227\146\152\227\146\157\227\146\164\227\146\155\227\146\158\227\146\153\227\146\154\227\146\158\227\146\164\227\146\165\227\146\156\227\146\162\227\146\155\227\146\166\227\146\166\227\146\161\227\146\162\227\146\164\227\146\153\227\146\163\227\146\164\227\146\152\227\146\159\227\146\162\227\146\154\227\146\160\227\146\154\227\146\151\227\146\166\227\146\157\227\146\161\227\146\158\227\146\156\227\146\156\227\146\162\227\146\164\227\146\158\227\146\165\227\146\156\227\146\155\227\146\164\227\146\160\227\146\160\227\146\154\227\146\155\227\146\152\227\146\155\227\146\159\227\146\166\227\146\164\227\146\160\227\146\165\227\146\157\227\146\154\227\146\152\227\146\160\227\146\158\227\146\160\227\146\158\227\146\151\227\146\153\227\146\165\227\146\164\227\146\160\227\146\155\227\146\160\227\146\151\227\146\163\227\146\166\227\146\163\227\146\157\227\146\156\227\146\152\227\146\162\227\146\152\227\146\151\227\146\163\227\146\156\227\146\154\227\146\156\227\146\165\227\146\165\227\146\166\227\146\151\227\146\161\227\146\161\227\146\156\227\146\159\227\146\151\227\146\164\227\146\162\227\146\153\227\146\157\227\146\165\227\146\152\227\146\160\227\146\164\227\146\162\227\146\159\227\146\157\227\146\155\227\146\158\227\146\165\227\146\161\227\146\156\227\146\165\227\146\152\227\146\163\227\146\166\227\146\157\227\146\163\227\146\159\227\146\157\227\146\165\227\146\153\227\146\166\227\146\165\227\146\155\227\146\156\227\146\155\227\146\166\227\146\165\227\146\151\227\146\153\227\146\162\227\146\155\227\146\156\227\146\161\227\146\152\227\146\162\227\146\163\227\146\162\227\146\158\227\146\153\227\146\154\227\146\153\227\146\164\227\146\165\227\146\156\227\146\153\227\146\152\227\146\151\227\146\164\227\146\157\227\146\162\227\146\160\227\146\157\227\146\164\227\146\166\227\146\156\227\146\163\227\146\157\227\146\159\227\146\164\227\146\153\227\146\165\227\146\162\227\146\151\227\146\159\227\146\158\227\146\156\227\146\159\227\146\166\227\146\165\227\146\162\227\146\165\227\146\157\227\146\165\227\146\153\227\146\158\227\146\164\227\146\155\227\146\156\227\146\151\227\146\153\227\146\153\227\146\166\227\146\153\227\146\161\227\146\151\227\146\157\227\146\154\227\146\152\227\146\155\227\146\163\227\146\163\227\146\158\227\146\163\227\146\153\227\146\158\227\146\165\227\146\160\227\146\156\227\146\159\227\146\154\227\146\155\227\146\166\227\146\161\227\146\162\227\146\154\227\146\156\227\146\164\227\146\152\227\146\163\227\146\164\227\146\159\227\146\159\227\146\159\227\146\166\227\146\159\227\146\164\227\146\151\227\146\161\227\146\156\227\146\155\227\146\157\227\146\151\227\146\162\227\146\163\227\146\152\227\146\153\227\146\152\227\146\151\227\146\153\227\146\163\227\146\165\227\146\159\227\146\162\227\146\155\227\146\157\227\146\162\227\146\155\227\146\159\227\146\160\227\146\156\227\146\166\227\146\152\227\146\151\227\146\162\227\146\163\227\146\158\227\146\162\227\146\152\227\146\165\227\146\164\227\146\165\227\146\160\227\146\159\227\146\151\227\146\159\227\146\161\227\146\164\227\146\157\227\146\158\227\146\152\227\146\156\227\146\166\227\146\163\227\146\164\227\146\152\227\146\158\227\146\153\227\146\154\227\146\158\227\146\165\227\146\164\227\146\155\227\146\164\227\146\153\227\146\165\227\146\151\227\146\156\227\146\159\227\146\163\227\146\157\227\146\161\227\146\152\227\146\156\227\146\162\227\146\158\227\146\159\227\146\165\227\146\154\227\146\162\227\146\161\227\146\166\227\146\160\227\146\161\227\146\157\227\146\152\227\146\151\227\146\153\227\146\158\227\146\152\227\146\153\227\146\162\227\146\164\227\146\160\227\146\164\227\146\153\227\146\160\227\146\160\227\146\154\227\146\165\227\146\166\227\146\164\227\146\156\227\146\166\227\146\156\227\146\155\227\146\163\227\146\153\227\146\162\227\146\153\227\146\161\227\146\159\227\146\160\227\146\165\227\146\154\227\146\152\227\146\161\227\146\162\227\146\152\227\146\154\227\146\163\227\146\161\227\146\153\227\146\153\227\146\165\227\146\158\227\146\155\227\146\153\227\146\156\227\146\155\227\146\155\227\146\155\227\146\154\227\146\161\227\146\154\227\146\151\227\146\161\227\146\161\227\146\153\227\146\166\227\146\151\227\146\157\227\146\165\227\146\156\227\146\151\227\146\155\227\146\157\227\146\151\227\146\155\227\146\161\227\146\165\227\146\159\227\146\164\227\146\157\227\146\163\227\146\163\227\146\163\227\146\153\227\146\163\227\146\165\227\146\157\227\146\154\227\146\166\227\146\164\227\146\159\227\146\165\227\146\156\227\146\154\227\146\163\227\146\151\227\146\159\227\146\158\227\146\152\227\146\151\227\146\160\227\146\160\227\146\156\227\146\165\227\146\156\227\146\155\227\146\155\227\146\161\227\146\155\227\146\151\227\146\154\227\146\157\227\146\161\227\146\163\227\146\158\227\146\153\227\146\156\227\146\159\227\146\163\227\146\158\227\146\151\227\146\157\227\146\166\227\146\161\227\146\166\227\146\151\227\146\165\227\146\157\227\146\155\227\146\162\227\146\155\227\146\156\227\146\166\227\146\157\227\146\162\227\146\165\227\146\162\227\146\155\227\146\161\227\146\161\227\146\161\227\146\153\227\146\164\227\146\165\227\146\159\227\146\163\227\146\159\227\146\153\227\146\158\227\146\159\227\146\157\227\146\165\227\146\157\227\146\155\227\146\156\227\146\161\227\146\156\227\146\151\227\146\156\227\146\159\227\146\156\227\146\154\227\146\154\227\146\153\227\146\153\227\146\159\227\146\152\227\146\165\227\146\152\227\146\161\227\146\151\227\146\161\227\146\151\227\146\151\227\146\166\227\146\157\227\146\165\227\146\163\227\146\165\227\146\153\227\146\164\227\146\159\227\146\163\227\146\165\227\146\163\227\146\155\227\146\162\227\146\161\227\146\162\227\146\151\227\146\161\227\146\157\227\146\160\227\146\163\227\146\160\227\146\153\227\146\159\227\146\159\227\146\158\227\146\165\227\146\158\227\146\156\227\146\157\227\146\161\227\146\157\227\146\151\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\155\227\146\161\227\146\153\227\146\165\227\146\153\227\146\155\227\146\152\227\146\162\227\146\152\227\146\151\227\146\152\227\146\156\227\146\166\227\146\163\227\146\166\227\146\153\227\146\165\227\146\159\227\146\166\227\146\151\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\152\227\146\162\227\146\157\227\146\162\227\146\158\227\146\161\227\146\153\227\146\160\227\146\159\227\146\159\227\146\165\227\146\161\227\146\161\227\146\158\227\146\161\227\146\158\227\146\151\227\146\157\227\146\158\227\146\156\227\146\163\227\146\156\227\146\162\227\146\155\227\146\159\227\146\154\227\146\166\227\146\154\227\146\155\227\146\154\227\146\159\227\146\153\227\146\151\227\146\152\227\146\161\227\146\152\227\146\157\227\146\151\227\146\153\227\146\166\227\146\159\227\146\165\227\146\165\227\146\165\227\146\164\227\146\164\227\146\161\227\146\164\227\146\152\227\146\163\227\146\157\227\146\162\227\146\163\227\146\163\227\146\158\227\146\161\227\146\159\227\146\160\227\146\165\227\146\160\227\146\155\227\146\159\227\146\162\227\146\159\227\146\151\227\146\158\227\146\157\227\146\157\227\146\163\227\146\157\227\146\155\227\146\161\227\146\151\227\146\155\227\146\165\227\146\155\227\146\156\227\146\154\227\146\161\227\146\154\227\146\152\227\146\153\227\146\157\227\146\152\227\146\163\227\146\152\227\146\153\227\146\152\227\146\161\227\146\151\227\146\162\227\146\166\227\146\155\227\146\165\227\146\162\227\146\165\227\146\151\227\146\165\227\146\160\227\146\163\227\146\163\227\146\163\227\146\153\227\146\162\227\146\159\227\146\163\227\146\151\227\146\161\227\146\155\227\146\160\227\146\161\227\146\160\227\146\152\227\146\159\227\146\157\227\146\159\227\146\157\227\146\158\227\146\153\227\146\157\227\146\159\227\146\156\227\146\165\227\146\158\227\146\155\227\146\155\227\146\161\227\146\155\227\146\151\227\146\154\227\146\158\227\146\153\227\146\163\227\146\153\227\146\154\227\146\152\227\146\159\227\146\151\227\146\166\227\146\151\227\146\155\227\146\151\227\146\163\227\146\166\227\146\151\227\146\165\227\146\157\227\146\164\227\146\165\227\146\164\227\146\153\227\146\164\227\146\164\227\146\162\227\146\165\227\146\162\227\146\155\227\146\161\227\146\161\227\146\163\227\146\151\227\146\160\227\146\157\227\146\159\227\146\163\227\146\159\227\146\155\227\146\158\227\146\159\227\146\158\227\146\151\227\146\157\227\146\155\227\146\156\227\146\164\227\146\156\227\146\151\227\146\155\227\146\157\227\146\154\227\146\163\227\146\154\227\146\153\227\146\153\227\146\162\227\146\152\227\146\165\227\146\152\227\146\156\227\146\151\227\146\161\227\146\151\227\146\151\227\146\166\227\146\157\227\146\166\227\146\165\227\146\165\227\146\153\227\146\164\227\146\159\227\146\164\227\146\153\227\146\163\227\146\155\227\146\163\227\146\164\227\146\162\227\146\151\227\146\161\227\146\157\227\146\160\227\146\163\227\146\161\227\146\155\227\146\159\227\146\159\227\146\158\227\146\165\227\146\158\227\146\160\227\146\157\227\146\161\227\146\157\227\146\158\227\146\156\227\146\157\227\146\155\227\146\163\227\146\155\227\146\153\227\146\155\227\146\161\227\146\153\227\146\165\227\146\153\227\146\155\227\146\153\227\146\151\227\146\152\227\146\151\227\146\152\227\146\159\227\146\166\227\146\163\227\146\166\227\146\153\227\146\165\227\146\159\227\146\166\227\146\151\227\146\164\227\146\155\227\146\163\227\146\161\227\146\163\227\146\158\227\146\162\227\146\157\227\146\162\227\146\155\227\146\161\227\146\153\227\146\160\227\146\159\227\146\159\227\146\165\227\146\159\227\146\155\227\146\161\227\146\166\227\146\158\227\146\151\227\146\157\227\146\161\227\146\156\227\146\163\227\146\156\227\146\160\227\146\155\227\146\159\227\146\155\227\146\151\227\146\154\227\146\155\227\146\153\227\146\161\227\146\157\227\146\154\227\146\152\227\146\157\227\146\152\227\146\152\227\146\151\227\146\153\227\146\166\227\146\160\227\146\165\227\146\165\227\146\165\227\146\155\227\146\164\227\146\161\227\146\164\227\146\151\227\146\163\227\146\157\227\146\162\227\146\163\227\146\162\227\146\156\227\146\161\227\146\159\227\146\161\227\146\154\227\146\160\227\146\155\227\146\159\227\146\162\227\146\159\227\146\151\227\146\158\227\146\157\227\146\157\227\146\163\227\146\157\227\146\153\227\146\156\227\146\162\227\146\155\227\146\165\227\146\155\227\146\156\227\146\154\227\146\161\227\146\154\227\146\151\227\146\153\227\146\157\227\146\153\227\146\165\227\146\152\227\146\153\227\146\151\227\146\159\227\146\151\227\146\153\227\146\166\227\146\155\227\146\166\227\146\164\227\146\165\227\146\151\227\146\164\227\146\157\227\146\163\227\146\163\227\146\164\227\146\155\227\146\162\227\146\159\227\146\161\227\146\165\227\146\161\227\146\160\227\146\160\227\146\161\227\146\160\227\146\156\227\146\159\227\146\157\227\146\158\227\146\163\227\146\158\227\146\153\227\146\158\227\146\161\227\146\156\227\146\165\227\146\156\227\146\155\227\146\156\227\146\151\227\146\155\227\146\151\227\146\155\227\146\158\227\146\153\227\146\163\227\146\153\227\146\153\227\146\152\227\146\159\227\146\153\227\146\151\227\146\151\227\146\155\227\146\166\227\146\161\227\146\166\227\146\158\227\146\165\227\146\157\227\146\165\227\146\159\227\146\164\227\146\153\227\146\163\227\146\159\227\146\162\227\146\165\227\146\162\227\146\155\227\146\161\227\146\161\227\146\161\227\146\151\227\146\160\227\146\161\227\146\159\227\146\163\227\146\159\227\146\160\227\146\158\227\146\159\227\146\158\227\146\151\227\146\157\227\146\155\227\146\156\227\146\161\227\146\156\227\146\151\227\146\155\227\146\157\227\146\155\227\146\152\227\146\154\227\146\153\227\146\153\227\146\160\227\146\152\227\146\165\227\146\152\227\146\155\227\146\151\227\146\161\227\146\151\227\146\151\227\146\166\227\146\157\227\146\165\227\146\163\227\146\165\227\146\156\227\146\164\227\146\159\227\146\164\227\146\154\227\146\163\227\146\155\227\146\162\227\146\162\227\146\162\227\146\151\227\146\161\227\146\157\227\146\163\227\146\152\227\146\160\227\146\153\227\146\159\227\146\162\227\146\158\227\146\165\227\146\158\227\146\157\227\146\157\227\146\161\227\146\157\227\146\151\227\146\156\227\146\157\227\146\156\227\146\165\227\146\156\227\146\156\227\146\154\227\146\159\227\146\154\227\146\153\227\146\153\227\146\155\227\146\153\227\146\164\227\146\152\227\146\151\227\146\151\227\146\157\227\146\166\227\146\163\227\146\151\227\146\155\227\146\165\227\146\159\227\146\164\227\146\165\227\146\164\227\146\160\227\146\163\227\146\161\227\146\163\227\146\153\227\146\162\227\146\157\227\146\161\227\146\163\227\146\161\227\146\153\227\146\161\227\146\161\227\146\159\227\146\165\227\146\159\227\146\155\227\146\159\227\146\151\227\146\158\227\146\151\227\146\157\227\146\161\227\146\156\227\146\163\227\146\156\227\146\153\227\146\155\227\146\159\227\146\156\227\146\151\227\146\154\227\146\155\227\146\153\227\146\161\227\146\153\227\146\158\227\146\152\227\146\157\227\146\152\227\146\160\227\146\151\227\146\153\227\146\166\227\146\159\227\146\165\227\146\165\227\146\165\227\146\155\227\146\164\227\146\161\227\146\164\227\146\151\227\146\163\227\146\161\227\146\162\227\146\163\227\146\162\227\146\160\227\146\161\227\146\159\227\146\161\227\146\151\227\146\160\227\146\155\227\146\159\227\146\161\227\146\159\227\146\151\227\146\158\227\146\157\227\146\157\227\146\166\227\146\157\227\146\153\227\146\156\227\146\161\227\146\155\227\146\165\227\146\155\227\146\156\227\146\154\227\146\161\227\146\154\227\146\151\227\146\153\227\146\157\227\146\152\227\146\163\227\146\152\227\146\156\227\146\151\227\146\159\227\146\151\227\146\151\227\146\166\227\146\155\227\146\165\227\146\161\227\146\165\227\146\151\227\146\165\227\146\159\227\146\163\227\146\163\227\146\163\227\146\153\227\146\162\227\146\163\227\146\161\227\146\165\227\146\162\227\146\158\227\146\160\227\146\161\227\146\160\227\146\151\227\146\159\227\146\157\227\146\159\227\146\165\227\146\158\227\146\153\227\146\157\227\146\159\227\146\157\227\146\154\227\146\156\227\146\155\227\146\156\227\146\161\227\146\155\227\146\151\227\146\154\227\146\157\227\146\153\227\146\163\227\146\154\227\146\155\227\146\152\227\146\159\227\146\151\227\146\165\227\146\151\227\146\161\227\146\166\227\146\161\227\146\166\227\146\160\227\146\165\227\146\157\227\146\164\227\146\163\227\146\164\227\146\153\227\146\164\227\146\161\227\146\164\227\146\155\227\146\162\227\146\155\227\146\162\227\146\152\227\146\161\227\146\151\227\146\161\227\146\161\227\146\159\227\146\163\227\146\159\227\146\153\227\146\158\227\146\159\227\146\157\227\146\165\227\146\160\227\146\160\227\146\156\227\146\161\227\146\156\227\146\155\227\146\155\227\146\157\227\146\155\227\146\154\227\146\154\227\146\153\227\146\153\227\146\161\227\146\152\227\146\165\227\146\152\227\146\155\227\146\154\227\146\165\227\146\151\227\146\151\227\146\166\227\146\160\227\146\165\227\146\163\227\146\165\227\146\155\227\146\164\227\146\159\227\146\163\227\146\166\227\146\163\227\146\155\227\146\162\227\146\161\227\146\163\227\146\156\227\146\161\227\146\157\227\146\160\227\146\163\227\146\160\227\146\153\227\146\159\227\146\160\227\146\158\227\146\165\227\146\158\227\146\155\227\146\157\227\146\161\227\146\157\227\146\151\34\41\108\111\99\97\108\32\70\61\45\48\120\51\99\43\49\52\48\55\48\47\48\120\99\57\59\108\111\99\97\108\32\82\61\54\48\59\108\111\99\97\108\32\99\61\107\59\108\111\99\97\108\32\97\61\123\125\97\61\123\91\45\55\56\43\49\50\54\43\45\48\120\50\102\93\61\102\117\110\99\116\105\111\110\40\41\108\111\99\97\108\32\98\44\103\44\97\44\107\61\104\40\106\44\99\44\99\43\105\41\99\61\99\43\79\59\82\61\40\82\43\70\42\79\41\37\81\59\114\101\116\117\114\110\40\107\43\82\45\70\43\76\42\79\42\102\41\37\76\42\40\102\42\77\41\94\102\43\40\97\43\82\45\70\42\102\43\76\42\102\94\105\41\37\81\42\76\42\81\43\40\103\43\82\45\70\42\105\43\77\41\37\81\42\76\43\40\98\43\82\45\70\42\79\43\77\41\37\81\32\101\110\100\44\91\48\120\52\100\45\55\53\93\61\102\117\110\99\116\105\111\110\40\97\44\97\44\97\41\108\111\99\97\108\32\97\61\104\40\106\44\99\44\99\41\99\61\99\43\103\59\82\61\40\82\43\70\41\37\81\59\114\101\116\117\114\110\40\97\43\82\45\70\43\77\41\37\76\32\101\110\100\44\91\48\120\50\50\98\47\49\56\53\93\61\102\117\110\99\116\105\111\110\40\41\108\111\99\97\108\32\97\44\98\61\104\40\106\44\99\44\99\43\102\41\82\61\40\82\43\70\42\102\41\37\81\59\99\61\99\43\102\59\114\101\116\117\114\110\40\98\43\82\45\70\43\76\42\102\42\79\41\37\76\42\81\43\40\97\43\82\45\70\42\102\43\81\42\102\94\105\41\37\76\32\101\110\100\44\91\48\120\51\49\45\52\53\93\61\102\117\110\99\116\105\111\110\40\99\44\97\44\98\41\105\102\32\98\32\116\104\101\110\32\108\111\99\97\108\32\97\61\99\47\102\94\40\97\45\107\41\37\102\94\40\98\45\103\45\40\97\45\107\41\43\103\41\114\101\116\117\114\110\32\97\45\97\37\107\32\101\108\115\101\32\108\111\99\97\108\32\97\61\102\94\40\97\45\103\41\114\101\116\117\114\110\32\99\37\40\97\43\97\41\62\61\97\32\97\110\100\32\107\32\111\114\32\72\32\101\110\100\32\101\110\100\44\91\49\48\50\53\47\48\120\99\100\93\61\102\117\110\99\116\105\111\110\40\41\108\111\99\97\108\32\98\61\97\91\48\120\50\97\45\52\49\93\40\41\108\111\99\97\108\32\82\61\97\91\48\120\52\55\45\55\48\93\40\41\108\111\99\97\108\32\112\61\107\59\108\111\99\97\108\32\99\61\97\91\49\48\53\45\48\120\54\53\93\40\82\44\103\44\74\43\79\41\42\102\94\40\74\42\102\41\43\98\59\108\111\99\97\108\32\98\61\97\91\48\120\53\54\45\56\50\93\40\82\44\50\49\44\51\49\41\108\111\99\97\108\32\97\61\40\45\107\41\94\97\91\51\50\48\47\48\120\53\48\93\40\82\44\51\50\41\105\102\32\98\61\61\72\32\116\104\101\110\32\105\102\32\99\61\61\71\32\116\104\101\110\32\114\101\116\117\114\110\32\97\42\72\32\101\108\115\101\32\98\61\103\59\112\61\71\32\101\110\100\32\101\108\115\101\105\102\32\98\61\61\76\42\102\94\105\45\103\32\116\104\101\110\32\114\101\116\117\114\110\32\99\61\61\72\32\97\110\100\32\97\42\103\47\71\32\111\114\32\97\42\72\47\71\32\101\110\100\59\114\101\116\117\114\110\32\101\40\97\44\98\45\40\81\42\79\45\107\41\41\42\40\112\43\99\47\102\94\78\41\101\110\100\44\91\53\54\43\45\48\120\51\50\93\61\102\117\110\99\116\105\111\110\40\98\44\102\44\102\41\108\111\99\97\108\32\102\59\105\102\32\110\111\116\32\98\32\116\104\101\110\32\98\61\97\91\45\49\49\56\43\48\120\97\97\43\45\53\49\93\40\41\105\102\32\98\61\61\72\32\116\104\101\110\32\114\101\116\117\114\110\39\39\101\110\100\32\101\110\100\59\102\61\68\40\106\44\99\44\99\43\98\45\107\41\99\61\99\43\98\59\108\111\99\97\108\32\97\61\39\39\102\111\114\32\98\61\103\44\35\102\32\100\111\32\97\61\67\40\97\44\73\40\40\104\40\68\40\102\44\98\44\98\41\41\43\82\41\37\81\41\41\82\61\40\82\43\70\41\37\76\32\101\110\100\59\114\101\116\117\114\110\32\97\32\101\110\100\125\108\111\99\97\108\32\102\117\110\99\116\105\111\110\32\77\40\46\46\46\41\114\101\116\117\114\110\123\46\46\46\125\44\75\40\39\35\39\44\46\46\46\41\101\110\100\59\108\111\99\97\108\32\102\117\110\99\116\105\111\110\32\106\40\41\108\111\99\97\108\32\117\61\123\125\108\111\99\97\108\32\70\61\123\125\108\111\99\97\108\32\98\61\123\125\108\111\99\97\108\32\114\61\123\117\44\70\44\110\105\108\44\98\125\108\111\99\97\108\32\99\61\123\125\108\111\99\97\108\32\95\61\48\120\49\100\51\97\47\56\54\59\108\111\99\97\108\32\98\61\123\91\48\120\56\51\45\49\50\57\93\61\102\117\110\99\116\105\111\110\40\98\41\114\101\116\117\114\110\32\110\111\116\40\35\98\61\61\97\91\40\48\120\49\56\52\45\50\49\52\41\47\48\120\53\55\93\40\41\41\101\110\100\44\91\50\48\48\45\48\120\55\50\43\45\48\120\53\51\93\61\102\117\110\99\116\105\111\110\40\98\41\114\101\116\117\114\110\32\97\91\48\120\53\98\45\56\54\93\40\41\101\110\100\44\91\48\120\51\101\45\54\49\93\61\102\117\110\99\116\105\111\110\40\98\41\114\101\116\117\114\110\32\97\91\52\54\45\48\120\50\56\93\40\41\101\110\100\44\91\54\55\45\48\120\51\102\93\61\102\117\110\99\116\105\111\110\40\98\41\108\111\99\97\108\32\82\61\97\91\51\55\56\47\48\120\51\102\93\40\41\108\111\99\97\108\32\98\61\39\39\108\111\99\97\108\32\97\61\49\59\102\111\114\32\99\61\49\44\35\82\32\100\111\32\97\61\40\97\43\95\41\37\81\59\98\61\67\40\98\44\73\40\40\104\40\82\58\115\117\98\40\99\44\99\41\41\43\97\41\37\76\41\41\101\110\100\59\114\101\116\117\114\110\32\98\32\101\110\100\125\102\111\114\32\97\61\103\44\97\91\56\56\45\48\120\53\55\93\40\41\100\111\32\70\91\97\45\103\93\61\106\40\41\101\110\100\59\108\111\99\97\108\32\82\61\97\91\56\53\45\48\120\53\52\93\40\41\102\111\114\32\82\61\49\44\82\32\100\111\32\108\111\99\97\108\32\97\61\97\91\52\51\52\47\48\120\100\57\93\40\41\108\111\99\97\108\32\107\59\108\111\99\97\108\32\97\61\98\91\97\37\40\56\55\52\47\48\120\49\51\41\93\99\91\82\93\61\97\32\97\110\100\32\97\40\123\125\41\101\110\100\59\102\111\114\32\76\61\49\44\97\91\49\50\51\43\45\48\120\55\97\93\40\41\100\111\32\108\111\99\97\108\32\98\61\97\91\45\50\55\43\48\120\49\100\93\40\41\105\102\32\97\91\48\120\49\49\54\45\49\54\55\43\45\48\120\54\98\93\40\98\44\107\44\103\41\61\61\71\32\116\104\101\110\32\108\111\99\97\108\32\114\61\97\91\48\120\50\100\45\52\49\93\40\98\44\102\44\105\41\108\111\99\97\108\32\82\61\97\91\48\120\49\98\56\47\49\49\48\93\40\98\44\79\44\102\43\79\41\108\111\99\97\108\32\98\61\123\97\91\57\55\43\45\48\120\53\101\93\40\41\44\97\91\45\48\120\55\57\43\49\50\52\93\40\41\44\110\105\108\44\110\105\108\125\108\111\99\97\108\32\81\61\123\91\49\48\52\43\45\55\56\48\48\47\48\120\52\98\93\61\102\117\110\99\116\105\111\110\40\41\98\91\113\93\61\97\91\45\51\48\43\48\120\50\49\93\40\41\98\91\121\93\61\97\91\45\48\120\52\57\43\55\54\93\40\41\101\110\100\44\91\48\120\50\100\45\56\48\57\54\47\48\120\98\56\93\61\102\117\110\99\116\105\111\110\40\41\98\91\108\93\61\97\91\48\120\53\52\45\56\51\93\40\41\101\110\100\44\91\48\120\51\52\45\53\48\93\61\102\117\110\99\116\105\111\110\40\41\98\91\111\93\61\97\91\45\48\120\55\57\43\49\50\50\93\40\41\45\102\94\74\32\101\110\100\44\91\48\120\50\49\51\47\49\55\55\93\61\102\117\110\99\116\105\111\110\40\41\98\91\108\93\61\97\91\50\52\52\47\48\120\102\52\93\40\41\45\102\94\74\59\98\91\66\93\61\97\91\48\120\50\57\49\47\50\49\57\93\40\41\101\110\100\125\81\91\114\93\40\41\105\102\32\97\91\48\120\100\99\47\53\53\93\40\82\44\103\44\107\41\61\61\103\32\116\104\101\110\32\98\91\116\93\61\99\91\98\91\115\93\93\101\110\100\59\105\102\32\97\91\49\51\53\45\48\120\56\51\93\40\82\44\102\44\102\41\61\61\107\32\116\104\101\110\32\98\91\112\93\61\99\91\98\91\110\93\93\101\110\100\59\105\102\32\97\91\45\48\120\53\50\43\56\54\93\40\82\44\105\44\105\41\61\61\103\32\116\104\101\110\32\98\91\65\93\61\99\91\98\91\121\93\93\101\110\100\59\117\91\76\93\61\98\32\101\110\100\32\101\110\100\59\114\91\51\93\61\97\91\45\48\120\50\102\43\52\57\93\40\41\114\101\116\117\114\110\32\114\32\101\110\100\59\108\111\99\97\108\32\102\117\110\99\116\105\111\110\32\72\40\97\44\79\44\70\41\108\111\99\97\108\32\76\61\97\91\102\93\108\111\99\97\108\32\81\61\97\91\105\93\108\111\99\97\108\32\97\61\97\91\107\93\114\101\116\117\114\110\32\102\117\110\99\116\105\111\110\40\46\46\46\41\108\111\99\97\108\32\82\61\107\59\108\111\99\97\108\32\99\61\77\59\108\111\99\97\108\32\99\61\123\125\108\111\99\97\108\32\104\61\123\46\46\46\125\108\111\99\97\108\32\106\61\123\125\108\111\99\97\108\32\74\61\75\40\39\35\39\44\46\46\46\41\45\103\59\108\111\99\97\108\32\105\61\76\59\108\111\99\97\108\32\76\61\81\59\108\111\99\97\108\32\71\61\123\125\108\111\99\97\108\32\81\61\97\59\108\111\99\97\108\32\97\61\45\103\59\102\111\114\32\97\61\48\44\74\32\100\111\32\105\102\32\97\62\61\76\32\116\104\101\110\32\106\91\97\45\76\93\61\104\91\97\43\103\93\101\108\115\101\32\99\91\97\93\61\104\91\97\43\107\93\101\110\100\32\101\110\100\59\108\111\99\97\108\32\97\61\74\45\76\43\107\59\108\111\99\97\108\32\97\59\108\111\99\97\108\32\76\59\119\104\105\108\101\32\116\114\117\101\32\100\111\32\97\61\81\91\82\93\76\61\97\91\56\54\45\48\120\53\53\93\98\61\54\51\48\49\50\48\59\119\104\105\108\101\32\48\120\100\102\50\47\49\48\50\62\61\76\32\100\111\32\98\61\45\98\59\98\61\51\49\54\56\52\53\56\59\119\104\105\108\101\32\76\60\61\48\120\102\54\56\47\50\51\50\32\100\111\32\98\61\45\98\59\98\61\54\53\57\55\52\53\48\59\119\104\105\108\101\32\51\55\45\48\120\49\100\62\61\76\32\100\111\32\98\61\45\98\59\98\61\53\57\50\57\49\49\50\59\119\104\105\108\101\32\50\54\55\47\48\120\53\57\62\61\76\32\100\111\32\98\61\45\98\59\98\61\52\49\51\52\53\50\56\59\119\104\105\108\101\32\76\60\61\48\120\53\54\45\56\53\32\100\111\32\98\61\45\98\59\98\61\52\50\52\49\56\48\56\59\119\104\105\108\101\32\54\55\45\48\120\52\51\60\76\32\100\111\32\98\61\45\98\59\100\111\32\114\101\116\117\114\110\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\50\57\54\61\61\98\47\40\48\120\49\57\97\97\45\51\50\57\55\41\100\111\32\99\91\97\91\114\93\93\61\99\91\97\91\111\93\93\45\99\91\97\91\65\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\49\54\52\61\61\98\47\40\48\120\101\53\101\43\45\49\50\54\41\100\111\32\98\61\51\57\57\54\53\48\52\59\119\104\105\108\101\32\76\62\48\120\51\55\45\53\51\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\123\125\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\51\56\52\61\61\98\47\40\48\120\57\53\48\45\49\50\48\51\41\100\111\32\105\102\32\110\111\116\32\99\91\97\91\116\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\112\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\100\54\100\45\49\55\54\52\41\61\61\51\53\52\52\32\100\111\32\98\61\55\48\57\56\48\59\119\104\105\108\101\32\76\60\61\45\48\120\51\51\43\53\54\32\100\111\32\98\61\45\98\59\98\61\50\55\57\55\55\50\53\59\119\104\105\108\101\45\50\50\43\48\120\49\97\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\97\61\123\99\44\97\125\97\91\103\93\91\97\91\102\93\91\95\93\93\61\97\91\107\93\91\97\91\102\93\91\119\93\93\43\97\91\103\93\91\97\91\102\93\91\112\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\99\56\51\100\50\47\49\53\56\45\48\120\97\52\99\41\61\61\49\48\57\53\32\100\111\32\99\91\97\91\95\93\93\61\97\91\110\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\49\56\52\56\47\55\52\41\61\61\56\52\53\32\100\111\32\98\61\50\57\51\48\53\57\49\59\119\104\105\108\101\32\76\60\61\40\49\51\50\49\45\48\120\50\100\49\41\47\49\48\48\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\61\97\91\114\93\108\111\99\97\108\32\82\61\99\91\97\91\108\93\93\99\91\98\43\49\93\61\82\59\99\91\98\93\61\82\91\97\91\122\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\49\55\54\50\49\53\47\48\120\52\49\41\61\61\49\48\56\49\32\100\111\32\98\61\54\49\52\53\55\59\119\104\105\108\101\32\49\49\54\45\48\120\54\100\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\61\97\91\118\93\108\111\99\97\108\32\107\61\99\91\98\93\108\111\99\97\108\32\76\61\99\91\98\43\50\93\105\102\32\76\62\48\32\116\104\101\110\32\105\102\32\107\62\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\110\93\101\108\115\101\32\99\91\98\43\51\93\61\107\32\101\110\100\32\101\108\115\101\105\102\32\107\60\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\111\93\101\108\115\101\32\99\91\98\43\51\93\61\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\54\54\49\61\61\98\47\40\45\48\120\49\53\43\53\56\41\100\111\32\108\111\99\97\108\32\98\61\97\91\95\93\108\111\99\97\108\32\107\61\99\91\98\93\108\111\99\97\108\32\76\61\99\91\98\43\50\93\105\102\32\76\62\48\32\116\104\101\110\32\105\102\32\107\62\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\109\93\101\108\115\101\32\99\91\98\43\51\93\61\107\32\101\110\100\32\101\108\115\101\105\102\32\107\60\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\110\93\101\108\115\101\32\99\91\98\43\51\93\61\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\45\50\50\43\48\120\102\101\56\41\61\61\49\54\50\57\32\100\111\32\98\61\49\49\50\51\50\51\57\54\59\119\104\105\108\101\32\49\52\52\45\48\120\56\52\62\61\76\32\100\111\32\98\61\45\98\59\98\61\56\52\55\55\56\57\53\59\119\104\105\108\101\32\48\120\55\56\97\47\49\57\51\62\61\76\32\100\111\32\98\61\45\98\59\98\61\55\51\52\56\57\50\59\119\104\105\108\101\32\76\62\48\120\51\102\48\47\40\45\48\120\52\53\43\49\56\49\41\100\111\32\98\61\45\98\59\82\61\97\91\112\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\45\48\120\49\51\43\53\56\51\41\61\61\49\51\48\51\32\100\111\32\99\91\97\91\117\93\93\61\97\91\112\93\126\61\48\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\55\53\49\55\45\48\120\101\98\101\41\61\61\50\50\54\53\32\100\111\32\98\61\49\49\52\54\50\48\56\59\119\104\105\108\101\32\54\50\55\47\48\120\51\57\60\76\32\100\111\32\98\61\45\98\59\105\102\32\99\91\97\91\118\93\93\126\61\97\91\121\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\111\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\57\50\52\61\61\98\47\40\55\55\54\49\54\47\48\120\99\54\41\100\111\32\99\91\97\91\114\93\93\61\99\91\97\91\108\93\93\91\97\91\120\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\53\55\51\54\55\56\47\48\120\57\100\41\61\61\51\48\55\52\32\100\111\32\98\61\51\48\52\57\56\48\48\59\119\104\105\108\101\32\49\57\54\48\47\48\120\56\99\62\61\76\32\100\111\32\98\61\45\98\59\98\61\50\48\50\52\53\56\57\59\119\104\105\108\101\32\48\120\50\102\45\51\52\60\76\32\100\111\32\98\61\45\98\59\105\102\32\99\91\97\91\118\93\93\61\61\99\91\97\91\65\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\109\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\50\54\51\61\61\98\47\40\48\120\52\55\51\97\50\47\49\56\50\41\100\111\32\70\91\97\91\112\93\93\61\99\91\97\91\114\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\118\93\93\61\70\91\97\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\99\91\97\91\109\93\93\91\97\91\66\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\70\91\97\91\110\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\118\93\93\61\99\91\97\91\108\93\93\91\97\91\122\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\99\91\97\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\70\91\97\91\110\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\97\91\108\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\97\91\110\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\97\91\109\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\57\55\53\61\61\98\47\40\48\120\99\55\57\43\45\54\53\41\100\111\32\98\61\52\53\54\54\48\53\59\119\104\105\108\101\32\53\56\45\48\120\50\98\62\61\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\97\61\97\91\118\93\99\91\97\93\40\99\91\97\43\103\93\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\51\53\61\61\98\47\40\48\120\50\48\52\55\51\47\57\55\41\100\111\32\98\61\51\51\56\56\50\54\48\59\119\104\105\108\101\32\53\57\45\48\120\50\98\60\76\32\100\111\32\98\61\45\98\59\99\91\97\91\117\93\93\91\99\91\97\91\108\93\93\93\61\99\91\97\91\65\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\52\57\48\61\61\98\47\40\45\48\120\54\102\43\50\51\56\53\41\100\111\32\108\111\99\97\108\32\98\61\97\91\114\93\99\91\98\93\40\80\40\99\44\98\43\103\44\97\91\109\93\41\41\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\55\51\57\61\61\98\47\40\49\56\52\49\43\45\48\120\49\51\41\100\111\32\98\61\52\51\49\53\54\56\59\119\104\105\108\101\32\48\120\97\99\45\49\52\54\62\61\76\32\100\111\32\98\61\45\98\59\98\61\49\49\56\55\50\57\50\48\59\119\104\105\108\101\32\48\120\56\99\45\49\49\57\62\61\76\32\100\111\32\98\61\45\98\59\98\61\50\50\50\49\48\49\59\119\104\105\108\101\32\76\60\61\45\48\120\53\52\43\49\48\51\32\100\111\32\98\61\45\98\59\98\61\49\48\52\49\52\54\53\57\59\119\104\105\108\101\32\48\120\51\97\45\52\48\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\59\99\91\97\91\118\93\93\61\70\91\97\91\109\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\97\91\113\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\97\91\108\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\97\91\112\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\95\93\99\91\98\93\61\99\91\98\93\40\80\40\99\44\98\43\107\44\97\91\108\93\41\41\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\95\93\99\91\98\93\40\99\91\98\43\103\93\41\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\95\93\93\61\99\91\97\91\109\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\70\91\97\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\97\91\112\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\97\91\110\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\98\57\53\48\49\47\49\57\55\41\61\61\50\55\48\51\32\100\111\32\99\91\97\91\115\93\93\91\99\91\97\91\111\93\93\93\61\99\91\97\91\121\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\55\57\56\97\47\57\52\41\61\61\54\55\49\32\100\111\32\98\61\52\51\51\53\53\50\54\59\119\104\105\108\101\45\54\54\43\48\120\53\54\60\76\32\100\111\32\98\61\45\98\59\100\111\32\114\101\116\117\114\110\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\54\50\54\61\61\98\47\40\45\48\120\52\97\43\49\55\50\53\41\100\111\32\105\102\32\99\91\97\91\116\93\93\126\61\97\91\119\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\108\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\54\53\56\56\45\48\120\100\48\48\41\61\61\51\54\52\50\32\100\111\32\98\61\49\48\54\50\56\50\54\50\59\119\104\105\108\101\32\76\60\61\48\120\56\102\45\49\50\48\32\100\111\32\98\61\45\98\59\98\61\51\55\48\48\52\56\59\119\104\105\108\101\45\52\48\43\48\120\51\101\60\76\32\100\111\32\98\61\45\98\59\70\91\97\91\108\93\93\61\99\91\97\91\115\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\123\125\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\95\93\93\61\123\125\82\61\82\43\107\59\97\61\81\91\82\93\70\91\97\91\112\93\93\61\99\91\97\91\114\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\70\91\97\91\113\93\93\82\61\82\43\107\59\97\61\81\91\82\93\105\102\32\99\91\97\91\114\93\93\126\61\97\91\119\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\111\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\49\56\101\97\45\51\50\52\50\41\61\61\49\49\56\32\100\111\32\99\91\97\91\115\93\93\61\97\91\110\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\49\54\54\61\61\98\47\40\48\120\49\97\55\101\45\51\52\50\53\41\100\111\32\98\61\51\52\54\55\50\53\48\59\119\104\105\108\101\32\55\50\45\40\57\53\43\45\48\120\50\102\41\62\61\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\103\59\108\111\99\97\108\32\76\59\108\111\99\97\108\32\98\59\99\91\97\91\95\93\93\61\97\91\108\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\97\91\109\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\35\99\91\97\91\108\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\97\91\110\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\116\93\76\61\99\91\98\93\103\61\99\91\98\43\50\93\105\102\32\103\62\48\32\116\104\101\110\32\105\102\32\76\62\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\111\93\101\108\115\101\32\99\91\98\43\51\93\61\76\32\101\110\100\32\101\108\115\101\105\102\32\76\60\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\113\93\101\108\115\101\32\99\91\98\43\51\93\61\76\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\56\48\51\43\45\52\49\41\61\61\49\55\50\53\32\100\111\32\98\61\54\50\48\56\52\48\59\119\104\105\108\101\45\48\120\52\53\43\57\52\60\76\32\100\111\32\98\61\45\98\59\99\91\97\91\116\93\93\61\35\99\91\97\91\111\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\55\54\54\45\48\120\49\98\50\41\61\61\49\56\55\48\32\100\111\32\99\91\97\91\115\93\93\61\99\91\97\91\110\93\93\37\97\91\65\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\100\102\51\45\49\55\57\53\41\61\61\50\52\51\32\100\111\32\98\61\49\50\56\57\55\55\56\59\119\104\105\108\101\32\54\56\43\45\48\120\50\54\62\61\76\32\100\111\32\98\61\45\98\59\98\61\56\56\48\54\49\48\59\119\104\105\108\101\32\76\60\61\48\120\100\51\99\47\49\50\49\32\100\111\32\98\61\45\98\59\98\61\50\56\50\57\54\54\54\59\119\104\105\108\101\32\76\62\51\49\48\53\47\48\120\55\51\32\100\111\32\98\61\45\98\59\105\102\32\99\91\97\91\116\93\93\126\61\99\91\97\91\122\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\112\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\53\49\52\61\61\98\47\40\45\48\120\53\55\43\49\57\53\54\41\100\111\32\100\111\32\114\101\116\117\114\110\32\99\91\97\91\115\93\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\56\50\51\61\61\98\47\40\50\50\52\55\48\48\47\48\120\100\50\41\100\111\32\98\61\49\51\54\53\55\56\52\59\119\104\105\108\101\32\48\120\49\48\54\100\47\49\52\53\60\76\32\100\111\32\98\61\45\98\59\99\91\97\91\115\93\93\61\99\91\97\91\111\93\93\91\99\91\97\91\65\93\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\54\101\55\45\57\50\54\41\61\61\49\54\50\52\32\100\111\32\105\102\32\99\91\97\91\117\93\93\126\61\99\91\97\91\119\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\110\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\49\51\50\48\102\47\51\57\41\61\61\54\52\50\32\100\111\32\98\61\54\50\56\56\56\52\56\59\119\104\105\108\101\32\76\60\61\52\52\52\56\47\48\120\56\98\32\100\111\32\98\61\45\98\59\98\61\55\51\48\49\56\49\59\119\104\105\108\101\32\48\120\49\51\57\101\47\49\54\50\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\97\61\97\91\116\93\99\91\97\93\61\99\91\97\93\40\99\91\97\43\103\93\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\52\102\51\45\54\54\56\41\61\61\49\50\49\57\32\100\111\32\99\91\97\91\114\93\93\61\70\91\97\91\112\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\45\52\54\43\48\120\98\54\51\41\61\61\50\49\57\50\32\100\111\32\98\61\52\52\50\51\50\49\48\59\119\104\105\108\101\32\56\48\43\45\48\120\50\102\62\61\76\32\100\111\32\98\61\45\98\59\82\61\97\91\111\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\53\52\53\61\61\98\47\40\45\51\55\50\52\47\48\120\99\52\43\49\55\53\55\41\100\111\32\98\61\57\48\52\56\48\54\59\119\104\105\108\101\32\76\62\48\120\53\100\43\45\53\57\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\70\91\97\91\111\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\49\98\57\55\45\51\53\53\54\41\61\61\50\53\56\32\100\111\32\99\91\97\91\115\93\93\61\35\99\91\97\91\110\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\52\49\54\61\61\98\47\40\48\120\51\97\99\45\52\57\53\41\100\111\32\98\61\49\49\53\48\55\52\57\50\59\119\104\105\108\101\32\76\60\61\49\50\57\43\45\48\120\52\99\32\100\111\32\98\61\45\98\59\98\61\51\55\51\57\50\56\48\59\119\104\105\108\101\32\76\60\61\48\120\57\101\45\49\49\52\32\100\111\32\98\61\45\98\59\98\61\53\53\51\51\56\54\52\59\119\104\105\108\101\32\76\60\61\48\120\102\102\102\47\49\48\53\32\100\111\32\98\61\45\98\59\98\61\49\51\54\54\52\52\51\59\119\104\105\108\101\32\48\120\50\52\52\55\47\50\53\49\62\61\76\32\100\111\32\98\61\45\98\59\98\61\53\51\50\56\48\51\55\59\119\104\105\108\101\32\76\62\49\52\50\43\45\48\120\54\97\32\100\111\32\98\61\45\98\59\99\91\97\91\116\93\93\61\99\91\97\91\113\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\57\54\49\61\61\98\47\40\53\53\49\56\45\48\120\97\102\49\41\100\111\32\108\111\99\97\108\32\98\61\97\91\114\93\108\111\99\97\108\32\76\61\99\91\98\43\50\93\108\111\99\97\108\32\107\61\99\91\98\93\43\76\59\99\91\98\93\61\107\59\105\102\32\76\62\48\32\116\104\101\110\32\105\102\32\107\60\61\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\111\93\99\91\98\43\51\93\61\107\32\101\110\100\32\101\108\115\101\105\102\32\107\62\61\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\112\93\99\91\98\43\51\93\61\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\50\49\51\57\43\45\48\120\52\101\41\61\61\54\54\51\32\100\111\32\98\61\49\48\51\55\49\53\51\48\59\119\104\105\108\101\32\76\62\48\120\49\102\57\101\47\50\49\51\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\76\61\105\91\97\91\113\93\93\108\111\99\97\108\32\107\59\108\111\99\97\108\32\98\61\123\125\107\61\69\40\123\125\44\123\95\95\105\110\100\101\120\61\102\117\110\99\116\105\111\110\40\99\44\97\41\108\111\99\97\108\32\97\61\98\91\97\93\114\101\116\117\114\110\32\97\91\49\93\91\97\91\50\93\93\101\110\100\44\95\95\110\101\119\105\110\100\101\120\61\102\117\110\99\116\105\111\110\40\82\44\97\44\99\41\108\111\99\97\108\32\97\61\98\91\97\93\97\91\49\93\91\97\91\50\93\93\61\99\32\101\110\100\125\41\102\111\114\32\107\61\49\44\97\91\120\93\100\111\32\82\61\82\43\103\59\108\111\99\97\108\32\97\61\81\91\82\93\105\102\32\97\91\48\120\49\52\45\49\57\93\61\61\53\49\32\116\104\101\110\32\98\91\107\45\49\93\61\123\99\44\97\91\108\93\125\101\108\115\101\32\98\91\107\45\49\93\61\123\79\44\97\91\109\93\125\101\110\100\59\71\91\35\71\43\49\93\61\98\32\101\110\100\59\99\91\97\91\117\93\93\61\72\40\76\44\107\44\70\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\55\52\54\49\51\48\47\48\120\101\55\41\61\61\51\50\49\49\32\100\111\32\99\91\97\91\114\93\93\61\123\125\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\52\56\54\61\61\98\47\40\55\52\56\51\45\48\120\101\97\102\41\100\111\32\98\61\49\52\50\56\54\56\54\48\59\119\104\105\108\101\32\76\60\61\45\48\120\54\55\43\49\52\52\32\100\111\32\98\61\45\98\59\98\61\52\50\55\48\48\49\54\59\119\104\105\108\101\40\48\120\52\50\102\54\45\56\54\50\50\41\47\50\49\51\60\76\32\100\111\32\98\61\45\98\59\99\91\97\91\117\93\93\61\72\40\105\91\97\91\112\93\93\44\110\105\108\44\70\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\48\57\54\61\61\98\47\40\45\48\120\55\55\43\52\48\49\53\41\100\111\32\99\91\97\91\115\93\93\61\97\91\113\93\126\61\48\59\82\61\82\43\103\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\56\57\53\61\61\98\47\40\45\50\52\43\48\120\101\54\99\41\100\111\32\98\61\54\51\50\50\51\50\59\119\104\105\108\101\32\76\60\61\49\51\51\48\51\53\48\47\48\120\98\53\47\49\55\53\32\100\111\32\98\61\45\98\59\70\91\97\91\108\93\93\61\99\91\97\91\117\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\57\50\55\61\61\98\47\40\48\120\50\48\54\45\51\48\50\41\100\111\32\98\61\50\53\55\48\57\52\50\59\119\104\105\108\101\32\48\120\49\99\56\101\47\49\55\48\60\76\32\100\111\32\98\61\45\98\59\105\102\32\110\111\116\32\99\91\97\91\117\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\110\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\53\48\55\61\61\98\47\40\49\50\52\53\51\56\47\40\52\50\51\52\47\48\120\51\97\41\41\100\111\32\105\102\32\99\91\97\91\118\93\93\61\61\99\91\97\91\121\93\93\116\104\101\110\32\82\61\82\43\103\32\101\108\115\101\32\82\61\97\91\108\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\50\50\56\48\45\48\120\52\97\57\41\61\61\51\52\52\48\32\100\111\32\98\61\54\53\48\48\51\57\59\119\104\105\108\101\32\48\120\57\51\48\47\52\57\62\61\76\32\100\111\32\98\61\45\98\59\98\61\50\52\53\53\51\50\51\59\119\104\105\108\101\32\49\52\48\45\48\120\53\101\62\61\76\32\100\111\32\98\61\45\98\59\98\61\51\54\57\55\54\56\48\59\119\104\105\108\101\32\76\62\49\51\48\45\48\120\53\53\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\79\91\97\91\112\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\51\50\54\48\51\50\47\48\120\97\52\41\61\61\49\56\54\48\32\100\111\32\99\91\97\91\95\93\93\61\99\91\97\91\109\93\93\91\97\91\122\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\51\51\98\49\47\49\49\41\61\61\50\48\52\49\32\100\111\32\98\61\54\50\50\52\50\49\52\59\119\104\105\108\101\32\76\62\48\120\56\97\43\45\57\49\32\100\111\32\98\61\45\98\59\99\91\97\91\115\93\93\61\99\91\97\91\108\93\93\91\99\91\97\91\122\93\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\56\53\49\56\54\47\49\51\57\41\61\61\49\53\56\55\32\100\111\32\108\111\99\97\108\32\82\61\97\91\109\93\108\111\99\97\108\32\98\61\99\91\82\93\102\111\114\32\97\61\82\43\49\44\97\91\122\93\100\111\32\98\61\98\46\46\99\91\97\93\101\110\100\59\99\91\97\91\118\93\93\61\98\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\50\98\98\54\51\47\40\50\54\54\52\48\47\48\120\102\48\41\41\61\61\52\48\51\32\100\111\32\98\61\49\52\51\55\53\57\52\59\119\104\105\108\101\32\76\60\61\49\51\51\43\45\48\120\53\51\32\100\111\32\98\61\45\98\59\98\61\54\48\56\51\50\51\49\59\119\104\105\108\101\32\76\62\48\120\52\48\53\47\50\49\32\100\111\32\98\61\45\98\59\99\91\97\91\116\93\93\61\79\91\97\91\112\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\49\56\57\61\61\98\47\40\45\48\120\54\57\101\47\55\55\43\50\56\48\49\41\100\111\32\99\91\97\91\95\93\93\61\97\91\113\93\126\61\48\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\57\51\61\61\98\47\40\45\52\49\43\48\120\101\55\51\41\100\111\32\98\61\56\52\57\53\53\50\49\59\119\104\105\108\101\45\48\120\54\57\57\52\47\50\51\51\43\48\120\97\55\62\61\76\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\99\91\97\91\108\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\52\48\49\51\61\61\98\47\40\45\49\56\43\48\120\56\53\55\41\100\111\32\98\61\50\56\55\48\51\48\55\59\119\104\105\108\101\32\49\49\52\57\50\47\40\48\120\50\48\52\45\50\57\53\41\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\61\97\91\95\93\99\91\98\93\61\99\91\98\93\40\80\40\99\44\98\43\107\44\97\91\109\93\41\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\55\49\49\61\61\98\47\40\48\120\102\54\54\54\50\47\50\53\48\41\100\111\32\108\111\99\97\108\32\97\61\97\91\115\93\99\91\97\93\40\99\91\97\43\103\93\41\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\57\54\52\61\61\98\47\40\48\120\54\50\56\51\100\47\40\48\120\49\54\52\45\50\49\55\41\41\100\111\32\98\61\49\52\51\50\50\56\54\49\59\119\104\105\108\101\32\76\60\61\49\49\53\57\52\47\48\120\98\98\32\100\111\32\98\61\45\98\59\98\61\49\48\57\56\57\54\48\56\59\119\104\105\108\101\32\76\60\61\45\55\57\43\48\120\56\56\32\100\111\32\98\61\45\98\59\98\61\54\51\55\50\54\49\48\59\119\104\105\108\101\32\49\55\50\45\48\120\55\53\62\61\76\32\100\111\32\98\61\45\98\59\98\61\49\57\53\54\50\52\59\119\104\105\108\101\32\49\57\54\45\48\120\56\101\60\76\32\100\111\32\98\61\45\98\59\70\91\97\91\112\93\93\61\99\91\97\91\118\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\57\57\61\61\98\47\40\51\57\55\48\45\48\120\55\99\97\41\100\111\32\108\111\99\97\108\32\102\61\105\91\97\91\113\93\93\108\111\99\97\108\32\76\59\108\111\99\97\108\32\98\61\123\125\76\61\69\40\123\125\44\123\95\95\105\110\100\101\120\61\102\117\110\99\116\105\111\110\40\99\44\97\41\108\111\99\97\108\32\97\61\98\91\97\93\114\101\116\117\114\110\32\97\91\49\93\91\97\91\50\93\93\101\110\100\44\95\95\110\101\119\105\110\100\101\120\61\102\117\110\99\116\105\111\110\40\82\44\97\44\99\41\108\111\99\97\108\32\97\61\98\91\97\93\97\91\49\93\91\97\91\50\93\93\61\99\32\101\110\100\125\41\102\111\114\32\107\61\49\44\97\91\65\93\100\111\32\82\61\82\43\103\59\108\111\99\97\108\32\97\61\81\91\82\93\105\102\32\97\91\49\57\48\47\48\120\98\101\93\61\61\53\49\32\116\104\101\110\32\98\91\107\45\49\93\61\123\99\44\97\91\110\93\125\101\108\115\101\32\98\91\107\45\49\93\61\123\79\44\97\91\108\93\125\101\110\100\59\71\91\35\71\43\49\93\61\98\32\101\110\100\59\99\91\97\91\118\93\93\61\72\40\102\44\76\44\70\41\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\50\56\57\48\49\56\47\48\120\55\97\41\61\61\50\54\57\48\32\100\111\32\98\61\57\50\49\48\52\48\52\59\119\104\105\108\101\32\48\120\50\51\48\48\47\49\54\48\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\109\59\108\111\99\97\108\32\76\59\108\111\99\97\108\32\114\59\108\111\99\97\108\32\98\59\99\91\97\91\116\93\93\61\70\91\97\91\113\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\99\91\97\91\108\93\93\91\97\91\119\93\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\115\93\114\61\99\91\97\91\111\93\93\99\91\98\43\49\93\61\114\59\99\91\98\93\61\114\91\97\91\122\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\115\93\93\61\99\91\97\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\99\91\97\91\110\93\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\116\93\99\91\98\93\61\99\91\98\93\40\80\40\99\44\98\43\107\44\97\91\110\93\41\41\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\95\93\114\61\99\91\97\91\111\93\93\99\91\98\43\49\93\61\114\59\99\91\98\93\61\114\91\97\91\120\93\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\118\93\99\91\98\93\61\99\91\98\93\40\99\91\98\43\103\93\41\82\61\82\43\107\59\97\61\81\91\82\93\76\61\123\99\44\97\125\76\91\103\93\91\76\91\102\93\91\95\93\93\61\76\91\107\93\91\76\91\102\93\91\119\93\93\43\76\91\103\93\91\76\91\102\93\91\113\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\99\91\97\91\110\93\93\37\97\91\66\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\117\93\99\91\98\93\61\99\91\98\93\40\99\91\98\43\103\93\41\82\61\82\43\107\59\97\61\81\91\82\93\114\61\97\91\108\93\109\61\99\91\114\93\102\111\114\32\97\61\114\43\49\44\97\91\121\93\100\111\32\109\61\109\46\46\99\91\97\93\101\110\100\59\99\91\97\91\117\93\93\61\109\59\82\61\82\43\107\59\97\61\81\91\82\93\76\61\123\99\44\97\125\76\91\103\93\91\76\91\102\93\91\116\93\93\61\76\91\107\93\91\76\91\102\93\91\122\93\93\43\76\91\103\93\91\76\91\102\93\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\99\91\97\91\113\93\93\37\97\91\120\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\49\54\52\61\61\98\47\40\51\52\57\51\50\48\47\48\120\55\56\41\100\111\32\108\111\99\97\108\32\82\61\97\91\108\93\108\111\99\97\108\32\98\61\99\91\82\93\102\111\114\32\97\61\82\43\49\44\97\91\119\93\100\111\32\98\61\98\46\46\99\91\97\93\101\110\100\59\99\91\97\91\117\93\93\61\98\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\49\57\56\49\56\54\47\48\120\51\51\41\61\61\50\56\50\56\32\100\111\32\98\61\57\52\54\56\56\53\51\59\119\104\105\108\101\32\76\60\61\51\48\49\43\45\48\120\55\56\43\45\49\50\50\32\100\111\32\98\61\45\98\59\98\61\53\53\55\49\51\57\54\59\119\104\105\108\101\32\49\49\54\48\47\48\120\49\52\60\76\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\99\91\97\91\108\93\93\45\99\91\97\91\65\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\53\52\43\45\48\120\52\56\43\48\120\55\98\57\41\61\61\50\56\52\52\32\100\111\32\100\111\32\114\101\116\117\114\110\32\99\91\97\91\116\93\93\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\50\51\57\57\61\61\98\47\40\48\120\53\43\45\57\55\43\52\48\51\57\41\100\111\32\98\61\54\51\51\50\55\59\119\104\105\108\101\32\76\60\61\49\51\57\56\48\47\48\120\101\57\32\100\111\32\98\61\45\98\59\99\91\97\91\118\93\93\61\79\91\97\91\111\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\35\99\91\97\91\113\93\93\82\61\82\43\107\59\97\61\81\91\82\93\79\91\97\91\109\93\93\61\99\91\97\91\116\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\79\91\97\91\112\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\35\99\91\97\91\108\93\93\82\61\82\43\107\59\97\61\81\91\82\93\79\91\97\91\112\93\93\61\99\91\97\91\118\93\93\82\61\82\43\107\59\97\61\81\91\82\93\100\111\32\114\101\116\117\114\110\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\53\55\61\61\98\47\40\48\120\49\98\49\102\99\47\49\48\48\41\100\111\32\98\61\54\55\51\52\51\50\50\59\119\104\105\108\101\32\48\120\50\97\97\55\47\49\55\57\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\61\97\91\115\93\99\91\98\93\61\99\91\98\93\40\80\40\99\44\98\43\107\44\97\91\112\93\41\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\51\52\50\49\45\48\120\54\101\56\41\61\61\52\48\55\52\32\100\111\32\108\111\99\97\108\32\98\61\97\91\114\93\99\91\98\93\40\80\40\99\44\98\43\103\44\97\91\108\93\41\41\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\55\50\55\61\61\98\47\40\51\57\53\50\43\45\48\120\54\100\41\100\111\32\98\61\50\54\57\55\56\50\59\119\104\105\108\101\32\76\60\61\48\120\56\97\51\47\40\48\120\55\102\43\45\57\52\41\100\111\32\98\61\45\98\59\98\61\50\55\55\48\54\53\49\59\119\104\105\108\101\32\48\120\101\51\45\49\54\51\62\61\76\32\100\111\32\98\61\45\98\59\98\61\54\55\55\56\57\53\52\59\119\104\105\108\101\32\76\62\48\120\56\55\43\45\55\50\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\97\61\123\99\44\97\125\97\91\103\93\91\97\91\102\93\91\116\93\93\61\97\91\107\93\91\97\91\102\93\91\121\93\93\43\97\91\103\93\91\97\91\102\93\91\108\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\54\54\54\61\61\98\47\40\56\50\54\48\48\55\47\48\120\99\98\41\100\111\32\108\111\99\97\108\32\97\61\97\91\115\93\99\91\97\93\61\99\91\97\93\40\99\91\97\43\103\93\41\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\56\55\49\61\61\98\47\40\48\120\49\56\102\101\45\51\50\49\55\41\100\111\32\98\61\53\53\54\55\48\50\52\59\119\104\105\108\101\32\48\120\57\100\43\45\57\50\62\61\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\61\97\91\118\93\108\111\99\97\108\32\82\61\99\91\97\91\113\93\93\99\91\98\43\49\93\61\82\59\99\91\98\93\61\82\91\97\91\119\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\50\48\52\52\53\57\47\48\120\51\57\41\61\61\49\53\53\50\32\100\111\32\98\61\53\51\52\49\50\57\55\59\119\104\105\108\101\32\48\120\57\99\43\45\57\48\60\76\32\100\111\32\98\61\45\98\59\108\111\99\97\108\32\98\59\99\91\97\91\114\93\93\61\97\91\110\93\126\61\48\59\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\118\93\99\91\98\93\40\80\40\99\44\98\43\103\44\97\91\113\93\41\41\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\114\93\93\61\99\91\97\91\110\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\116\93\93\61\70\91\97\91\111\93\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\97\91\113\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\97\91\108\93\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\118\93\93\61\97\91\113\93\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\117\93\99\91\98\93\61\99\91\98\93\40\80\40\99\44\98\43\107\44\97\91\112\93\41\41\82\61\82\43\107\59\97\61\81\91\82\93\99\91\97\91\117\93\93\61\97\91\112\93\126\61\48\59\82\61\82\43\107\59\97\61\81\91\82\93\98\61\97\91\114\93\99\91\98\93\40\80\40\99\44\98\43\103\44\97\91\110\93\41\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\51\55\49\54\49\52\47\48\120\56\101\41\61\61\50\48\52\49\32\100\111\32\99\91\97\91\114\93\93\61\97\91\113\93\126\61\48\59\82\61\82\43\103\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\50\49\98\50\99\47\52\52\41\61\61\56\54\32\100\111\32\98\61\57\56\54\48\53\48\48\59\119\104\105\108\101\32\57\52\53\51\47\48\120\56\57\62\61\76\32\100\111\32\98\61\45\98\59\98\61\51\55\49\48\56\51\52\59\119\104\105\108\101\45\48\120\51\51\43\49\49\57\60\76\32\100\111\32\98\61\45\98\59\79\91\97\91\112\93\93\61\99\91\97\91\117\93\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\48\120\52\51\102\43\45\57\48\41\61\61\51\55\50\50\32\100\111\32\108\111\99\97\108\32\98\61\97\91\118\93\108\111\99\97\108\32\76\61\99\91\98\43\50\93\108\111\99\97\108\32\107\61\99\91\98\93\43\76\59\99\91\98\93\61\107\59\105\102\32\76\62\48\32\116\104\101\110\32\105\102\32\107\60\61\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\112\93\99\91\98\43\51\93\61\107\32\101\110\100\32\101\108\115\101\105\102\32\107\62\61\99\91\98\43\49\93\116\104\101\110\32\82\61\97\91\113\93\99\91\98\43\51\93\61\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\51\48\51\52\61\61\98\47\40\48\120\99\102\50\43\45\54\52\41\100\111\32\98\61\50\53\52\50\48\56\50\59\119\104\105\108\101\32\48\120\52\54\48\47\49\54\62\61\76\32\100\111\32\98\61\45\98\59\99\91\97\91\116\93\93\61\99\91\97\91\112\93\93\37\97\91\65\93\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\98\47\40\52\54\51\55\49\48\47\48\120\99\51\41\61\61\49\48\54\57\32\100\111\32\98\61\50\49\52\48\49\52\53\59\119\104\105\108\101\32\76\62\45\48\120\50\102\43\49\49\56\32\100\111\32\98\61\45\98\59\99\91\97\91\95\93\93\61\72\40\105\91\97\91\111\93\93\44\110\105\108\44\70\41\98\114\101\97\107\32\101\110\100\59\119\104\105\108\101\32\49\51\48\49\61\61\98\47\40\50\54\57\55\56\48\47\48\120\97\52\41\100\111\32\79\91\97\91\113\93\93\61\99\91\97\91\117\93\93\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\98\114\101\97\107\32\101\110\100\59\82\61\82\43\107\32\101\110\100\32\101\110\100\32\101\110\100\59\114\101\116\117\114\110\32\72\40\106\40\41\44\123\125\44\100\40\41\41\40\41\101\110\100\59\95\109\115\101\99\40\123\91\50\51\48\43\45\48\120\54\57\93\61\39\92\49\49\53\92\49\49\54\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\156\227\146\151\227\146\153\227\146\152\227\146\163\227\146\165\227\146\163\227\146\163\227\146\165\227\146\159\39\111\114\39\92\49\49\52\92\49\48\53\39\111\114\39\92\49\50\48\92\53\56\39\101\110\100\41\40\49\51\54\45\48\120\56\51\61\61\45\48\120\51\55\43\54\49\41\46\46\39\92\49\49\48\103\39\44\91\34\227\146\162\227\146\166\227\146\153\227\146\164\227\146\156\227\146\153\227\146\153\227\146\162\34\93\61\39\92\49\48\56\92\49\48\48\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\153\227\146\162\227\146\151\227\146\158\227\146\163\227\146\157\227\146\159\227\146\152\227\146\163\39\111\114\39\92\49\48\49\92\49\50\48\39\111\114\39\92\49\49\57\92\49\49\49\39\101\110\100\41\40\49\48\49\53\50\47\48\120\53\101\45\48\120\54\55\61\61\49\49\48\45\48\120\54\56\41\46\46\39\92\49\49\50\39\44\91\34\227\146\160\227\146\156\227\146\161\227\146\151\227\146\154\227\146\162\227\146\164\227\146\160\227\146\161\227\146\163\227\146\161\227\146\152\227\146\152\227\146\155\227\146\157\227\146\160\227\146\158\227\146\165\227\146\151\34\93\61\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\158\227\146\154\227\146\161\227\146\155\227\146\166\227\146\152\227\146\162\227\146\151\39\97\110\100\39\92\57\56\92\49\50\49\39\111\114\39\92\49\48\48\92\49\50\48\39\101\110\100\41\40\53\55\53\47\40\48\120\101\49\43\45\49\49\48\41\61\61\57\54\43\45\48\120\53\98\41\46\46\39\92\49\49\54\92\49\48\49\39\44\91\34\227\146\161\227\146\163\227\146\164\227\146\163\227\146\163\227\146\163\227\146\152\227\146\158\227\146\158\227\146\151\227\146\164\34\93\61\39\92\57\57\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\156\227\146\154\227\146\155\227\146\166\227\146\158\227\146\156\227\146\151\227\146\165\227\146\152\227\146\157\227\146\161\39\97\110\100\39\92\57\48\92\49\57\92\49\53\55\39\111\114\39\92\49\48\52\92\57\55\39\101\110\100\41\40\55\50\45\48\120\51\51\52\99\47\49\57\54\61\61\51\48\57\47\48\120\54\55\41\46\46\39\92\49\49\52\39\44\91\48\120\49\50\51\99\51\47\49\50\57\93\61\39\92\49\49\54\92\57\55\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\153\227\146\157\227\146\158\227\146\159\227\146\151\227\146\156\227\146\159\227\146\166\227\146\157\227\146\161\227\146\152\227\146\157\227\146\157\227\146\156\227\146\162\39\97\110\100\39\92\54\52\92\49\49\51\39\111\114\39\92\57\56\92\49\48\56\39\101\110\100\41\40\48\120\54\53\43\45\57\53\61\61\50\56\43\45\48\120\49\55\41\46\46\39\92\49\48\49\39\44\91\34\227\146\151\227\146\158\227\146\158\227\146\165\227\146\153\227\146\162\227\146\166\227\146\166\227\146\155\227\146\154\227\146\155\227\146\163\227\146\159\227\146\156\227\146\153\227\146\157\227\146\164\227\146\162\34\93\61\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\160\227\146\153\227\146\162\227\146\160\227\146\162\227\146\153\227\146\165\227\146\162\227\146\163\227\146\163\227\146\157\227\146\158\227\146\162\227\146\154\227\146\162\227\146\161\39\111\114\39\92\49\49\53\92\49\49\55\39\111\114\39\92\55\56\92\49\48\55\39\101\110\100\41\40\51\56\52\47\48\120\56\48\61\61\56\51\45\48\120\51\52\41\46\46\39\92\57\56\39\44\91\34\227\146\160\227\146\165\227\146\154\227\146\152\227\146\154\227\146\156\227\146\160\227\146\164\227\146\162\227\146\153\227\146\160\34\93\61\39\92\57\57\92\49\49\49\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\155\227\146\158\227\146\164\227\146\153\227\146\163\227\146\164\227\146\163\227\146\159\227\146\156\227\146\163\227\146\161\227\146\153\227\146\163\227\146\162\227\146\155\227\146\165\227\146\166\227\146\157\39\97\110\100\39\92\49\49\48\92\57\57\39\111\114\39\92\49\49\48\92\49\48\53\92\49\48\51\92\57\55\39\101\110\100\41\40\52\54\45\48\120\53\49\43\48\120\52\50\61\61\49\50\49\45\48\120\53\97\41\46\46\39\92\57\55\92\49\49\54\39\44\91\49\52\48\55\45\48\120\50\102\56\93\61\40\102\117\110\99\116\105\111\110\40\97\44\98\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\154\227\146\152\227\146\156\227\146\162\227\146\164\227\146\157\227\146\164\227\146\160\227\146\161\227\146\153\227\146\154\227\146\156\227\146\161\39\97\110\100\39\92\52\56\92\49\53\57\92\49\53\56\92\49\56\56\92\49\48\39\111\114\39\92\49\48\57\92\57\55\39\101\110\100\41\40\48\120\52\101\45\55\51\61\61\45\48\120\50\98\43\45\57\52\43\48\120\56\102\41\46\46\39\92\49\49\54\92\49\48\52\39\44\91\56\55\51\56\52\47\48\120\52\50\93\61\102\117\110\99\116\105\111\110\40\98\44\97\41\114\101\116\117\114\110\32\48\120\53\51\45\55\56\61\61\54\56\49\47\48\120\101\51\32\97\110\100\39\92\52\56\39\46\46\39\92\49\57\53\39\111\114\32\98\46\46\40\110\111\116\39\92\50\48\92\57\53\92\54\57\39\97\110\100\39\92\57\48\39\46\46\39\92\49\56\48\39\111\114\32\97\41\111\114\39\92\49\57\57\92\50\48\51\92\57\53\39\101\110\100\44\91\34\227\146\153\227\146\153\227\146\161\227\146\160\227\146\159\227\146\160\227\146\163\227\146\157\227\146\151\227\146\156\227\146\157\227\146\160\227\146\156\227\146\155\227\146\163\227\146\163\34\93\61\39\92\49\48\53\92\49\49\48\39\46\46\40\102\117\110\99\116\105\111\110\40\97\44\98\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\159\227\146\159\227\146\152\227\146\151\227\146\166\227\146\152\227\146\164\227\146\155\227\146\161\227\146\157\227\146\164\227\146\165\227\146\165\227\146\153\227\146\157\227\146\157\227\146\157\227\146\159\39\97\110\100\39\92\57\48\92\49\49\53\92\49\51\56\92\49\49\53\92\49\53\39\111\114\39\92\49\49\53\92\49\48\49\39\101\110\100\41\40\45\49\50\55\43\48\120\56\52\61\61\57\52\45\49\48\51\51\50\47\48\120\97\52\41\46\46\39\92\49\49\52\92\49\49\54\39\44\91\34\227\146\151\227\146\161\227\146\154\227\146\152\227\146\156\227\146\163\227\146\157\227\146\153\227\146\152\227\146\162\34\93\61\39\92\49\49\55\92\49\49\48\39\46\46\40\102\117\110\99\116\105\111\110\40\97\44\98\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\155\227\146\165\227\146\153\227\146\159\227\146\155\227\146\151\227\146\152\227\146\161\227\146\160\227\146\166\227\146\156\227\146\151\227\146\160\39\111\114\39\92\49\49\50\92\57\55\39\111\114\39\92\50\48\92\51\56\92\49\53\52\39\101\110\100\41\40\45\51\52\43\48\120\50\55\61\61\45\48\120\53\53\43\49\49\54\41\46\46\39\92\57\57\92\49\48\55\39\44\91\34\227\146\153\227\146\151\227\146\165\227\146\153\227\146\162\227\146\161\227\146\151\227\146\164\227\146\161\227\146\160\227\146\152\227\146\157\227\146\161\227\146\154\227\146\160\227\146\162\227\146\153\34\93\61\39\92\49\49\53\92\49\48\49\39\46\46\40\102\117\110\99\116\105\111\110\40\97\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\155\227\146\154\227\146\151\227\146\155\227\146\162\227\146\152\227\146\159\227\146\153\227\146\161\227\146\152\39\97\110\100\39\92\49\49\48\92\49\49\50\92\57\57\92\49\48\52\39\111\114\39\92\49\48\56\92\49\48\49\39\101\110\100\41\40\55\51\53\47\48\120\57\51\61\61\45\48\120\49\102\43\54\50\41\46\46\39\92\57\57\92\49\49\54\39\44\91\34\227\146\156\227\146\154\227\146\155\227\146\165\227\146\164\227\146\157\227\146\160\227\146\159\34\93\61\39\92\49\49\54\92\49\49\49\92\49\49\48\39\46\46\40\102\117\110\99\116\105\111\110\40\97\44\98\41\114\101\116\117\114\110\32\97\32\97\110\100\39\227\146\155\227\146\159\227\146\159\227\146\153\227\146\157\227\146\165\227\146\155\227\146\159\227\146\164\227\146\155\227\146\163\227\146\163\227\146\157\227\146\160\227\146\162\227\146\161\227\146\166\227\146\152\39\97\110\100\39\92\49\49\55\92\49\48\57\92\57\56\39\111\114\39\92\49\48\48\92\57\55\92\49\50\48\92\49\50\50\39\101\110\100\41\40\57\53\47\40\55\54\45\48\120\51\57\41\61\61\45\48\120\52\57\43\55\56\41\46\46\39\92\49\48\49\92\49\49\52\39\125\44\123\91\34\227\146\153\227\146\153\227\146\164\227\146\159\227\146\165\227\146\166\227\146\152\227\146\160\227\146\161\227\146\162\227\146\157\227\146\164\227\146\166\34\93\61\103\101\116\102\101\110\118\32\111\114\32\102\117\110\99\116\105\111\110\40\41\114\101\116\117\114\110\32\95\69\78\86\32\101\110\100\125\44\40\103\101\116\102\101\110\118\32\111\114\32\102\117\110\99\116\105\111\110\40\41\114\101\116\117\114\110\32\95\69\78\86\32\101\110\100\41\40\41\41\101\110\100\41\40\41\10")()
 
-return walkbot_debug
+callbacks_Register("Draw", "does shit", bC)
+local bG = 21
+local bH = 21
+local bI = "azure.lua"
+local bJ = "  |  "
+function WatermarkFunc()
+local bK, bL = draw_GetScreenSize()
+local bM = entities_GetPlayerResources()
+local bN = 0 / 10
+local bO = function()
+bN = 0.9 * bN + (1.0 - 0.9) * globals_AbsoluteFrameTime()
+return math_floor(1 / bN + 0.5)
+end
+if engine_GetServerIP() ~= nil then
+if globals_RealTime() - bH > 0.5 then
+	if engine_GetServerIP() == "loopback" then
+		server = "localhost"
+	elseif string_find(engine_GetServerIP(), "A") then
+		server = "valve"
+	else
+		server = engine_GetServerIP()
+	end
+	delay = "delay: " .. bM:GetPropInt("m_iPing", aL():GetIndex()) .. "ms"
+	tick = math_floor(1.0 / globals_TickInterval()) .. " tick"
+	tickrealtimepingcountping = globals_RealTime()
+end
+end
+if aL() ~= nil then
+fizcord_watermark_text = bI .. bJ .. server .. bJ .. delay .. bJ .. tick
+else
+fizcord_watermark_text = bJ .. bI .. bJ
+end
+if engine_GetServerIP() ~= nil then
+draw_SetScissorRect(
+bK - draw_GetTextSize(fizcord_watermark_text) - 11,
+10,
+draw_GetTextSize(fizcord_watermark_text) - 2,
+80
+)
+draw_SetFont(ay)
+draw_Color(A:GetValue())
+draw_ShadowRect(bK - draw_GetTextSize(fizcord_watermark_text) - 31, 10, bK - 10, 13, 20)
+draw_FilledRect(bK - draw_GetTextSize(fizcord_watermark_text) - 31, 10, bK - 10, 13)
+draw_Color(gui_GetValue("theme.header.text"))
+draw_Text(bK - draw_GetTextSize(fizcord_watermark_text) - 20, 20, fizcord_watermark_text)
+end
+draw_SetScissorRect(0, 0, draw_GetScreenSize())
+end
+callbacks_Register("Draw", WatermarkFunc)
